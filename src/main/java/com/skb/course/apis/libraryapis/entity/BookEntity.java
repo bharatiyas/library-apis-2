@@ -24,12 +24,6 @@ public class BookEntity {
     @Column(name = "Title")
     private String title;
 
-    @Column(name = "Number_Of_Copies_Available")
-    private String numberOfCopiesAvailable;
-
-    @Column(name = "Number_Of_Copies_Issued")
-    private String numberOfCopiesIssued;
-
     private long publisherId;
 
     @Column(name = "Year_Published")
@@ -41,34 +35,32 @@ public class BookEntity {
     @OneToOne
     private PublisherEntity publisher = new PublisherEntity();
 
+    @OneToOne
+    private BookStatusEntity bookStatus = new BookStatusEntity();
+
     @ManyToMany
     // This will create only 1 mapping table named: AUTHOR_BOOK having 2 columns = BOOK_ID, AUTHOR_ID
     @JoinTable(name = "author_book", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<AuthorEntity> authors = new HashSet<>();
 
-    public BookEntity(String isbn, String title, String numberOfCopiesAvailable, String numberOfCopiesIssued,
-                      long publisherId, int yearPublished, String edition) {
+    public BookEntity(String isbn, String title, long publisherId, int yearPublished, String edition) {
         this.isbn = isbn;
         this.title = title;
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
-        this.numberOfCopiesIssued = numberOfCopiesIssued;
         this.publisherId = publisherId;
         this.yearPublished = yearPublished;
         this.edition = edition;
     }
 
-    public BookEntity(String isbn, String title, String numberOfCopiesAvailable, String numberOfCopiesIssued,
-                      long publisherId, int yearPublished, String edition, PublisherEntity publisher,
-                      Set<AuthorEntity> authors) {
+    public BookEntity(String isbn, String title, long publisherId, int yearPublished, String edition,
+                      PublisherEntity publisher, Set<AuthorEntity> authors, BookStatusEntity bookStatus) {
         this.isbn = isbn;
         this.title = title;
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
-        this.numberOfCopiesIssued = numberOfCopiesIssued;
         this.publisherId = publisherId;
         this.yearPublished = yearPublished;
         this.edition = edition;
         this.publisher = publisher;
         this.authors = authors;
+        this.bookStatus = bookStatus;
     }
 
     public long getBookId() {
@@ -95,22 +87,6 @@ public class BookEntity {
         this.title = title;
     }
 
-    public String getNumberOfCopiesAvailable() {
-        return numberOfCopiesAvailable;
-    }
-
-    public void setNumberOfCopiesAvailable(String numberOfCopiesAvailable) {
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
-    }
-
-    public String getNumberOfCopiesIssued() {
-        return numberOfCopiesIssued;
-    }
-
-    public void setNumberOfCopiesIssued(String numberOfCopiesIssued) {
-        this.numberOfCopiesIssued = numberOfCopiesIssued;
-    }
-
     public long getPublisherId() {
         return publisherId;
     }
@@ -134,5 +110,7 @@ public class BookEntity {
     public void setEdition(String edition) {
         this.edition = edition;
     }
+
+
 }
 

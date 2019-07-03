@@ -86,3 +86,9 @@ CREATE TABLE BOOK_STATUS (
 		Number_Of_Copies_Issued int DEFAULT 0,
 		FOREIGN KEY fk_book(Book_Id) REFERENCES BOOK(Book_Id)
 	);
+
+CREATE TABLE BOOK_STATUS_SEQUENCE (
+	  Author_Id int NOT NULL,
+      next_val int );
+
+INSERT INTO BOOK_STATUS_SEQUENCE (Author_Id, next_val) VALUES (1,2);
