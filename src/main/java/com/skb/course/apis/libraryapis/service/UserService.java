@@ -13,16 +13,16 @@ public class UserService {
     private UserRepository userRepository;
 
     public User addUser(User userToBeAdded) {
-        UserEntity userEntity = new UserEntity(userToBeAdded.getUserId(),
-                userToBeAdded.getPassword(),
+        UserEntity userEntity = new UserEntity(
                 userToBeAdded.getFirstName(),
                 userToBeAdded.getLastName(),
-                userToBeAdded.getAge(),
+                userToBeAdded.getDateOfBirth(),
                 userToBeAdded.getGender(),
                 userToBeAdded.getPhoneNumber(),
                 userToBeAdded.getEmailId());
-        userRepository.save(userEntity);
 
+        UserEntity addedUser = userRepository.save(userEntity);
+        userToBeAdded.setUserId(addedUser.getUserId());
         return userToBeAdded;
     }
 }

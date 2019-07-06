@@ -1,24 +1,37 @@
 package com.skb.course.apis.libraryapis.model;
 
-public class Publisher {
+import java.io.Serializable;
 
-    private long publisherId;
+public class Publisher implements Serializable {
 
+    private int publisherId;
     private String name;
-
     private String emailId;
-
     private String phoneNumber;
 
-    public Publisher(long publisherId, String name, String emailId, String phoneNumber) {
+    public Publisher(int publisherId, String name, String emailId, String phoneNumber) {
         this.publisherId = publisherId;
         this.name = name;
         this.emailId = emailId;
         this.phoneNumber = phoneNumber;
     }
 
-    public long getPublisherId() {
+    public Publisher(String name, String emailId, String phoneNumber) {
+        this.name = name;
+        this.emailId = emailId;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public int getPublisherId() {
         return publisherId;
+    }
+
+    public void setPublisherId(int publisherId) {
+        this.publisherId = publisherId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getName() {

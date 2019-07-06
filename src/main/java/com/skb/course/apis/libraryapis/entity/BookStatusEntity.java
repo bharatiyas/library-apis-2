@@ -9,11 +9,9 @@ import javax.persistence.*;
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class BookStatusEntity {
 
-    @Column(name = "Id")
+    @Column(name = "Book_Id")
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "book_status_generator")
-    @SequenceGenerator(name="book_status_generator", sequenceName = "book_status_sequence", allocationSize = 50)
-    private long id;
+    private int bookId;
 
     @Column(name = "Status")
     private String status;

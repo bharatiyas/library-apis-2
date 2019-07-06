@@ -4,24 +4,55 @@ import java.io.Serializable;
 
 public class Book implements Serializable {
 
-    private long bookId;
+    private int bookId;
     private String isbn;
     private String title;
+    private long publisherId;
     private int yearPublished;
     private String edition;
 
     public Book() {
     }
 
-    public Book(String isbn, String title, int yearPublished, String edition) {
+    public Book(String isbn, String title, long publisherId, int yearPublished, String edition) {
         this.isbn = isbn;
         this.title = title;
+        this.publisherId = publisherId;
         this.yearPublished = yearPublished;
         this.edition = edition;
     }
 
-    public long getBookId() {
+    public Book(int bookId, String isbn, String title, long publisherId, int yearPublished, String edition) {
+        this.bookId = bookId;
+        this.isbn = isbn;
+        this.title = title;
+        this.publisherId = publisherId;
+        this.yearPublished = yearPublished;
+        this.edition = edition;
+    }
+
+    public int getBookId() {
         return bookId;
+    }
+
+    public void setBookId(int bookId) {
+        this.bookId = bookId;
+    }
+
+    public int getYearPublished() {
+        return yearPublished;
+    }
+
+    public void setYearPublished(int yearPublished) {
+        this.yearPublished = yearPublished;
+    }
+
+    public String getEdition() {
+        return edition;
+    }
+
+    public void setEdition(String edition) {
+        this.edition = edition;
     }
 
     public String getIsbn() {
@@ -32,12 +63,8 @@ public class Book implements Serializable {
         return title;
     }
 
-    public int getYearPublished() {
-        return yearPublished;
-    }
-
-    public String getEdition() {
-        return edition;
+    public long getPublisherId() {
+        return publisherId;
     }
 
     @Override
@@ -46,6 +73,7 @@ public class Book implements Serializable {
                 "bookId=" + bookId +
                 ", isbn='" + isbn + '\'' +
                 ", title='" + title + '\'' +
+                ", publisherId=" + publisherId +
                 ", yearPublished=" + yearPublished +
                 ", edition='" + edition + '\'' +
                 '}';

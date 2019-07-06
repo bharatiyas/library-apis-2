@@ -5,15 +5,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "PUBLISHERS")
+@Table(name = "PUBLISHER")
 @JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class PublisherEntity {
 
     @Column(name = "Publisher_Id")
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "publisherId_generator")
-    @SequenceGenerator(name="publisherId_generator", sequenceName = "publishers_sequence", allocationSize = 50)
-    private long publisherId;
+    @SequenceGenerator(name="publisherId_generator", sequenceName = "publisher_sequence", allocationSize = 50)
+    private int publisherId;
 
     @Column(name = "Name")
     private String name;
@@ -33,20 +33,12 @@ public class PublisherEntity {
         this.phoneNumber = phoneNumber;
     }
 
-    public long getPublisherId() {
+    public int getPublisherId() {
         return publisherId;
-    }
-
-    public void setPublisherId(long publisherId) {
-        this.publisherId = publisherId;
     }
 
     public String getName() {
         return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getEmailId() {
@@ -64,7 +56,6 @@ public class PublisherEntity {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-
 
 }
 

@@ -19,10 +19,13 @@ public class BookService {
         BookEntity bookEntity = new BookEntity(
                 bookToBeAdded.getIsbn(),
                 bookToBeAdded.getTitle(),
+                bookToBeAdded.getPublisherId(),
                 bookToBeAdded.getYearPublished(),
                 bookToBeAdded.getEdition());
-        bookRepository.save(bookEntity);
 
+        BookEntity addedBook = bookRepository.save(bookEntity);
+
+        bookToBeAdded.setBookId(addedBook.getBookId());
         return bookToBeAdded;
     }
 }

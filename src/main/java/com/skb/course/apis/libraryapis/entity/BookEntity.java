@@ -16,7 +16,7 @@ public class BookEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bookId_generator")
     @SequenceGenerator(name="bookId_generator", sequenceName = "book_sequence", allocationSize = 50)
-    private long bookId;
+    private int bookId;
 
     @Column(name = "ISBN")
     private String isbn;
@@ -38,9 +38,12 @@ public class BookEntity {
     @OneToOne
     private BookStatusEntity bookStatus = new BookStatusEntity();
 
+    public BookEntity() {
+    }
+
     @ManyToMany
     // This will create only 1 mapping table named: AUTHOR_BOOK having 2 columns = BOOK_ID, AUTHOR_ID
-    @JoinTable(name = "author_book", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
+    @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<AuthorEntity> authors = new HashSet<>();
 
     public BookEntity(String isbn, String title, long publisherId, int yearPublished, String edition) {
@@ -63,54 +66,40 @@ public class BookEntity {
         this.bookStatus = bookStatus;
     }
 
-    public long getBookId() {
+    public int getBookId() {
         return bookId;
-    }
-
-    public void setBookId(long bookId) {
-        this.bookId = bookId;
     }
 
     public String getIsbn() {
         return isbn;
     }
 
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
-    }
-
     public String getTitle() {
         return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
     }
 
     public long getPublisherId() {
         return publisherId;
     }
 
-    public void setPublisherId(long publisherId) {
-        this.publisherId = publisherId;
-    }
-
     public int getYearPublished() {
         return yearPublished;
-    }
-
-    public void setYearPublished(int yearPublished) {
-        this.yearPublished = yearPublished;
     }
 
     public String getEdition() {
         return edition;
     }
 
+    public void setPublisherId(long publisherId) {
+        this.publisherId = publisherId;
+    }
+
+    public void setYearPublished(int yearPublished) {
+        this.yearPublished = yearPublished;
+    }
+
     public void setEdition(String edition) {
         this.edition = edition;
     }
-
-
 }
 
