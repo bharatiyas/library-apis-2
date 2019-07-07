@@ -20,15 +20,14 @@ public class User implements Serializable {
     @Past
     private LocalDate dateOfBirth;
 
-    @Pattern(regexp = "Male|Female|Undisclosed", message = "Inappropriate gender")
-    private String gender;
+    private Gender gender;
     private String phoneNumber;
     private String emailId;
 
     public User() {
     }
 
-    public User(int userId, String password, String firstName, String lastName, LocalDate dateOfBirth, String gender,
+    public User(int userId, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
                 String phoneNumber, String emailId) {
         this.userId = userId;
         this.password = password;
@@ -40,10 +39,11 @@ public class User implements Serializable {
         this.emailId = emailId;
     }
 
-    public User(@NotNull(message = "First Name cannot be null") String firstName,
-                @NotNull(message = "Last Name cannot be null") String lastName,
-                @Past LocalDate dateOfBirth,
-                @Pattern(regexp = "Male|Female|Undisclosed", message = "Inappropriate gender") String gender,
+
+    public User(String firstName,
+                String lastName,
+                LocalDate dateOfBirth,
+                Gender gender,
                 String phoneNumber, String emailId) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -73,7 +73,7 @@ public class User implements Serializable {
         return lastName;
     }
 
-    public String getGender() {
+    public Gender getGender() {
         return gender;
     }
 

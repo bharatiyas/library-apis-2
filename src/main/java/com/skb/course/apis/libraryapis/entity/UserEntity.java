@@ -1,6 +1,7 @@
 package com.skb.course.apis.libraryapis.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skb.course.apis.libraryapis.model.Gender;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -29,7 +30,8 @@ public class UserEntity {
     private LocalDate dateOfBirth;
 
     @Column(name = "Gender")
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name = "Phone_Number")
     private String phoneNumber;
@@ -37,7 +39,7 @@ public class UserEntity {
     @Column(name = "Email_Id")
     private String emailId;
 
-    public UserEntity(String firstName, String lastName, LocalDate dateOfBirth, String gender,
+    public UserEntity(String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
                       String phoneNumber, String emailId) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -67,7 +69,7 @@ public class UserEntity {
         return dateOfBirth;
     }
 
-    public String getGender() {
+    public Gender getGender() {
         return gender;
     }
 

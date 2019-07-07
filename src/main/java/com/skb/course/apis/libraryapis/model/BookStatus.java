@@ -1,33 +1,16 @@
-package com.skb.course.apis.libraryapis.entity;
+package com.skb.course.apis.libraryapis.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.skb.course.apis.libraryapis.model.BookStatusState;
+public class BookStatus {
 
-import javax.persistence.*;
-
-@Entity
-@Table(name = "BOOK_STATUS")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
-public class BookStatusEntity {
-
-    @Column(name = "Book_Id")
-    @Id
     private int bookId;
-
-    @Column(name = "State")
-    @Enumerated(EnumType.STRING)
     private BookStatusState state;
-
-    @Column(name = "Number_Of_Copies_Available")
     private int numberOfCopiesAvailable;
-
-    @Column(name = "Number_Of_Copies_Issued")
     private int numberOfCopiesIssued;
 
-    public BookStatusEntity() {
+    public BookStatus() {
     }
 
-    public BookStatusEntity(int bookId, BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
+    public BookStatus(int bookId, BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
         this.bookId = bookId;
         this.state = state;
         this.numberOfCopiesAvailable = numberOfCopiesAvailable;

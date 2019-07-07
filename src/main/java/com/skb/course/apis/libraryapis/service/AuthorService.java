@@ -4,7 +4,9 @@ import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.repository.AuthorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class AuthorService {
 
     @Autowired

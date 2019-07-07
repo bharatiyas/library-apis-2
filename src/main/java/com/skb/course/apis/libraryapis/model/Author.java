@@ -9,12 +9,12 @@ public class Author implements Serializable {
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
-    private String gender;
+    private Gender gender;
 
     public Author() {
     }
 
-    public Author(int authorId, String firstName, String lastName, LocalDate dateOfBirth, String gender) {
+    public Author(int authorId, String firstName, String lastName, LocalDate dateOfBirth, Gender gender) {
         this.authorId = authorId;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -22,7 +22,7 @@ public class Author implements Serializable {
         this.gender = gender;
     }
 
-    public Author(String firstName, String lastName, LocalDate dateOfBirth, String gender) {
+    public Author(String firstName, String lastName, LocalDate dateOfBirth, Gender gender) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
@@ -61,11 +61,11 @@ public class Author implements Serializable {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public String getGender() {
+    public Gender getGender() {
         return gender;
     }
 
-    public void setGender(String gender) {
+    public void setGender(Gender gender) {
         this.gender = gender;
     }
 

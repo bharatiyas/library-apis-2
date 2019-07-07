@@ -10,25 +10,28 @@ public class Book implements Serializable {
     private long publisherId;
     private int yearPublished;
     private String edition;
+    private BookStatus bookStatus;
 
     public Book() {
     }
 
-    public Book(String isbn, String title, long publisherId, int yearPublished, String edition) {
+    public Book(String isbn, String title, long publisherId, int yearPublished, String edition, BookStatus bookStatus) {
         this.isbn = isbn;
         this.title = title;
         this.publisherId = publisherId;
         this.yearPublished = yearPublished;
         this.edition = edition;
+        this.bookStatus = bookStatus;
     }
 
-    public Book(int bookId, String isbn, String title, long publisherId, int yearPublished, String edition) {
+    public Book(int bookId, String isbn, String title, long publisherId, int yearPublished, String edition, BookStatus bookStatus) {
         this.bookId = bookId;
         this.isbn = isbn;
         this.title = title;
         this.publisherId = publisherId;
         this.yearPublished = yearPublished;
         this.edition = edition;
+        this.bookStatus = bookStatus;
     }
 
     public int getBookId() {
@@ -65,6 +68,14 @@ public class Book implements Serializable {
 
     public long getPublisherId() {
         return publisherId;
+    }
+
+    public BookStatus getBookStatus() {
+        return bookStatus;
+    }
+
+    public void setBookStatus(BookStatus bookStatus) {
+        this.bookStatus = bookStatus;
     }
 
     @Override

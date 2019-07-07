@@ -1,6 +1,7 @@
 package com.skb.course.apis.libraryapis.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skb.course.apis.libraryapis.model.Gender;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -28,7 +29,8 @@ public class AuthorEntity {
     private LocalDate dateOfBirth;
 
     @Column(name = "Gender")
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @ManyToMany(mappedBy = "authors")
     private Set<BookEntity> authors = new HashSet<>();
@@ -36,14 +38,14 @@ public class AuthorEntity {
     public AuthorEntity() {
     }
 
-    public AuthorEntity(String firstName, String lastName, LocalDate dateOfBirth, String gender) {
+    public AuthorEntity(String firstName, String lastName, LocalDate dateOfBirth, Gender gender) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
     }
 
-    public AuthorEntity(String firstName, String lastName, LocalDate dateOfBirth, String gender, Set<BookEntity> authors) {
+    public AuthorEntity(String firstName, String lastName, LocalDate dateOfBirth, Gender gender, Set<BookEntity> authors) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
@@ -51,7 +53,7 @@ public class AuthorEntity {
         this.authors = authors;
     }
 
-    public long getAuthorId() {
+    public int getAuthorId() {
         return authorId;
     }
 
@@ -67,7 +69,7 @@ public class AuthorEntity {
         return dateOfBirth;
     }
 
-    public String getGender() {
+    public Gender getGender() {
         return gender;
     }
 
