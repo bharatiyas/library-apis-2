@@ -39,8 +39,12 @@ public class UserEntity {
     @Column(name = "Email_Id")
     private String emailId;
 
-    public UserEntity(String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+    public UserEntity() {
+    }
+
+    public UserEntity(String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
                       String phoneNumber, String emailId) {
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;

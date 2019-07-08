@@ -16,6 +16,7 @@ public class UserService {
 
     public User addUser(User userToBeAdded) {
         UserEntity userEntity = new UserEntity(
+                "Password123",
                 userToBeAdded.getFirstName(),
                 userToBeAdded.getLastName(),
                 userToBeAdded.getDateOfBirth(),
