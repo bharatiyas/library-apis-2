@@ -17,6 +17,12 @@ public class BookStatus {
         this.numberOfCopiesIssued = numberOfCopiesIssued;
     }
 
+    public BookStatus(BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
+        this.state = state;
+        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
+        this.numberOfCopiesIssued = numberOfCopiesIssued;
+    }
+
     public BookStatusState getState() {
         return state;
     }

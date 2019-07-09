@@ -24,7 +24,7 @@ public class BookEntity {
     @Column(name = "Title")
     private String title;
 
-    private long publisherId;
+    private int publisherId;
 
     @Column(name = "Year_Published")
     private int yearPublished;
@@ -46,7 +46,7 @@ public class BookEntity {
     @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<AuthorEntity> authors = new HashSet<>();
 
-    public BookEntity(String isbn, String title, long publisherId, int yearPublished, String edition) {
+    public BookEntity(String isbn, String title, int publisherId, int yearPublished, String edition) {
         this.isbn = isbn;
         this.title = title;
         this.publisherId = publisherId;
@@ -54,7 +54,7 @@ public class BookEntity {
         this.edition = edition;
     }
 
-    public BookEntity(String isbn, String title, long publisherId, int yearPublished, String edition,
+    public BookEntity(String isbn, String title, int publisherId, int yearPublished, String edition,
                       PublisherEntity publisher, Set<AuthorEntity> authors, BookStatusEntity bookStatus) {
         this.isbn = isbn;
         this.title = title;
@@ -78,7 +78,7 @@ public class BookEntity {
         return title;
     }
 
-    public long getPublisherId() {
+    public int getPublisherId() {
         return publisherId;
     }
 
@@ -90,7 +90,7 @@ public class BookEntity {
         return edition;
     }
 
-    public void setPublisherId(long publisherId) {
+    public void setPublisherId(int publisherId) {
         this.publisherId = publisherId;
     }
 
@@ -100,6 +100,22 @@ public class BookEntity {
 
     public void setEdition(String edition) {
         this.edition = edition;
+    }
+
+    public BookStatusEntity getBookStatus() {
+        return bookStatus;
+    }
+
+    public void setBookStatus(BookStatusEntity bookStatus) {
+        this.bookStatus = bookStatus;
+    }
+
+    public Set<AuthorEntity> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(Set<AuthorEntity> authors) {
+        this.authors = authors;
     }
 }
 

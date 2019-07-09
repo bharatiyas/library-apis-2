@@ -1,21 +1,26 @@
 package com.skb.course.apis.libraryapis.model;
 
+import com.skb.course.apis.libraryapis.entity.AuthorEntity;
+
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Book implements Serializable {
 
     private int bookId;
     private String isbn;
     private String title;
-    private long publisherId;
-    private int yearPublished;
+    private int publisherId;
+    private Integer yearPublished;
     private String edition;
     private BookStatus bookStatus;
+    private Set<AuthorEntity> authors = new HashSet<>();
 
     public Book() {
     }
 
-    public Book(String isbn, String title, long publisherId, int yearPublished, String edition, BookStatus bookStatus) {
+    public Book(String isbn, String title, int publisherId, int yearPublished, String edition, BookStatus bookStatus) {
         this.isbn = isbn;
         this.title = title;
         this.publisherId = publisherId;
@@ -24,7 +29,7 @@ public class Book implements Serializable {
         this.bookStatus = bookStatus;
     }
 
-    public Book(int bookId, String isbn, String title, long publisherId, int yearPublished, String edition, BookStatus bookStatus) {
+    public Book(int bookId, String isbn, String title, int publisherId, int yearPublished, String edition, BookStatus bookStatus) {
         this.bookId = bookId;
         this.isbn = isbn;
         this.title = title;
@@ -42,7 +47,7 @@ public class Book implements Serializable {
         this.bookId = bookId;
     }
 
-    public int getYearPublished() {
+    public Integer getYearPublished() {
         return yearPublished;
     }
 
@@ -66,7 +71,7 @@ public class Book implements Serializable {
         return title;
     }
 
-    public long getPublisherId() {
+    public Integer getPublisherId() {
         return publisherId;
     }
 
@@ -76,6 +81,14 @@ public class Book implements Serializable {
 
     public void setBookStatus(BookStatus bookStatus) {
         this.bookStatus = bookStatus;
+    }
+
+    public Set<AuthorEntity> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(Set<AuthorEntity> authors) {
+        this.authors = authors;
     }
 
     @Override

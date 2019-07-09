@@ -73,6 +73,14 @@ public class AuthorEntity {
         return gender;
     }
 
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
+
     public Set<BookEntity> getAuthors() {
         return authors;
     }
