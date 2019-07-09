@@ -4,26 +4,30 @@ import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 import com.skb.course.apis.libraryapis.entity.BookEntity;
 import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
 import com.skb.course.apis.libraryapis.exception.BookNotFoundException;
-import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.BookStatus;
+import com.skb.course.apis.libraryapis.repository.AuthorRepository;
 import com.skb.course.apis.libraryapis.repository.BookRepository;
 import com.skb.course.apis.libraryapis.repository.BookStatusRepository;
 import com.skb.course.apis.libraryapis.util.Utility;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
 
-    @Autowired
     private BookRepository bookRepository;
-
-    @Autowired
     private BookStatusRepository bookStatusRepository;
+    private AuthorRepository authorRepository;
+
+    public BookService(BookRepository bookRepository, BookStatusRepository bookStatusRepository, AuthorRepository authorRepository) {
+        this.bookRepository = bookRepository;
+        this.bookStatusRepository = bookStatusRepository;
+        this.authorRepository = authorRepository;
+    }
 
     public Book addBook(Book bookToBeAdded) {
         BookEntity bookEntity = new BookEntity(
@@ -33,13 +37,20 @@ public class BookService {
                 bookToBeAdded.getYearPublished(),
                 bookToBeAdded.getEdition());
 
+        BookStatusEntity bookStatusEntity = new BookStatusEntity(bookToBeAdded.getBookStatus().getState(),
+                bookToBeAdded.getBookStatus().getNumberOfCopiesAvailable(), 0);
+
+
+        // Set child reference(userProfile) in parent entity(user)
+        bookEntity.setBookStatus(bookStatusEntity);
+
+        // Set parent reference(user) in child entity(userProfile)
+        bookStatusEntity.setBookEntity(bookEntity);
+
         BookEntity addedBook = bookRepository.save(bookEntity);
 
-        BookStatusEntity bookStatusEntity = new BookStatusEntity(addedBook.getBookId(), bookToBeAdded.getBookStatus().getState(),
-                bookToBeAdded.getBookStatus().getNumberOfCopiesAvailable(), 0);
-        bookStatusRepository.save(bookStatusEntity);
-
         bookToBeAdded.setBookId(addedBook.getBookId());
+        bookToBeAdded.setBookStatus(createBookStatusFromEntity(bookStatusEntity));
         return bookToBeAdded;
     }
 
@@ -77,31 +88,37 @@ public class BookService {
         return book;
     }
 
-    public Book addBookAuhors(int bookId, Set<Author> authors) {
-        if(authors == null || authors.size() == 0) {
+    public Book addBookAuhors(int bookId, Set<Integer> authorIds) throws BookNotFoundException {
+        if(authorIds == null || authorIds.size() == 0) {
             throw new IllegalArgumentException("Invalid Authors list");
         }
         Optional<BookEntity> bookEntity = bookRepository.findById(bookId);
         Book book = null;
         if(bookEntity.isPresent()) {
             BookEntity be = bookEntity.get();
-            authors.stream()
-                    .map(author -> {
-                        return new AuthorEntity()
-                    })
-            be.setAuthors();
+            Set<AuthorEntity> authors = authorIds.stream()
+                    .map(authorId ->
+                            authorRepository.findById(authorId)
+                    ).collect(Collectors.toSet()).stream()
+                    .filter(ae -> ae.isPresent() == true)
+                    .map(ae -> ae.get())
+                    .collect(Collectors.toSet());
+            be.setAuthors(authors);
             bookRepository.save(be);
             book = createBookFromEntity(be);
         } else {
-            throw new BookNotFoundException("Book Id: " + bookToBeUpdated.getBookId() + " Not Found");
+            throw new BookNotFoundException("Book Id: " + bookId + " Not Found");
         }
         return book;
     }
 
     private Book createBookFromEntity(BookEntity be) {
-        // int bookId, BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued
-        BookStatusEntity bse = be.getBookStatus();
-        BookStatus bs = new BookStatus(bse.getState(), bse.getNumberOfCopiesAvailable(), bse.getNumberOfCopiesIssued());
-        return new Book(be.getBookId(), be.getIsbn(), be.getTitle(), be.getPublisherId(), be.getYearPublished(), be.getEdition(), bs);
+        return new Book(be.getBookId(), be.getIsbn(), be.getTitle(), be.getPublisherId(), be.getYearPublished(), be.getEdition()
+                ,createBookStatusFromEntity(bookStatusRepository.findById(be.getBookId()).get())
+        );
+    }
+
+    private BookStatus createBookStatusFromEntity(BookStatusEntity bse) {
+        return new BookStatus(bse.getState(), bse.getNumberOfCopiesAvailable(), bse.getNumberOfCopiesIssued());
     }
 }

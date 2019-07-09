@@ -26,7 +26,7 @@ public class PublisherController {
         return new ResponseEntity<>(publisher, HttpStatus.CREATED);
     }
 
-    @GetMapping(path = "/{userId}")
+    @GetMapping(path = "/{publisherId}")
     public ResponseEntity<?> getPublisher(@PathVariable int publisherId) {
 
         Publisher publisher = null;

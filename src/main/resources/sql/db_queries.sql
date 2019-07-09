@@ -85,8 +85,9 @@ INSERT INTO AUTHOR_SEQUENCE (Author_Id, next_val) VALUES (3111,3112);
 
 CREATE TABLE BOOK_AUTHOR (
       /*ID INT PRIMARY KEY,*/
-      Book_Id INT,
+      Book_Id INT ,
       Author_Id INT,
+      /*PRIMARY KEY (Book_Id, Author_Id),*/
       FOREIGN KEY fk_author(Author_Id) REFERENCES AUTHOR(Author_Id),
       FOREIGN KEY fk_book(Book_Id) REFERENCES BOOK(Book_Id)
       );

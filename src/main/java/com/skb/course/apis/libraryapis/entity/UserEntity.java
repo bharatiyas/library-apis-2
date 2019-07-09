@@ -8,7 +8,6 @@ import java.time.LocalDate;
 
 @Entity
 @Table(name = "USER")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class UserEntity {
 
     @Column(name = "User_Id")

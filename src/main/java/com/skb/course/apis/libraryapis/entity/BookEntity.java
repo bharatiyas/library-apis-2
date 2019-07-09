@@ -15,7 +15,7 @@ public class BookEntity {
     @Column(name = "Book_Id")
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bookId_generator")
-    @SequenceGenerator(name="bookId_generator", sequenceName = "book_sequence", allocationSize = 50)
+    @SequenceGenerator(name="bookId_generator", sequenceName = "book_sequence", allocationSize = 1)
     private int bookId;
 
     @Column(name = "ISBN")
@@ -32,16 +32,21 @@ public class BookEntity {
     @Column(name = "Edition")
     private String edition;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
     private PublisherEntity publisher = new PublisherEntity();
 
-    @OneToOne
+    @OneToOne(mappedBy = "bookEntity", cascade = CascadeType.ALL)
     private BookStatusEntity bookStatus = new BookStatusEntity();
 
     public BookEntity() {
     }
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            })
     // This will create only 1 mapping table named: AUTHOR_BOOK having 2 columns = BOOK_ID, AUTHOR_ID
     @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
     private Set<AuthorEntity> authors = new HashSet<>();
@@ -55,7 +60,7 @@ public class BookEntity {
     }
 
     public BookEntity(String isbn, String title, int publisherId, int yearPublished, String edition,
-                      PublisherEntity publisher, Set<AuthorEntity> authors, BookStatusEntity bookStatus) {
+                      PublisherEntity publisher, Set<AuthorEntity> authors) {
         this.isbn = isbn;
         this.title = title;
         this.publisherId = publisherId;
@@ -63,7 +68,6 @@ public class BookEntity {
         this.edition = edition;
         this.publisher = publisher;
         this.authors = authors;
-        this.bookStatus = bookStatus;
     }
 
     public int getBookId() {

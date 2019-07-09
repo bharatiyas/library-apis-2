@@ -6,7 +6,6 @@ import javax.persistence.*;
 
 @Entity
 @Table(name = "PUBLISHER")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class PublisherEntity {
 
     @Column(name = "Publisher_Id")

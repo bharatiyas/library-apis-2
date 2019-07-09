@@ -9,6 +9,9 @@ public class Publisher implements Serializable {
     private String emailId;
     private String phoneNumber;
 
+    public Publisher() {
+    }
+
     public Publisher(int publisherId, String name, String emailId, String phoneNumber) {
         this.publisherId = publisherId;
         this.name = name;

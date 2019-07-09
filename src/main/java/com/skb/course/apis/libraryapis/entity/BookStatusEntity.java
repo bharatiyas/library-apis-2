@@ -1,18 +1,22 @@
 package com.skb.course.apis.libraryapis.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.BookStatusState;
 
 import javax.persistence.*;
 
 @Entity
 @Table(name = "BOOK_STATUS")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class BookStatusEntity {
 
     @Column(name = "Book_Id")
     @Id
     private int bookId;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "Book_Id", nullable = false)
+    private BookEntity bookEntity;
 
     @Column(name = "State")
     @Enumerated(EnumType.STRING)
@@ -27,8 +31,7 @@ public class BookStatusEntity {
     public BookStatusEntity() {
     }
 
-    public BookStatusEntity(int bookId, BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
-        this.bookId = bookId;
+    public BookStatusEntity(BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
         this.state = state;
         this.numberOfCopiesAvailable = numberOfCopiesAvailable;
         this.numberOfCopiesIssued = numberOfCopiesIssued;
@@ -56,6 +59,14 @@ public class BookStatusEntity {
 
     public void setNumberOfCopiesIssued(int numberOfCopiesIssued) {
         this.numberOfCopiesIssued = numberOfCopiesIssued;
+    }
+
+    public BookEntity getBookEntity() {
+        return bookEntity;
+    }
+
+    public void setBookEntity(BookEntity bookEntity) {
+        this.bookEntity = bookEntity;
     }
 }
 

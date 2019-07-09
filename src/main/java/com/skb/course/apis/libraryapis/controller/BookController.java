@@ -15,15 +15,18 @@ import java.util.Set;
 @RequestMapping(path="/books")
 public class BookController {
 
-    @Autowired
     private BookService bookService;
+
+    public BookController(BookService bookService) {
+        this.bookService = bookService;
+    }
 
     @PostMapping(path = "/")
     private ResponseEntity<?> addBook(@RequestBody Book book) {
         try {
             book = bookService.addBook(book);
         } catch (Exception e) {
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(book, HttpStatus.CREATED);
     }
@@ -58,10 +61,14 @@ public class BookController {
     }
 
     @PutMapping(path = "/{bookId}/authors")
-    public ResponseEntity<?> addBookAuhors(@PathVariable int bookId, @RequestBody Set<Author> authors) {
+    public ResponseEntity<?> addBookAuhors(@PathVariable int bookId, @RequestBody Set<Integer> authorIds) {
 
+        if(authorIds == null || authorIds.size() == 0) {
+            throw new IllegalArgumentException("Invalid Authors list");
+        }
+        Book book = null;
         try {
-            book = bookService.addBookAuhors(bookId, authors);
+            book = bookService.addBookAuhors(bookId, authorIds);
         } catch (BookNotFoundException e) {
             return new ResponseEntity<>("Book Not Found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
