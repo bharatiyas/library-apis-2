@@ -1,7 +1,8 @@
 package com.skb.course.apis.libraryapis.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skb.course.apis.libraryapis.model.Gender;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -10,7 +11,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "AUTHOR")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class AuthorEntity {
 
     @Column(name = "Author_Id")
@@ -32,8 +32,12 @@ public class AuthorEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
-    @ManyToMany(mappedBy = "authors")
-    private Set<BookEntity> authors = new HashSet<>();
+    @ManyToMany(fetch = FetchType.LAZY,
+                cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+                )
+    @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<BookEntity> books = new HashSet<>();
 
     public AuthorEntity() {
     }
@@ -43,14 +47,6 @@ public class AuthorEntity {
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
-    }
-
-    public AuthorEntity(String firstName, String lastName, LocalDate dateOfBirth, Gender gender, Set<BookEntity> authors) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dateOfBirth = dateOfBirth;
-        this.gender = gender;
-        this.authors = authors;
     }
 
     public int getAuthorId() {
@@ -81,12 +77,5 @@ public class AuthorEntity {
         this.gender = gender;
     }
 
-    public Set<BookEntity> getAuthors() {
-        return authors;
-    }
-
-    public void setAuthors(Set<BookEntity> authors) {
-        this.authors = authors;
-    }
 }
 

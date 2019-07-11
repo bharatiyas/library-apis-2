@@ -1,7 +1,7 @@
 package com.skb.course.apis.libraryapis.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.hibernate.annotations.GeneratorType;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.HashSet;
@@ -9,7 +9,6 @@ import java.util.Set;
 
 @Entity
 @Table(name = "BOOK")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class BookEntity {
 
     @Column(name = "Book_Id")
@@ -24,50 +23,43 @@ public class BookEntity {
     @Column(name = "Title")
     private String title;
 
-    private int publisherId;
-
     @Column(name = "Year_Published")
     private int yearPublished;
 
     @Column(name = "Edition")
     private String edition;
 
-    @OneToOne(fetch = FetchType.LAZY,
+    @ManyToOne(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
-    private PublisherEntity publisher = new PublisherEntity();
+    @JoinColumn(name = "Publisher_Id",
+            nullable = false)
+    private PublisherEntity publisher;
 
-    @OneToOne(mappedBy = "bookEntity", cascade = CascadeType.ALL)
-    private BookStatusEntity bookStatus = new BookStatusEntity();
-
-    public BookEntity() {
-    }
+    @OneToOne(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            mappedBy = "bookEntity")
+    private BookStatusEntity bookStatus;
 
     @ManyToMany(fetch = FetchType.LAZY,
             cascade = {
                     CascadeType.PERSIST,
                     CascadeType.MERGE
-            })
+            },
+            mappedBy = "books"
+    )
     // This will create only 1 mapping table named: AUTHOR_BOOK having 2 columns = BOOK_ID, AUTHOR_ID
-    @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
+    //@JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<AuthorEntity> authors = new HashSet<>();
 
-    public BookEntity(String isbn, String title, int publisherId, int yearPublished, String edition) {
-        this.isbn = isbn;
-        this.title = title;
-        this.publisherId = publisherId;
-        this.yearPublished = yearPublished;
-        this.edition = edition;
+    public BookEntity() {
     }
 
-    public BookEntity(String isbn, String title, int publisherId, int yearPublished, String edition,
-                      PublisherEntity publisher, Set<AuthorEntity> authors) {
+    public BookEntity(String isbn, String title, int yearPublished, String edition) {
         this.isbn = isbn;
         this.title = title;
-        this.publisherId = publisherId;
         this.yearPublished = yearPublished;
         this.edition = edition;
-        this.publisher = publisher;
-        this.authors = authors;
     }
 
     public int getBookId() {
@@ -82,20 +74,12 @@ public class BookEntity {
         return title;
     }
 
-    public int getPublisherId() {
-        return publisherId;
-    }
-
     public int getYearPublished() {
         return yearPublished;
     }
 
     public String getEdition() {
         return edition;
-    }
-
-    public void setPublisherId(int publisherId) {
-        this.publisherId = publisherId;
     }
 
     public void setYearPublished(int yearPublished) {
@@ -120,6 +104,14 @@ public class BookEntity {
 
     public void setAuthors(Set<AuthorEntity> authors) {
         this.authors = authors;
+    }
+
+    public PublisherEntity getPublisher() {
+        return publisher;
+    }
+
+    public void setPublisher(PublisherEntity publisher) {
+        this.publisher = publisher;
     }
 }
 

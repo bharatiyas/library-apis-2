@@ -1,128 +1,126 @@
 {
-	"id": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-	"name": "library-apis",
-	"description": "Collection to test library APIs",
-	"order": [
-		"77aeb8a8-14ed-2c43-400e-1cec36e24c29",
-		"be3ea03c-52f0-148f-f6cc-d12de040baf6",
-		"4e860cdd-ae30-69af-f613-362e70866030",
-		"97f19ca6-3c33-d6ba-ec8d-7695d71a1e08"
-	],
-	"folders": [],
-	"folders_order": [],
-	"timestamp": 0,
-	"owner": "1331371",
-	"public": false,
-	"requests": [
+	"info": {
+		"_postman_id": "0c5d40b1-27d1-4240-b0bf-acc9437e8fbc",
+		"name": "library-apis",
+		"description": "Collection to test library APIs",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
 		{
-			"id": "4e860cdd-ae30-69af-f613-362e70866030",
-			"name": "author-add",
-			"url": "http://localhost:8080/users/",
-			"description": "",
-			"data": [],
-			"dataMode": "raw",
-			"headerData": [
-				{
-					"key": "Content-Type",
-					"name": "Content-Type",
-					"value": "application/json",
-					"description": "",
-					"type": "text"
-				}
-			],
-			"method": "POST",
-			"pathVariableData": [],
-			"queryParams": [],
-			"auth": null,
-			"events": null,
-			"folder": null,
-			"currentHelper": null,
-			"helperAttributes": null,
-			"collectionId": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"rawModeData": "{\r\n\t\"userId\": \"sanjayfromgomia\",\r\n    \"password\": \"Sanjay!23\",\r\n    \"firstName\": \"Sanjay\",\r\n    \"lastName\": \"Bharatiya\",\r\n    \"age\": \"40\",\r\n    \"gender\": \"M\",\r\n    \"phoneNumber\": \"12457638\",\r\n    \"emailId\": \"sanjayfromgomia@gmail.com\"\r\n}",
-			"headers": "Content-Type: application/json\n",
-			"pathVariables": [],
-			"collection_id": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"preRequestScript": "",
-			"tests": ""
-		},
-		{
-			"id": "77aeb8a8-14ed-2c43-400e-1cec36e24c29",
 			"name": "user-add",
-			"url": "http://localhost:8080/users/",
-			"description": "",
-			"data": [],
-			"dataMode": "raw",
-			"headerData": [
-				{
-					"key": "Content-Type",
-					"name": "Content-Type",
-					"value": "application/json",
-					"description": "",
-					"type": "text"
-				}
-			],
-			"method": "POST",
-			"pathVariableData": [],
-			"queryParams": [],
-			"auth": null,
-			"events": null,
-			"folder": null,
-			"currentHelper": null,
-			"helperAttributes": null,
-			"collectionId": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"rawModeData": "{\r\n\t\"userId\": \"sanjayfromgomia\",\r\n    \"password\": \"Sanjay!23\",\r\n    \"firstName\": \"Sanjay\",\r\n    \"lastName\": \"Bharatiya\",\r\n    \"age\": \"40\",\r\n    \"gender\": \"M\",\r\n    \"phoneNumber\": \"12457638\",\r\n    \"emailId\": \"sanjayfromgomia@gmail.com\"\r\n}",
-			"headers": "Content-Type: application/json\n",
-			"pathVariables": [],
-			"collection_id": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"preRequestScript": "",
-			"tests": ""
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"userId\": \"sanjayfromgomia\",\r\n    \"password\": \"Sanjay!23\",\r\n    \"firstName\": \"Sanjay\",\r\n    \"lastName\": \"Bharatiya\",\r\n    \"age\": \"40\",\r\n    \"gender\": \"M\",\r\n    \"phoneNumber\": \"12457638\",\r\n    \"emailId\": \"sanjayfromgomia@gmail.com\"\r\n}"
+				},
+				"url": "http://localhost:8080/users/"
+			},
+			"response": []
 		},
 		{
-			"id": "97f19ca6-3c33-d6ba-ec8d-7695d71a1e08",
-			"name": "author-get",
-			"url": "http://localhost:8080/users/4212",
-			"description": "",
-			"data": null,
-			"dataMode": null,
-			"headerData": [],
-			"method": "GET",
-			"pathVariableData": [],
-			"queryParams": [],
-			"auth": null,
-			"events": [],
-			"folder": null,
-			"currentHelper": null,
-			"helperAttributes": null,
-			"collectionId": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"headers": "",
-			"pathVariables": [],
-			"collection_id": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"preRequestScript": "",
-			"tests": ""
-		},
-		{
-			"id": "be3ea03c-52f0-148f-f6cc-d12de040baf6",
 			"name": "user-get",
-			"url": "http://localhost:8080/users/4212",
-			"description": "",
-			"data": null,
-			"dataMode": null,
-			"headerData": [],
-			"method": "GET",
-			"pathVariableData": [],
-			"queryParams": [],
-			"auth": null,
-			"events": [],
-			"folder": null,
-			"currentHelper": null,
-			"helperAttributes": null,
-			"collectionId": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"headers": "",
-			"pathVariables": [],
-			"collection_id": "7540ae78-77d6-e4d1-6e24-272fd71025c0",
-			"preRequestScript": "",
-			"tests": ""
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/users/4212"
+			},
+			"response": []
+		},
+		{
+			"name": "author-add",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"firstName\": \"Shobha\",\r\n    \"lastName\": \"Dey\",\r\n    \"dateOfBirth\": \"1965-01-23\",\r\n    \"gender\": \"Female\"\r\n}"
+				},
+				"url": "http://localhost:8080/authors/"
+			},
+			"response": []
+		},
+		{
+			"name": "author-get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/authors/3065"
+			},
+			"response": []
+		},
+		{
+			"name": "publisher-add",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"name\": \"OReally\",\r\n    \"emailId\": \"o.really@email.com\",\r\n    \"phoneNumber\": \"196876723\"\r\n}"
+				},
+				"url": "http://localhost:8080/publishers/"
+			},
+			"response": []
+		},
+		{
+			"name": "publisher-get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/publishers/953"
+			},
+			"response": []
+		},
+		{
+			"name": "book-add",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"isbn\": \"978-3-16-148410-1\",\r\n    \"title\": \"JavaScript is fun\",\r\n    \"publisherId\": 953,\r\n    \"yearPublished\": 2001,\r\n    \"edition\": \"First\",\r\n    \"bookStatus\": {\r\n    \t\"state\": \"Active\",\r\n    \t\"numberOfCopiesAvailable\": 5\r\n    }\r\n}"
+				},
+				"url": "http://localhost:8080/books/"
+			},
+			"response": []
+		},
+		{
+			"name": "book-get",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "http://localhost:8080/publishers/953"
+			},
+			"response": []
 		}
 	]
 }

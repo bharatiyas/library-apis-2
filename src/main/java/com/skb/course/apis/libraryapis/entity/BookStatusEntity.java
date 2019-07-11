@@ -1,7 +1,5 @@
 package com.skb.course.apis.libraryapis.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.BookStatusState;
 
 import javax.persistence.*;
@@ -14,7 +12,7 @@ public class BookStatusEntity {
     @Id
     private int bookId;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "Book_Id", nullable = false)
     private BookEntity bookEntity;
 
@@ -31,7 +29,8 @@ public class BookStatusEntity {
     public BookStatusEntity() {
     }
 
-    public BookStatusEntity(BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
+    public BookStatusEntity(int bookId, BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
+        this.bookId = bookId;
         this.state = state;
         this.numberOfCopiesAvailable = numberOfCopiesAvailable;
         this.numberOfCopiesIssued = numberOfCopiesIssued;

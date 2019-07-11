@@ -1,7 +1,5 @@
 package com.skb.course.apis.libraryapis.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 
 @Entity

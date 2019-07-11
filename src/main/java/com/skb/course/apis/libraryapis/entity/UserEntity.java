@@ -1,6 +1,5 @@
 package com.skb.course.apis.libraryapis.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.skb.course.apis.libraryapis.model.Gender;
 
 import javax.persistence.*;
