@@ -1,31 +1,66 @@
 package com.skb.course.apis.libraryapis.model;
 
+import com.skb.course.apis.libraryapis.entity.AuthorEntity;
+
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Book implements Serializable {
 
-    private long bookId;
+    private int bookId;
     private String isbn;
     private String title;
-    private String numberOfCopiesAvailable;
-    private String numberOfCopiesIssued;
-    private int yearPublished;
+    private int publisherId;
+    private Integer yearPublished;
     private String edition;
+    private BookStatus bookStatus;
+    private Set<AuthorEntity> authors = new HashSet<>();
 
     public Book() {
     }
 
-    public Book(String isbn, String title, String numberOfCopiesAvailable, String numberOfCopiesIssued, int yearPublished, String edition) {
+    public Book(String isbn, String title, int publisherId, int yearPublished, String edition, BookStatus bookStatus) {
         this.isbn = isbn;
         this.title = title;
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
-        this.numberOfCopiesIssued = numberOfCopiesIssued;
+        this.publisherId = publisherId;
         this.yearPublished = yearPublished;
         this.edition = edition;
+        this.bookStatus = bookStatus;
     }
 
-    public long getBookId() {
+    public Book(int bookId, String isbn, String title, int publisherId, int yearPublished, String edition, BookStatus bookStatus) {
+        this.bookId = bookId;
+        this.isbn = isbn;
+        this.title = title;
+        this.publisherId = publisherId;
+        this.yearPublished = yearPublished;
+        this.edition = edition;
+        this.bookStatus = bookStatus;
+    }
+
+    public int getBookId() {
         return bookId;
+    }
+
+    public void setBookId(int bookId) {
+        this.bookId = bookId;
+    }
+
+    public Integer getYearPublished() {
+        return yearPublished;
+    }
+
+    public void setYearPublished(int yearPublished) {
+        this.yearPublished = yearPublished;
+    }
+
+    public String getEdition() {
+        return edition;
+    }
+
+    public void setEdition(String edition) {
+        this.edition = edition;
     }
 
     public String getIsbn() {
@@ -36,28 +71,24 @@ public class Book implements Serializable {
         return title;
     }
 
-    public String getNumberOfCopiesAvailable() {
-        return numberOfCopiesAvailable;
+    public Integer getPublisherId() {
+        return publisherId;
     }
 
-    public String getNumberOfCopiesIssued() {
-        return numberOfCopiesIssued;
+    public BookStatus getBookStatus() {
+        return bookStatus;
     }
 
-    public int getYearPublished() {
-        return yearPublished;
+    public void setBookStatus(BookStatus bookStatus) {
+        this.bookStatus = bookStatus;
     }
 
-    public String getEdition() {
-        return edition;
+    public Set<AuthorEntity> getAuthors() {
+        return authors;
     }
 
-    public void setNumberOfCopiesAvailable(String numberOfCopiesAvailable) {
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
-    }
-
-    public void setNumberOfCopiesIssued(String numberOfCopiesIssued) {
-        this.numberOfCopiesIssued = numberOfCopiesIssued;
+    public void setAuthors(Set<AuthorEntity> authors) {
+        this.authors = authors;
     }
 
     @Override
@@ -66,8 +97,7 @@ public class Book implements Serializable {
                 "bookId=" + bookId +
                 ", isbn='" + isbn + '\'' +
                 ", title='" + title + '\'' +
-                ", numberOfCopiesAvailable='" + numberOfCopiesAvailable + '\'' +
-                ", numberOfCopiesIssued='" + numberOfCopiesIssued + '\'' +
+                ", publisherId=" + publisherId +
                 ", yearPublished=" + yearPublished +
                 ", edition='" + edition + '\'' +
                 '}';

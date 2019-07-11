@@ -1,101 +1,90 @@
 package com.skb.course.apis.libraryapis.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.skb.course.apis.libraryapis.model.Gender;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "AUTHOR")
-@JsonIgnoreProperties(value = {"createdAt", "updatedAt"})
 public class AuthorEntity {
 
-    @Column(name = "Book_Id")
+    @Column(name = "Author_Id")
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "bookId_generator")
-    @SequenceGenerator(name="bookId_generator", sequenceName = "books_sequence", allocationSize = 50)
-    private long bookId;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "authorId_generator")
+    @SequenceGenerator(name="authorId_generator", sequenceName = "author_sequence", allocationSize = 50)
+    private int authorId;
 
-    @Column(name = "ISBN")
-    private String isbn;
+    @Column(name = "First_Name")
+    private String firstName;
 
-    @Column(name = "Title")
-    private String title;
+    @Column(name = "Last_Name")
+    private String lastName;
 
-    @Column(name = "Number_Of_Copies_Available")
-    private String numberOfCopiesAvailable;
+    @Column(name = "Date_Of_Birth")
+    private LocalDate dateOfBirth;
 
-    @Column(name = "Number_Of_Copies_Issued")
-    private String numberOfCopiesIssued;
+    @Column(name = "Gender")
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
-    private long publisherId;
+    // In a bi-directional association, the @ManyToMany annotation is used on both the entities but only one entity can
+    // be the owner of the relationship.
+    // FetchType.LAZY - Fetch the related entity lazily from the database.
+    @ManyToMany(fetch = FetchType.LAZY,
+                cascade = {CascadeType.PERSIST, CascadeType.MERGE}
+                )
+    // This is to represent to the mapping table named: BOOK_AUTHOR having 2 columns:
+    // BOOK_ID (FK to Book) and AUTHOR_ID (FK to Author)
+    // joinColumn = Column name of this Table/Entity (Author)
+    // inverseJoinColumn = Column name of other Table (Book)
+    // The entity that specifies the @JoinTable is the owning side of the relationship.
+    @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Set<BookEntity> books = new HashSet<>();
 
-    @Column(name = "Year_Published")
-    private int yearPublished;
-
-    @Column(name = "Edition")
-    private String edition;
-
-    public AuthorEntity(String isbn, String title, String numberOfCopiesAvailable, String numberOfCopiesIssued,
-                        long publisherId, int yearPublished, String edition) {
-        this.isbn = isbn;
-        this.title = title;
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
-        this.numberOfCopiesIssued = numberOfCopiesIssued;
-        this.publisherId = publisherId;
-        this.yearPublished = yearPublished;
-        this.edition = edition;
+    public AuthorEntity() {
     }
 
-    public long getBookId() {
-        return bookId;
+    // We do not set any mapping fields in the constructor
+    public AuthorEntity(String firstName, String lastName, LocalDate dateOfBirth, Gender gender) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
     }
 
-    public void setBookId(long bookId) {
-        this.bookId = bookId;
+    public int getAuthorId() {
+        return authorId;
     }
 
-    public String getIsbn() {
-        return isbn;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setIsbn(String isbn) {
-        this.isbn = isbn;
+    public String getLastName() {
+        return lastName;
     }
 
-    public String getTitle() {
-        return title;
+    public LocalDate getDateOfBirth() {
+        return dateOfBirth;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public Gender getGender() {
+        return gender;
     }
 
-    public String getNumberOfCopiesAvailable() {
-        return numberOfCopiesAvailable;
+    public void setDateOfBirth(LocalDate dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
     }
 
-    public void setNumberOfCopiesAvailable(String numberOfCopiesAvailable) {
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
+    public void setGender(Gender gender) {
+        this.gender = gender;
     }
 
-    public String getNumberOfCopiesIssued() {
-        return numberOfCopiesIssued;
-    }
-
-    public void setNumberOfCopiesIssued(String numberOfCopiesIssued) {
-        this.numberOfCopiesIssued = numberOfCopiesIssued;
-    }
-
-    public long getPublisherId() {
-        return publisherId;
-    }
-
-    public int getYearPublished() {
-        return yearPublished;
-    }
-
-    public String getEdition() {
-        return edition;
-    }
 }
 

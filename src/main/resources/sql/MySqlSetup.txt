@@ -1,7 +1,7 @@
 
 1.  Login into EC2 instance
 2.  Run MySql Docker image
-		$ docker container run --name=mysql1 -d mysql/mysql-server
+		$ docker container run --name=mysql -d mysql/mysql-server
 
 3.	Check the logs to get the default (generated) password
 		$ docker container logs mysql1
@@ -13,13 +13,13 @@
 		$ docker container exec -it mysql1 mysql -uroot -p
 
 5.  Change the default password
-		mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql-docker'
+		mysql> ALTER USER 'root'@'localhost' IDENTIFIED BY 'mysql-docker';
 
 6.  Create a DB
 		mysql> create database library_db
 
 7.  Change to the newly created DB
-		mysql> use library_db  -- Create the new database
+		mysql> use library_db;  -- Create the new database
 		mysql> create user 'springuser'@'%' identified by 'ThePassword'; -- Creates the user
 		mysql> grant all on library_db_2.* to 'springuser'@'%'; -- Gives all the privileges to the new user on the newly created database
 

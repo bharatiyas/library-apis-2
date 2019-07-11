@@ -1,30 +1,25 @@
-package com.skb.course.apis.libraryapis.entity;
+package com.skb.course.apis.libraryapis.model;
 
-import javax.persistence.*;
+import java.io.Serializable;
 
-@Entity
-@Table(name = "PUBLISHER")
-public class PublisherEntity {
+public class Publisher implements Serializable {
 
-    @Column(name = "Publisher_Id")
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "publisherId_generator")
-    @SequenceGenerator(name="publisherId_generator", sequenceName = "publisher_sequence", allocationSize = 50)
     private int publisherId;
-
-    @Column(name = "Name")
     private String name;
-
-    @Column(name = "Email_Id")
     private String emailId;
-
-    @Column(name = "Phone_Number")
     private String phoneNumber;
 
-    public PublisherEntity() {
+    public Publisher() {
     }
 
-    public PublisherEntity(String name, String emailId, String phoneNumber) {
+    public Publisher(int publisherId, String name, String emailId, String phoneNumber) {
+        this.publisherId = publisherId;
+        this.name = name;
+        this.emailId = emailId;
+        this.phoneNumber = phoneNumber;
+    }
+
+    public Publisher(String name, String emailId, String phoneNumber) {
         this.name = name;
         this.emailId = emailId;
         this.phoneNumber = phoneNumber;
@@ -32,6 +27,14 @@ public class PublisherEntity {
 
     public int getPublisherId() {
         return publisherId;
+    }
+
+    public void setPublisherId(int publisherId) {
+        this.publisherId = publisherId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getName() {
@@ -53,6 +56,4 @@ public class PublisherEntity {
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
-
 }
-
