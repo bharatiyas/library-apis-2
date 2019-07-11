@@ -32,9 +32,17 @@ public class AuthorEntity {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    // In a bi-directional association, the @ManyToMany annotation is used on both the entities but only one entity can
+    // be the owner of the relationship.
+    // FetchType.LAZY - Fetch the related entity lazily from the database.
     @ManyToMany(fetch = FetchType.LAZY,
                 cascade = {CascadeType.PERSIST, CascadeType.MERGE}
                 )
+    // This is to represent to the mapping table named: BOOK_AUTHOR having 2 columns:
+    // BOOK_ID (FK to Book) and AUTHOR_ID (FK to Author)
+    // joinColumn = Column name of this Table/Entity (Author)
+    // inverseJoinColumn = Column name of other Table (Book)
+    // The entity that specifies the @JoinTable is the owning side of the relationship.
     @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "author_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Set<BookEntity> books = new HashSet<>();
@@ -42,6 +50,7 @@ public class AuthorEntity {
     public AuthorEntity() {
     }
 
+    // We do not set any mapping fields in the constructor
     public AuthorEntity(String firstName, String lastName, LocalDate dateOfBirth, Gender gender) {
         this.firstName = firstName;
         this.lastName = lastName;

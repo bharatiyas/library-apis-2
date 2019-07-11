@@ -12,6 +12,8 @@ public class BookStatusEntity {
     @Id
     private int bookId;
 
+    // BookStatusEntity has a 1-1 relationship with BookEntity, where BookEntity is the parent and Book_Id column
+    // is the FK on the BookStatus table
     @OneToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "Book_Id", nullable = false)
     private BookEntity bookEntity;

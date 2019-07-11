@@ -42,6 +42,7 @@ public class BookService {
                 bookToBeAdded.getYearPublished(),
                 bookToBeAdded.getEdition());
 
+        // Get the parent of Book (Publisher is parent. Book has 1-M relationship with Publisher)
         Optional<PublisherEntity> publisherEntity = publisherRepository.findById(bookToBeAdded.getPublisherId());
         if(publisherEntity.isPresent()) {
             bookEntity.setPublisher(publisherEntity.get());
@@ -52,13 +53,15 @@ public class BookService {
         // Save book to DB
         BookEntity addedBook = bookRepository.save(bookEntity);
 
+        // Manage 1-1 relationship
+        // 1-1 relationship: Create the (Child) BookStatusEntity object
         BookStatusEntity bookStatusEntity = new BookStatusEntity(addedBook.getBookId(), bookToBeAdded.getBookStatus().getState(),
                 bookToBeAdded.getBookStatus().getNumberOfCopiesAvailable(), 0);
 
-        // Set parent reference(user) in child entity(userProfile)
+        // 1-1 relationship: Set parent reference(BookEntity) in child entity(BookStatusEntity)
         bookStatusEntity.setBookEntity(bookEntity);
 
-        // Save BookStatusEntity
+        // Save the child entity (BookStatusEntity)
         bookStatusRepository.save(bookStatusEntity);
 
         bookToBeAdded.setBookId(addedBook.getBookId());
