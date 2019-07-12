@@ -4,6 +4,7 @@ import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
 import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.service.PublisherService;
 import com.skb.course.apis.libraryapis.service.PublisherService;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,11 @@ public class PublisherController {
     private PublisherService publisherService;
 
     @PostMapping(path = "/")
-    public ResponseEntity<?> addPublisher(@RequestBody Publisher publisher) {
+    public ResponseEntity<?> addPublisher(@RequestBody Publisher publisher,
+                                          @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot add a Publisher", HttpStatus.UNAUTHORIZED);
+        }
         try {
             publisher = publisherService.addPublisher(publisher);
         } catch (Exception e) {
@@ -40,9 +45,13 @@ public class PublisherController {
         return new ResponseEntity<>(publisher, HttpStatus.OK);
     }
 
-    @PutMapping(path = "/{userId}")
-    public ResponseEntity<?> updatePublisher(@PathVariable int publisherId, @RequestBody Publisher publisher) {
-        if(publisher.getPublisherId() != publisherId) {
+    @PutMapping(path = "/{publisherId}")
+    public ResponseEntity<?> updatePublisher(@PathVariable int publisherId, @RequestBody Publisher publisher,
+                                             @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot update Publisher details", HttpStatus.UNAUTHORIZED);
+        }
+        if(((publisher.getPublisherId() != null) ) && (publisher.getPublisherId() != publisherId)) {
             return new ResponseEntity<>("Invalid Publisher Id", HttpStatus.BAD_REQUEST);
         }
         try {
@@ -53,5 +62,18 @@ public class PublisherController {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(publisher, HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/{publisherID}")
+    public ResponseEntity<?> deletePublisher(@PathVariable int publisherId, @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot delete an publisher", HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            publisherService.deletePublisher(publisherId);
+        } catch (Exception e) {
+            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }

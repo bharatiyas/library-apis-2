@@ -59,6 +59,10 @@ public class PublisherService {
         return publisher;
     }
 
+    public void deletePublisher(int authorId) {
+        publisherRepository.deleteById(authorId);
+    }
+
     private Publisher createPublisherFromEntity(PublisherEntity pe) {
         return new Publisher(pe.getPublisherId(), pe.getName(), pe.getEmailId(), pe.getPhoneNumber());
     }

@@ -15,16 +15,25 @@ public class LibraryApiUtils {
     }
 
     public static int getUserIdFromClaim(String jwtString) {
-        return JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET))
+        return JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
                 .build()
-                .verify(jwtString.replace(SecurityConstants.TOKEN_PREFIX, ""))
+                .verify(jwtString.replace(SecurityConstants.getBearerTokenPrefix(), ""))
                 .getClaim("userId").asInt();
     }
 
     public static String getRoleFromClaim(String jwtString) {
-        return JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET))
+        return JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
                 .build()
-                .verify(jwtString.replace(SecurityConstants.TOKEN_PREFIX, ""))
+                .verify(jwtString.replace(SecurityConstants.getBearerTokenPrefix(), ""))
                 .getClaim("role").asString();
+    }
+
+    public static boolean isUserAdmin(String jwtString) {
+        String role = JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
+                .build()
+                .verify(jwtString.replace(SecurityConstants.getBearerTokenPrefix(), ""))
+                .getClaim("role").asString();
+
+        return role.equals("ADMIN");
     }
 }

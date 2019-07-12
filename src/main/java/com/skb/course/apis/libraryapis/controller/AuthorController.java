@@ -5,6 +5,7 @@ import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.service.AuthorService;
 import com.skb.course.apis.libraryapis.service.BookService;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,10 @@ public class AuthorController {
     private AuthorService authorService;
 
     @PostMapping(path = "/")
-    public ResponseEntity<?> addAuthor(@RequestBody Author author) {
+    public ResponseEntity<?> addAuthor(@RequestBody Author author, @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot add an author", HttpStatus.UNAUTHORIZED);
+        }
         try {
             author = authorService.addAuthor(author);
         } catch (Exception e) {
@@ -42,9 +46,13 @@ public class AuthorController {
     }
 
     @PutMapping(path = "/{authorID}")
-    public ResponseEntity<?> updateAuthor(@PathVariable int authorID, @RequestBody Author author) {
-        if(author.getAuthorId() != authorID) {
-            return new ResponseEntity<>("Invalid LibraryUser Id", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> updateAuthor(@PathVariable int authorID, @RequestBody Author author,
+                                          @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot update Author details", HttpStatus.UNAUTHORIZED);
+        }
+        if((author.getAuthorId() != null) && (author.getAuthorId() != authorID)) {
+            return new ResponseEntity<>("Invalid Author Id", HttpStatus.BAD_REQUEST);
         }
         try {
             author = authorService.updateAuthor(author);
@@ -54,5 +62,18 @@ public class AuthorController {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(author, HttpStatus.OK);
+    }
+
+    @DeleteMapping(path = "/{authorID}")
+    public ResponseEntity<?> deleteAuthor(@PathVariable int authorId, @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot delete an author", HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            authorService.deleteAuthor(authorId);
+        } catch (Exception e) {
+            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 }

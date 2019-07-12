@@ -26,10 +26,13 @@ public class ApplicationInitializer {
 
     @PostConstruct
     private void init() {
-        // insert admin user on application start up
-        UserEntity userEntity = new UserEntity("admin", bCryptPasswordEncoder.encode("admin!23"),
-                "Library", "Admin", LocalDate.now().minusYears(30), Gender.Female, "000-000000", "library.admin@email.com", "ADMIN");
+        // insert admin user on application start up, only for the first time
+        UserEntity admin = userRepository.findByUsername("admin");
+        if(admin == null) {
+            UserEntity userEntity = new UserEntity("admin", bCryptPasswordEncoder.encode("admin!23"),
+                    "Library", "Admin", LocalDate.now().minusYears(30), Gender.Female, "000-000000", "library.admin@email.com", "ADMIN");
 
-        userRepository.save(userEntity);
+            userRepository.save(userEntity);
+        }
     }
 }

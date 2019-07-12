@@ -38,7 +38,7 @@ public class LibraryUser implements UserDetails {
     public LibraryUser() {
     }
 
-    public LibraryUser(int userId, String username, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+    public LibraryUser(int userId, String username, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
                        String phoneNumber, String emailId, Role role) {
         this.userId = userId;
         this.username = username;
@@ -52,7 +52,7 @@ public class LibraryUser implements UserDetails {
         this.role = role;
     }
 
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
@@ -109,26 +109,31 @@ public class LibraryUser implements UserDetails {
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return null;
     }

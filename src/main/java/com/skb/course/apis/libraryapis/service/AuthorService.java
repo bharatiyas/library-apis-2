@@ -60,6 +60,10 @@ public class AuthorService {
         return author;
     }
 
+    public void deleteAuthor(int authorId) {
+        authorRepository.deleteById(authorId);
+    }
+
     private Author createAuthorFromEntity(AuthorEntity ae) {
         return new Author(ae.getAuthorId(), ae.getFirstName(), ae.getLastName(),
                 ae.getDateOfBirth(), ae.getGender());

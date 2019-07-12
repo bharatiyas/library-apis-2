@@ -89,8 +89,12 @@ public class UserService {
         return libraryUser;
     }
 
+    public void deleteUserByUserId(int userId) throws UserNotFoundException {
+        userRepository.deleteById(userId);
+    }
+
     private LibraryUser createUserFromEntity(UserEntity ue) {
-        return new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getPassword(), ue.getFirstName(), ue.getLastName(),
+        return new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
                 ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
     }
 }
