@@ -7,22 +7,31 @@
 	},
 	"item": [
 		{
-			"name": "user-add",
+			"name": "user-register",
 			"request": {
 				"method": "POST",
 				"header": [
 					{
 						"key": "Content-Type",
 						"name": "Content-Type",
-						"value": "application/json",
-						"type": "text"
+						"type": "text",
+						"value": "application/json"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n\t\"userId\": \"sanjayfromgomia\",\r\n    \"password\": \"Sanjay!23\",\r\n    \"firstName\": \"Sanjay\",\r\n    \"lastName\": \"Bharatiya\",\r\n    \"age\": \"40\",\r\n    \"gender\": \"M\",\r\n    \"phoneNumber\": \"12457638\",\r\n    \"emailId\": \"sanjayfromgomia@gmail.com\"\r\n}"
+					"raw": "{\r\n\t\"username\": \"james.anderson\",\r\n    \"firstName\": \"James\",\r\n    \"lastName\": \"Anderson\",\r\n    \"dateOfBirth\": \"1989-09-12\",\r\n    \"gender\": \"Male\",\r\n    \"phoneNumber\": \"12457638\",\r\n    \"emailId\": \"james.anderson@gmail.com\"\r\n}"
 				},
-				"url": "http://localhost:8080/users/"
+				"url": "http://localhost:8080/users/register"
+			},
+			"response": []
+		},
+		{
+			"name": "user-login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": "http://localhost:8080/users/4212"
 			},
 			"response": []
 		},
@@ -118,7 +127,7 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost:8080/publishers/953"
+				"url": "http://localhost:8080/books/2003"
 			},
 			"response": []
 		}
