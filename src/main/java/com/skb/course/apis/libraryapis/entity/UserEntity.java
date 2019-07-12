@@ -40,11 +40,14 @@ public class UserEntity {
     @Column(name = "Email_Id")
     private String emailId;
 
+    @Column(name = "Role")
+    private String role;
+
     public UserEntity() {
     }
 
     public UserEntity(String username, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
-                      String phoneNumber, String emailId) {
+                      String phoneNumber, String emailId, String role) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
@@ -53,6 +56,7 @@ public class UserEntity {
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.emailId = emailId;
+        this.role = role;
     }
 
     public int getUserId() {
@@ -101,6 +105,14 @@ public class UserEntity {
 
     public void setEmailId(String emailId) {
         this.emailId = emailId;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
 

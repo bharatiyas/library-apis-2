@@ -55,11 +55,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain chain,
                                             Authentication auth) throws IOException, ServletException {
 
+        LibraryUser principal = (LibraryUser) auth.getPrincipal();
         String token = JWT.create()
-                .withSubject(((LibraryUser) auth.getPrincipal()).getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.EXPIRATION_TIME))
-                .sign(HMAC512(SecurityConstants.SECRET.getBytes()));
+                .withSubject(principal.getUsername())
+                .withExpiresAt(new Date(System.currentTimeMillis() + SecurityConstants.getExpirationTime()))
+                .withClaim("userId", principal.getUserId())
+                .withClaim("role", principal.getRole().toString())
+                .sign(HMAC512(SecurityConstants.getSigningSecret().getBytes()));
 
-        response.addHeader(SecurityConstants.HEADER_STRING,  SecurityConstants.TOKEN_PREFIX + token);
+        response.addHeader(SecurityConstants.getAuthorizationHeaderString(),  SecurityConstants.getBearerTokenPrefix() + token);
     }
 }

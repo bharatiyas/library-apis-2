@@ -1,5 +1,6 @@
 package com.skb.course.apis.libraryapis.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -31,11 +32,14 @@ public class LibraryUser implements UserDetails {
     private String phoneNumber;
     private String emailId;
 
+    @JsonIgnore
+    private Role role;
+
     public LibraryUser() {
     }
 
     public LibraryUser(int userId, String username, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
-                       String phoneNumber, String emailId) {
+                       String phoneNumber, String emailId, Role role) {
         this.userId = userId;
         this.username = username;
         this.password = password;
@@ -45,6 +49,7 @@ public class LibraryUser implements UserDetails {
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.emailId = emailId;
+        this.role = role;
     }
 
     public int getUserId() {
@@ -93,6 +98,14 @@ public class LibraryUser implements UserDetails {
 
     public void setEmailId(String emailId) {
         this.emailId = emailId;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 
     @Override

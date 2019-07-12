@@ -29,7 +29,7 @@ public class LibraryUserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LibraryUser libraryUser =  null;
         try {
-            libraryUser = userService.getUserByUserId(username);
+            libraryUser = userService.getUserByUsername(username);
         } catch (UserNotFoundException e) {
             throw new UsernameNotFoundException(e.getMessage());
         }

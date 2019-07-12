@@ -29,7 +29,7 @@ public class LibraryApiSecurity extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) {
         try {
             httpSecurity.cors().and().csrf().disable().authorizeRequests()
-                    .antMatchers(HttpMethod.POST, SecurityConstants.USERS_REGISTER).permitAll()
+                    .antMatchers(HttpMethod.POST, SecurityConstants.getNewUserRegisterationUrl()).permitAll()
                     .anyRequest().authenticated()
                     .and()
                     .addFilter(new JwtAuthenticationFilter(authenticationManager()))

@@ -3,6 +3,8 @@ package com.skb.course.apis.libraryapis.controller;
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.UserService;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,18 +20,31 @@ public class UserController {
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<?> addUser(@RequestBody LibraryUser libraryUser) {
+    public ResponseEntity<?> registerUser(@RequestBody LibraryUser libraryUser) {
         try {
             libraryUser = userService.addUser(libraryUser);
+        } catch (DataIntegrityViolationException e) {
+            if(e.getMessage().contains("constraint [Username]")) {
+                return new ResponseEntity<>("Username already exists!! Please use different Username.", HttpStatus.CONFLICT);
+            } else {
+                return new ResponseEntity<>("EmailId already exists!! You cannot register with same Email address",
+                        HttpStatus.CONFLICT);
+            }
         } catch (Exception e) {
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(libraryUser, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable int userId) {
+    public ResponseEntity<?> getUser(@PathVariable int userId, @RequestHeader("Authorization") String bearerToken) {
 
+        int userIdFromClaim = LibraryApiUtils.getUserIdFromClaim(bearerToken);
+        String roleFromClaim = LibraryApiUtils.getRoleFromClaim(bearerToken);
+        if(roleFromClaim.equals("USER") && userId != userIdFromClaim)   {
+            return new ResponseEntity<>("You cannot get details for userId: " + userId,
+                    HttpStatus.UNAUTHORIZED);
+        }
         LibraryUser libraryUser = null;
         try {
             libraryUser = userService.getUserByUserId(userId);

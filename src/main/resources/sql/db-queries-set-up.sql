@@ -13,7 +13,8 @@ CREATE TABLE USER (
 				Date_Of_Birth DATE NOT NULL,
 				Gender ENUM('Male', 'Female', 'Undisclosed') NOT NULL,
 				Phone_Number VARCHAR(10) NOT NULL,
-				Email_Id VARCHAR(100) NOT NULL
+				Email_Id VARCHAR(100) NOT NULL UNIQUE,
+				Role ENUM('ADMIN', 'USER') NOT NULL
 );
 
 CREATE TABLE USER_SEQUENCE (

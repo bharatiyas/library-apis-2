@@ -3,8 +3,10 @@ package com.skb.course.apis.libraryapis.service;
 import com.skb.course.apis.libraryapis.entity.UserEntity;
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
+import com.skb.course.apis.libraryapis.model.Role;
 import com.skb.course.apis.libraryapis.repository.UserRepository;
-import com.skb.course.apis.libraryapis.util.Utility;
+import com.skb.course.apis.libraryapis.security.SecurityConstants;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +15,7 @@ import java.util.Optional;
 @Service
 public class UserService {
 
-    private static String DEFAULT_PASSWORD = "Password123";
+
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private UserRepository userRepository;
@@ -27,15 +29,16 @@ public class UserService {
         UserEntity userEntity = new UserEntity(
                 // Saving password as plain text isn't a good idea therefore encrypt it
                 libraryUserToBeAdded.getUsername(),
-                bCryptPasswordEncoder.encode(DEFAULT_PASSWORD),
+                bCryptPasswordEncoder.encode(SecurityConstants.getNewUserDefaultPassword()),
                 libraryUserToBeAdded.getFirstName(),
                 libraryUserToBeAdded.getLastName(),
                 libraryUserToBeAdded.getDateOfBirth(),
                 libraryUserToBeAdded.getGender(),
                 libraryUserToBeAdded.getPhoneNumber(),
-                libraryUserToBeAdded.getEmailId());
+                libraryUserToBeAdded.getEmailId(),
+                "USER");
 
-        libraryUserToBeAdded.setPassword(DEFAULT_PASSWORD);
+        libraryUserToBeAdded.setPassword(SecurityConstants.getNewUserDefaultPassword());
         UserEntity addedUser = userRepository.save(userEntity);
         libraryUserToBeAdded.setUserId(addedUser.getUserId());
         return libraryUserToBeAdded;
@@ -53,7 +56,7 @@ public class UserService {
         return libraryUser;
     }
 
-    public LibraryUser getUserByUserId(String username) throws UserNotFoundException {
+    public LibraryUser getUserByUsername(String username) throws UserNotFoundException {
         UserEntity userEntity = userRepository.findByUsername(username);
         LibraryUser libraryUser = null;
         if(userEntity != null) {
@@ -69,13 +72,13 @@ public class UserService {
         LibraryUser libraryUser = null;
         if(userEntity.isPresent()) {
             UserEntity ue = userEntity.get();
-            if(Utility.doesStringValueExist(libraryUserToBeUpdated.getEmailId())) {
+            if(LibraryApiUtils.doesStringValueExist(libraryUserToBeUpdated.getEmailId())) {
                 ue.setEmailId(libraryUserToBeUpdated.getEmailId());
             }
-            if(Utility.doesStringValueExist(libraryUserToBeUpdated.getPhoneNumber())) {
+            if(LibraryApiUtils.doesStringValueExist(libraryUserToBeUpdated.getPhoneNumber())) {
                 ue.setPhoneNumber(libraryUserToBeUpdated.getPhoneNumber());
             }
-            if(Utility.doesStringValueExist(libraryUserToBeUpdated.getPassword())) {
+            if(LibraryApiUtils.doesStringValueExist(libraryUserToBeUpdated.getPassword())) {
                 ue.setPassword(libraryUserToBeUpdated.getPassword());
             }
             userRepository.save(ue);
@@ -88,6 +91,6 @@ public class UserService {
 
     private LibraryUser createUserFromEntity(UserEntity ue) {
         return new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getPassword(), ue.getFirstName(), ue.getLastName(),
-                ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId());
+                ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
     }
 }

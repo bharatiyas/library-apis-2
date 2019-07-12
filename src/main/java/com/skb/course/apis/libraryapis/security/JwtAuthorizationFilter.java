@@ -5,7 +5,6 @@ import com.auth0.jwt.algorithms.Algorithm;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import javax.servlet.FilterChain;
@@ -26,9 +25,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         throws IOException, ServletException {
 
         // Validate if the Authorization header is present in HTTP header
-        String authorizationHeader = request.getHeader(SecurityConstants.HEADER_STRING);
+        String authorizationHeader = request.getHeader(SecurityConstants.getAuthorizationHeaderString());
 
-        if(authorizationHeader == null || !authorizationHeader.startsWith(SecurityConstants.TOKEN_PREFIX)){
+        if(authorizationHeader == null || !authorizationHeader.startsWith(SecurityConstants.getBearerTokenPrefix())){
             chain.doFilter(request, response);
             return;
         }
@@ -45,9 +44,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         // Verify the token and fetch the user information and set it in SecurityContext to access later
         if(authorizationHeader != null) {
-            String userNameFromJwt = JWT.require(Algorithm.HMAC512(SecurityConstants.SECRET))
+            String userNameFromJwt = JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
                         .build()
-                        .verify(authorizationHeader.replace(SecurityConstants.TOKEN_PREFIX, ""))
+                        .verify(authorizationHeader.replace(SecurityConstants.getBearerTokenPrefix(), ""))
                         .getSubject();
             if(userNameFromJwt != null) {
                 return new UsernamePasswordAuthenticationToken(userNameFromJwt, null, new ArrayList<>());
