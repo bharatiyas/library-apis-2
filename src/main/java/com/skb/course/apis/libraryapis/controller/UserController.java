@@ -1,9 +1,8 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
-import com.skb.course.apis.libraryapis.model.User;
+import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,46 +11,49 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path="/users")
 public class UserController {
 
-    @Autowired
     private UserService userService;
 
-    @PostMapping(path = "/")
-    public ResponseEntity<?> addUser(@RequestBody User user) {
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping(path = "/register")
+    public ResponseEntity<?> addUser(@RequestBody LibraryUser libraryUser) {
         try {
-            user = userService.addUser(user);
+            libraryUser = userService.addUser(libraryUser);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>(libraryUser, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/{userId}")
     public ResponseEntity<?> getUser(@PathVariable int userId) {
 
-        User user = null;
+        LibraryUser libraryUser = null;
         try {
-            user = userService.getUser(userId);
+            libraryUser = userService.getUserByUserId(userId);
         } catch (UserNotFoundException e) {
-            return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("LibraryUser Not Found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return new ResponseEntity<>(libraryUser, HttpStatus.OK);
     }
 
     @PutMapping(path = "/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable int userId, @RequestBody User user) {
-        if(user.getUserId() != userId) {
-            return new ResponseEntity<>("Invalid User Id", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> updateUser(@PathVariable int userId, @RequestBody LibraryUser libraryUser) {
+        if(libraryUser.getUserId() != userId) {
+            return new ResponseEntity<>("Invalid LibraryUser Id", HttpStatus.BAD_REQUEST);
         }
         try {
-            user = userService.updateUser(user);
+            libraryUser = userService.updateUser(libraryUser);
         } catch (UserNotFoundException e) {
-            return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("LibraryUser Not Found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return new ResponseEntity<>(libraryUser, HttpStatus.OK);
     }
 
 

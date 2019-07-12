@@ -15,6 +15,9 @@ public class UserEntity {
     @SequenceGenerator(name="userId_generator", sequenceName = "user_sequence", allocationSize=1)
     private int userId;
 
+    @Column(name = "Username")
+    private String username;
+
     @Column(name = "Password")
     private String password;
 
@@ -40,8 +43,9 @@ public class UserEntity {
     public UserEntity() {
     }
 
-    public UserEntity(String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+    public UserEntity(String username, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
                       String phoneNumber, String emailId) {
+        this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -53,6 +57,10 @@ public class UserEntity {
 
     public int getUserId() {
         return userId;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public String getPassword() {

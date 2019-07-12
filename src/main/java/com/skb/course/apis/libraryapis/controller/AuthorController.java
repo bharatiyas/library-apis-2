@@ -44,7 +44,7 @@ public class AuthorController {
     @PutMapping(path = "/{authorID}")
     public ResponseEntity<?> updateAuthor(@PathVariable int authorID, @RequestBody Author author) {
         if(author.getAuthorId() != authorID) {
-            return new ResponseEntity<>("Invalid User Id", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Invalid LibraryUser Id", HttpStatus.BAD_REQUEST);
         }
         try {
             author = authorService.updateAuthor(author);

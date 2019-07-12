@@ -1,14 +1,21 @@
 package com.skb.course.apis.libraryapis.model;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Collection;
 
-public class User implements Serializable {
+// Spring Security will use the information stored in the LibraryUser object to perform authentication and authorization.
+public class LibraryUser implements UserDetails {
 
     private int userId;
+
+    private String username;
     private String password;
 
     @NotNull(message = "First Name cannot be null")
@@ -24,27 +31,14 @@ public class User implements Serializable {
     private String phoneNumber;
     private String emailId;
 
-    public User() {
+    public LibraryUser() {
     }
 
-    public User(int userId, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
-                String phoneNumber, String emailId) {
+    public LibraryUser(int userId, String username, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+                       String phoneNumber, String emailId) {
         this.userId = userId;
+        this.username = username;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dateOfBirth = dateOfBirth;
-        this.gender = gender;
-        this.phoneNumber = phoneNumber;
-        this.emailId = emailId;
-    }
-
-
-    public User(String firstName,
-                String lastName,
-                LocalDate dateOfBirth,
-                Gender gender,
-                String phoneNumber, String emailId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
@@ -102,8 +96,38 @@ public class User implements Serializable {
     }
 
     @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
     public String toString() {
-        return "User{" +
+        return "LibraryUser{" +
                 "userId='" + userId + '\'' +
                 ", password='" + password + '\'' +
                 ", firstName='" + firstName + '\'' +
@@ -114,4 +138,5 @@ public class User implements Serializable {
                 ", emailId='" + emailId + '\'' +
                 '}';
     }
+
 }
