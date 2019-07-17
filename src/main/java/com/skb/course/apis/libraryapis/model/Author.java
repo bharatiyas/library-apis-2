@@ -29,7 +29,7 @@ public class Author implements Serializable {
         this.gender = gender;
     }
 
-    public int getAuthorId() {
+    public Integer getAuthorId() {
         return authorId;
     }
 

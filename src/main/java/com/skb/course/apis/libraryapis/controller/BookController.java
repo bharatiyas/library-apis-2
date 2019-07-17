@@ -1,10 +1,9 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.BookNotFoundException;
-import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.service.BookService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +21,10 @@ public class BookController {
     }
 
     @PostMapping(path = "/")
-    private ResponseEntity<?> addBook(@RequestBody Book book) {
+    private ResponseEntity<?> addBook(@RequestBody Book book, @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot add a Book", HttpStatus.UNAUTHORIZED);
+        }
         try {
             book = bookService.addBook(book);
         } catch (Exception e) {
@@ -46,8 +48,12 @@ public class BookController {
     }
 
     @PutMapping(path = "/{bookId}")
-    public ResponseEntity<?> updateBook(@PathVariable int bookId, @RequestBody Book book) {
-        if(book.getBookId() != bookId) {
+    public ResponseEntity<?> updateBook(@PathVariable int bookId, @RequestBody Book book,
+                                        @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot update the Book details", HttpStatus.UNAUTHORIZED);
+        }
+        if((book.getBookId() != null) && (book.getBookId() != bookId)) {
             return new ResponseEntity<>("Invalid Book Id", HttpStatus.BAD_REQUEST);
         }
         try {
@@ -61,8 +67,11 @@ public class BookController {
     }
 
     @PutMapping(path = "/{bookId}/authors")
-    public ResponseEntity<?> addBookAuhors(@PathVariable int bookId, @RequestBody Set<Integer> authorIds) {
-
+    public ResponseEntity<?> addBookAuhors(@PathVariable int bookId, @RequestBody Set<Integer> authorIds,
+                                           @RequestHeader("Authorization") String bearerToken) {
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot add Authors to the Book", HttpStatus.UNAUTHORIZED);
+        }
         if(authorIds == null || authorIds.size() == 0) {
             throw new IllegalArgumentException("Invalid Authors list");
         }

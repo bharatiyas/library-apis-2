@@ -8,12 +8,11 @@ import com.skb.course.apis.libraryapis.exception.BookNotFoundException;
 import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.BookStatus;
-import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.repository.AuthorRepository;
 import com.skb.course.apis.libraryapis.repository.BookRepository;
 import com.skb.course.apis.libraryapis.repository.BookStatusRepository;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
-import com.skb.course.apis.libraryapis.util.Utility;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -86,7 +85,7 @@ public class BookService {
         Book book = null;
         if(bookEntity.isPresent()) {
             BookEntity be = bookEntity.get();
-            if(Utility.doesStringValueExist(bookToBeUpdated.getEdition())) {
+            if(LibraryApiUtils.doesStringValueExist(bookToBeUpdated.getEdition())) {
                 be.setEdition(bookToBeUpdated.getEdition());
             }
             if(bookToBeUpdated.getYearPublished() != null) {

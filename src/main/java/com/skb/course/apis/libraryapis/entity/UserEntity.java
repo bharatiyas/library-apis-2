@@ -15,6 +15,9 @@ public class UserEntity {
     @SequenceGenerator(name="userId_generator", sequenceName = "user_sequence", allocationSize=1)
     private int userId;
 
+    @Column(name = "Username")
+    private String username;
+
     @Column(name = "Password")
     private String password;
 
@@ -37,11 +40,15 @@ public class UserEntity {
     @Column(name = "Email_Id")
     private String emailId;
 
+    @Column(name = "Role")
+    private String role;
+
     public UserEntity() {
     }
 
-    public UserEntity(String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
-                      String phoneNumber, String emailId) {
+    public UserEntity(String username, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+                      String phoneNumber, String emailId, String role) {
+        this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -49,10 +56,15 @@ public class UserEntity {
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.emailId = emailId;
+        this.role = role;
     }
 
     public int getUserId() {
         return userId;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public String getPassword() {
@@ -93,6 +105,14 @@ public class UserEntity {
 
     public void setEmailId(String emailId) {
         this.emailId = emailId;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
 

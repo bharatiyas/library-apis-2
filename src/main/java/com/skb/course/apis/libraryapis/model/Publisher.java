@@ -25,7 +25,7 @@ public class Publisher implements Serializable {
         this.phoneNumber = phoneNumber;
     }
 
-    public int getPublisherId() {
+    public Integer getPublisherId() {
         return publisherId;
     }
 

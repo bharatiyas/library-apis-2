@@ -1,14 +1,22 @@
 package com.skb.course.apis.libraryapis.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Collection;
 
-public class User implements Serializable {
+// Spring Security will use the information stored in the LibraryUser object to perform authentication and authorization.
+public class LibraryUser implements UserDetails {
 
     private int userId;
+
+    private String username;
     private String password;
 
     @NotNull(message = "First Name cannot be null")
@@ -24,12 +32,16 @@ public class User implements Serializable {
     private String phoneNumber;
     private String emailId;
 
-    public User() {
+    @JsonIgnore
+    private Role role;
+
+    public LibraryUser() {
     }
 
-    public User(int userId, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
-                String phoneNumber, String emailId) {
+    public LibraryUser(int userId, String username, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+                       String phoneNumber, String emailId, Role role) {
         this.userId = userId;
+        this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -37,23 +49,10 @@ public class User implements Serializable {
         this.gender = gender;
         this.phoneNumber = phoneNumber;
         this.emailId = emailId;
+        this.role = role;
     }
 
-
-    public User(String firstName,
-                String lastName,
-                LocalDate dateOfBirth,
-                Gender gender,
-                String phoneNumber, String emailId) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.dateOfBirth = dateOfBirth;
-        this.gender = gender;
-        this.phoneNumber = phoneNumber;
-        this.emailId = emailId;
-    }
-
-    public int getUserId() {
+    public Integer getUserId() {
         return userId;
     }
 
@@ -101,9 +100,52 @@ public class User implements Serializable {
         this.emailId = emailId;
     }
 
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @Override
+    @JsonIgnore
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
     @Override
     public String toString() {
-        return "User{" +
+        return "LibraryUser{" +
                 "userId='" + userId + '\'' +
                 ", password='" + password + '\'' +
                 ", firstName='" + firstName + '\'' +
@@ -114,4 +156,5 @@ public class User implements Serializable {
                 ", emailId='" + emailId + '\'' +
                 '}';
     }
+
 }

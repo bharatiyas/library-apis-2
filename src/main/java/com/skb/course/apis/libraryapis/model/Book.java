@@ -39,7 +39,7 @@ public class Book implements Serializable {
         this.bookStatus = bookStatus;
     }
 
-    public int getBookId() {
+    public Integer getBookId() {
         return bookId;
     }
 

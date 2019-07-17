@@ -20,6 +20,6 @@
 
 7.  Change to the newly created DB
 		mysql> use library_db;  -- Create the new database
-		mysql> create user 'springuser'@'%' identified by 'ThePassword'; -- Creates the user
-		mysql> grant all on library_db_2.* to 'springuser'@'%'; -- Gives all the privileges to the new user on the newly created database
+		mysql> create libraryUser 'springuser'@'%' identified by 'ThePassword'; -- Creates the libraryUser
+		mysql> grant all on library_db_2.* to 'springuser'@'%'; -- Gives all the privileges to the new libraryUser on the newly created database
 

@@ -1,9 +1,10 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
-import com.skb.course.apis.libraryapis.model.User;
+import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,47 +13,103 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(path="/users")
 public class UserController {
 
-    @Autowired
     private UserService userService;
 
-    @PostMapping(path = "/")
-    public ResponseEntity<?> addUser(@RequestBody User user) {
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    @PostMapping(path = "/register")
+    public ResponseEntity<?> registerUser(@RequestBody LibraryUser libraryUser) {
         try {
-            user = userService.addUser(user);
+            libraryUser = userService.addUser(libraryUser);
+        } catch (DataIntegrityViolationException e) {
+            if(e.getMessage().contains("constraint [Username]")) {
+                return new ResponseEntity<>("Username already exists!! Please use different Username.", HttpStatus.CONFLICT);
+            } else {
+                return new ResponseEntity<>("EmailId already exists!! You cannot register with same Email address",
+                        HttpStatus.CONFLICT);
+            }
         } catch (Exception e) {
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
+        return new ResponseEntity<>(libraryUser, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/{userId}")
-    public ResponseEntity<?> getUser(@PathVariable int userId) {
+    public ResponseEntity<?> getUser(@PathVariable int userId, @RequestHeader("Authorization") String bearerToken) {
 
-        User user = null;
+        int userIdFromClaim = LibraryApiUtils.getUserIdFromClaim(bearerToken);
+        String roleFromClaim = LibraryApiUtils.getRoleFromClaim(bearerToken);
+        if(roleFromClaim.equals("USER") && userId != userIdFromClaim)   {
+            return new ResponseEntity<>("You cannot get details for userId: " + userId,
+                    HttpStatus.UNAUTHORIZED);
+        }
+        LibraryUser libraryUser = null;
         try {
-            user = userService.getUser(userId);
+            libraryUser = userService.getUserByUserId(userId);
         } catch (UserNotFoundException e) {
-            return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("LibraryUser Not Found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return new ResponseEntity<>(libraryUser, HttpStatus.OK);
     }
 
+    // This method can be used to update Password, PhoneNumber and EmailId
+    // You cannot update any other details for a user
     @PutMapping(path = "/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable int userId, @RequestBody User user) {
-        if(user.getUserId() != userId) {
-            return new ResponseEntity<>("Invalid User Id", HttpStatus.BAD_REQUEST);
+    public ResponseEntity<?> updateUser(@PathVariable int userId, @RequestBody LibraryUser libraryUser,
+                                        @RequestHeader("Authorization") String bearerToken) {
+        int userIdFromClaim = LibraryApiUtils.getUserIdFromClaim(bearerToken);
+        String roleFromClaim = LibraryApiUtils.getRoleFromClaim(bearerToken);
+
+        // Even if you are admin you cannot update a User
+        if(LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot update a User", HttpStatus.UNAUTHORIZED);
         }
+
+        // Check for User validity. A User can update ONLY its details, not anyone else's
+        if(roleFromClaim.equals("USER") && (userId != userIdFromClaim))   {
+            return new ResponseEntity<>("You cannot update details for userId: " + userId,
+                    HttpStatus.UNAUTHORIZED);
+        }
+        if((libraryUser.getUserId() != null) && (libraryUser.getUserId() != userId)) {
+            return new ResponseEntity<>("Invalid LibraryUser Id", HttpStatus.BAD_REQUEST);
+        }
+
+        // Sanity check done. You are good to go.
         try {
-            user = userService.updateUser(user);
+            libraryUser = userService.updateUser(libraryUser);
         } catch (UserNotFoundException e) {
-            return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>("LibraryUser Not Found", HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return new ResponseEntity<>(user, HttpStatus.OK);
+        return new ResponseEntity<>(libraryUser, HttpStatus.OK);
     }
 
+    @DeleteMapping(path = "/{userId}")
+    public ResponseEntity<?> deleteUser(@PathVariable int userId, @RequestHeader("Authorization") String bearerToken) {
 
+        int userIdFromClaim = LibraryApiUtils.getUserIdFromClaim(bearerToken);
+        String roleFromClaim = LibraryApiUtils.getRoleFromClaim(bearerToken);
+
+        // Even if you are admin you cannot delete a User
+        if(LibraryApiUtils.isUserAdmin(bearerToken)) {
+            return new ResponseEntity<>("You cannot delete a User", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Check for User validity. A User can delete ONLY itself
+        if(roleFromClaim.equals("USER") && userId != userIdFromClaim)   {
+            return new ResponseEntity<>("You cannot delete User with userId: " + userId,
+                    HttpStatus.UNAUTHORIZED);
+        }
+        try {
+            userService.deleteUserByUserId(userId);
+        } catch (Exception e) {
+            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
 }

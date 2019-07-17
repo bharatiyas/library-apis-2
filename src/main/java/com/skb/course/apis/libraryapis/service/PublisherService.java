@@ -4,7 +4,7 @@ import com.skb.course.apis.libraryapis.entity.PublisherEntity;
 import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
 import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
-import com.skb.course.apis.libraryapis.util.Utility;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -45,10 +45,10 @@ public class PublisherService {
         Publisher publisher = null;
         if(publisherEntity.isPresent()) {
             PublisherEntity pe = publisherEntity.get();
-            if(Utility.doesStringValueExist(publisherToBeUpdated.getEmailId())) {
+            if(LibraryApiUtils.doesStringValueExist(publisherToBeUpdated.getEmailId())) {
                 pe.setEmailId(publisherToBeUpdated.getEmailId());
             }
-            if(Utility.doesStringValueExist(publisherToBeUpdated.getPhoneNumber())) {
+            if(LibraryApiUtils.doesStringValueExist(publisherToBeUpdated.getPhoneNumber())) {
                 pe.setPhoneNumber(publisherToBeUpdated.getPhoneNumber());
             }
             publisherRepository.save(pe);
@@ -57,6 +57,10 @@ public class PublisherService {
             throw new PublisherNotFoundException("Publisher Id: " + publisherToBeUpdated.getPublisherId() + " Not Found");
         }
         return publisher;
+    }
+
+    public void deletePublisher(int authorId) {
+        publisherRepository.deleteById(authorId);
     }
 
     private Publisher createPublisherFromEntity(PublisherEntity pe) {
