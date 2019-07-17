@@ -52,6 +52,12 @@ public class LibraryUser implements UserDetails {
         this.role = role;
     }
 
+    public LibraryUser(String username, String firstName, String lastName) {
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
+
     public Integer getUserId() {
         return userId;
     }

@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path="/users")
 public class UserController {
@@ -111,5 +113,24 @@ public class UserController {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping(path = "/search")
+    public ResponseEntity<?> searchUsers(@RequestParam String firstName, @RequestParam String lastName,
+                                        @RequestParam(defaultValue = "0") Integer pageNo,
+                                        @RequestParam(defaultValue = "10") Integer pageSize,
+                                        @RequestParam(defaultValue = "userId") String sortBy
+                                        ) {
+
+
+        List<LibraryUser> libraryUsers = null;
+        try {
+            libraryUsers = userService.searchUsers(firstName, lastName, pageNo, pageSize, sortBy);
+        } catch (UserNotFoundException e) {
+            return new ResponseEntity<>("LibraryUser Not Found", HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(libraryUsers, HttpStatus.OK);
     }
 }
