@@ -1,20 +1,20 @@
 package com.skb.course.apis.libraryapis.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
-import javax.validation.constraints.Pattern;
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Collection;
 
 // Spring Security will use the information stored in the LibraryUser object to perform authentication and authorization.
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LibraryUser implements UserDetails {
 
-    private int userId;
+    private Integer userId;
 
     private String username;
     private String password;
@@ -38,11 +38,24 @@ public class LibraryUser implements UserDetails {
     public LibraryUser() {
     }
 
-    public LibraryUser(int userId, String username, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+    public LibraryUser(int userId, String username, String password, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
                        String phoneNumber, String emailId, Role role) {
         this.userId = userId;
         this.username = username;
         this.password = password;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+        this.phoneNumber = phoneNumber;
+        this.emailId = emailId;
+        this.role = role;
+    }
+
+    public LibraryUser(int userId, String username, String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+                       String phoneNumber, String emailId, Role role) {
+        this.userId = userId;
+        this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;

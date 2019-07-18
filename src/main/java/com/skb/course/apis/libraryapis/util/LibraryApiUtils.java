@@ -6,6 +6,11 @@ import com.skb.course.apis.libraryapis.security.SecurityConstants;
 
 public class LibraryApiUtils {
 
+    /**
+     * Checks if supplied string value is having a value. Checks if the string is not null and has some length
+     * @param str
+     * @return
+     */
     public static boolean doesStringValueExist(String str) {
         if(str != null && str.trim().length() > 0) {
             return true;
