@@ -86,7 +86,7 @@ public class UserService {
                 ue.setPhoneNumber(libraryUserToBeUpdated.getPhoneNumber());
             }
             if(LibraryApiUtils.doesStringValueExist(libraryUserToBeUpdated.getPassword())) {
-                ue.setPassword(libraryUserToBeUpdated.getPassword());
+                ue.setPassword(bCryptPasswordEncoder.encode(libraryUserToBeUpdated.getPassword()));
             }
             userRepository.save(ue);
             libraryUser = createUserFromEntity(ue);

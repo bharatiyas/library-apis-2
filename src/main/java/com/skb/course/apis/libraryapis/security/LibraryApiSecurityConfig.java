@@ -10,26 +10,24 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @EnableWebSecurity
-public class LibraryApiSecurity extends WebSecurityConfigurerAdapter {
+public class LibraryApiSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private LibraryUserDetailsServiceImpl libraryUserDetailsService;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public LibraryApiSecurity(LibraryUserDetailsServiceImpl libraryUserDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public LibraryApiSecurityConfig(LibraryUserDetailsServiceImpl libraryUserDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.libraryUserDetailsService = libraryUserDetailsService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
-
-    /*public LibraryApiSecurity(boolean disableDefaults, LibraryUserDetailsServiceImpl libraryUserDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        super(disableDefaults);
-        this.libraryUserDetailsService = libraryUserDetailsService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-    }*/
 
     protected void configure(HttpSecurity httpSecurity) {
         try {
             httpSecurity.cors().and().csrf().disable().authorizeRequests()
                     .antMatchers(HttpMethod.POST, SecurityConstants.getNewUserRegisterationUrl()).permitAll()
+                    .antMatchers(HttpMethod.GET, "/users/search").permitAll()
+                    .antMatchers(HttpMethod.GET, "/books/search").permitAll()
+                    .antMatchers(HttpMethod.GET, "/authors/search").permitAll()
+                    .antMatchers(HttpMethod.GET, "/publishers/search").permitAll()
                     .anyRequest().authenticated()
                     .and()
                     .addFilter(new JwtAuthenticationFilter(authenticationManager()))

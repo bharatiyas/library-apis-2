@@ -9,7 +9,6 @@ import java.util.List;
 public interface UserRepository extends CrudRepository<UserEntity, Integer> {
     UserEntity findByUsername(String username);
 
-    // Enabling ignoring case for all suitable properties
     List<UserEntity> findByLastNameAndFirstName(String lastName, String firstName);
 
     List<UserEntity> findByFirstName(String firstName);

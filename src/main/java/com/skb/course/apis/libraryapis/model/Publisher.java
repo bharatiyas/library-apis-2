@@ -1,10 +1,13 @@
 package com.skb.course.apis.libraryapis.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Publisher implements Serializable {
 
-    private int publisherId;
+    private Integer publisherId;
     private String name;
     private String emailId;
     private String phoneNumber;
