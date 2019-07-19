@@ -20,23 +20,23 @@ public class LibraryApiUtils {
     }
 
     public static int getUserIdFromClaim(String jwtString) {
-        return JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
+        return JWT.require(Algorithm.HMAC512(SecurityConstants.SIGNING_SECRET))
                 .build()
-                .verify(jwtString.replace(SecurityConstants.getBearerTokenPrefix(), ""))
+                .verify(jwtString.replace(SecurityConstants.BEARER_TOKEN_PREFIX, ""))
                 .getClaim("userId").asInt();
     }
 
     public static String getRoleFromClaim(String jwtString) {
-        return JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
+        return JWT.require(Algorithm.HMAC512(SecurityConstants.SIGNING_SECRET))
                 .build()
-                .verify(jwtString.replace(SecurityConstants.getBearerTokenPrefix(), ""))
+                .verify(jwtString.replace(SecurityConstants.BEARER_TOKEN_PREFIX, ""))
                 .getClaim("role").asString();
     }
 
     public static boolean isUserAdmin(String jwtString) {
-        String role = JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
+        String role = JWT.require(Algorithm.HMAC512(SecurityConstants.SIGNING_SECRET))
                 .build()
-                .verify(jwtString.replace(SecurityConstants.getBearerTokenPrefix(), ""))
+                .verify(jwtString.replace(SecurityConstants.BEARER_TOKEN_PREFIX, ""))
                 .getClaim("role").asString();
 
         return role.equals("ADMIN");

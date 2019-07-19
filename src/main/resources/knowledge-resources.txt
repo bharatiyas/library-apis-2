@@ -1,0 +1,14 @@
+
+1.  Crud Repository custom methods: https://docs.spring.io/spring-data/jpa/docs/current/reference/html/
+2.  JPA Many-to-many mappings:
+        https://hellokoding.com/jpa-many-to-many-relationship-mapping-example-with-spring-boot-maven-and-mysql/
+
+3.  Search APIs pagination:
+        https://howtodoinjava.com/spring-boot2/pagination-sorting-example/
+
+4.  Controller IT:
+        https://howtodoinjava.com/spring-boot2/testresttemplate-post-example/
+        https://stackoverflow.com/questions/43341856/in-memory-database-configuration-hsqldb-for-integration-testing-in-spring-boot
+        https://www.baeldung.com/spring-testing-separate-data-source
+
+

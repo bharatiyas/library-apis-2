@@ -36,7 +36,7 @@ public class UserService {
         UserEntity userEntity = new UserEntity(
                 // Saving password as plain text isn't a good idea therefore encrypt it
                 libraryUserToBeAdded.getUsername(),
-                bCryptPasswordEncoder.encode(SecurityConstants.getNewUserDefaultPassword()),
+                bCryptPasswordEncoder.encode(SecurityConstants.NEW_USER_DEFAULT_PASSWORD),
                 libraryUserToBeAdded.getFirstName(),
                 libraryUserToBeAdded.getLastName(),
                 libraryUserToBeAdded.getDateOfBirth(),
@@ -45,7 +45,7 @@ public class UserService {
                 libraryUserToBeAdded.getEmailId(),
                 "USER");
 
-        libraryUserToBeAdded.setPassword(SecurityConstants.getNewUserDefaultPassword());
+        libraryUserToBeAdded.setPassword(SecurityConstants.NEW_USER_DEFAULT_PASSWORD);
         UserEntity addedUser = userRepository.save(userEntity);
         libraryUserToBeAdded.setUserId(addedUser.getUserId());
         return libraryUserToBeAdded;

@@ -25,9 +25,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         throws IOException, ServletException {
 
         // Validate if the Authorization header is present in HTTP header
-        String authorizationHeader = request.getHeader(SecurityConstants.getAuthorizationHeaderString());
+        String authorizationHeader = request.getHeader(SecurityConstants.AUTHORIZATION_HEADER_STRING);
 
-        if(authorizationHeader == null || !authorizationHeader.startsWith(SecurityConstants.getBearerTokenPrefix())){
+        if(authorizationHeader == null || !authorizationHeader.startsWith(SecurityConstants.BEARER_TOKEN_PREFIX)){
             chain.doFilter(request, response);
             return;
         }
@@ -44,9 +44,9 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
         // Verify the token and fetch the user information and set it in SecurityContext to access later
         if(authorizationHeader != null) {
-            String userNameFromJwt = JWT.require(Algorithm.HMAC512(SecurityConstants.getSigningSecret()))
+            String userNameFromJwt = JWT.require(Algorithm.HMAC512(SecurityConstants.SIGNING_SECRET))
                         .build()
-                        .verify(authorizationHeader.replace(SecurityConstants.getBearerTokenPrefix(), ""))
+                        .verify(authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, ""))
                         .getSubject();
             if(userNameFromJwt != null) {
                 return new UsernamePasswordAuthenticationToken(userNameFromJwt, null, new ArrayList<>());
