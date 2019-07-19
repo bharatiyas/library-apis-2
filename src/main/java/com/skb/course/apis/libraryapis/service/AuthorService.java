@@ -4,10 +4,13 @@ import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 import com.skb.course.apis.libraryapis.exception.AuthorNotFoundException;
 import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.repository.AuthorRepository;
+import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthorService {
@@ -64,8 +67,32 @@ public class AuthorService {
         authorRepository.deleteById(authorId);
     }
 
+    public List<Author> searchAuthors(String firstName, String lastName, Integer pageNo, Integer pageSize,
+                                      String sortBy) throws AuthorNotFoundException {
+        //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        List<AuthorEntity> authorEntities = null;
+        if(LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
+            authorEntities = authorRepository.findByLastNameAndFirstName(lastName, firstName);
+        } else if(LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
+            authorEntities = authorRepository.findByFirstName(firstName);
+        } else if(!LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
+            authorEntities = authorRepository.findByLastName(lastName);
+        }
+        if(authorEntities != null && authorEntities.size() > 0) {
+            return createUsersForSearchResponse(authorEntities);
+        } else {
+            throw new AuthorNotFoundException("No Authors found with First name: " + firstName + " and Last name: " + lastName);
+        }
+    }
+
     private Author createAuthorFromEntity(AuthorEntity ae) {
         return new Author(ae.getAuthorId(), ae.getFirstName(), ae.getLastName(),
                 ae.getDateOfBirth(), ae.getGender());
+    }
+
+    private List<Author> createUsersForSearchResponse(List<AuthorEntity> authorEntities) {
+        return authorEntities.stream()
+                .map(ae -> new Author(ae.getAuthorId(), ae.getFirstName(), ae.getLastName()))
+                .collect(Collectors.toList());
     }
 }

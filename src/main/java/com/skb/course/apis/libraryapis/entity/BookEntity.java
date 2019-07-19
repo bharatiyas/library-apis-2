@@ -48,18 +48,19 @@ public class BookEntity {
             mappedBy = "bookEntity")
     private BookStatusEntity bookStatus;
 
-    // BookEntity has M-M relationship with AuthorEntity
-    // books property in AuthorEntity class maps to BookEntity
     // In a bi-directional association, the @ManyToMany annotation is used on both the entities but only one entity can
-    // be the owner of the relationship. The entity that specifies the mappedBy attribute is the inverse side.
+    // be the owner of the relationship.
+    // FetchType.LAZY - Fetch the related entity lazily from the database.
     @ManyToMany(fetch = FetchType.LAZY,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            },
-            mappedBy = "books"
+            cascade = CascadeType.ALL
     )
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    // This is to represent to the mapping table named: BOOK_AUTHOR having 2 columns:
+    // BOOK_ID (FK to Book) and AUTHOR_ID (FK to Author)
+    // joinColumn = Column name of this Table/Entity (Book)
+    // inverseJoinColumn = Column name of other Table (Author)
+    // The entity that specifies the @JoinTable is the owning side of the relationship.
+    @JoinTable(name = "book_author", joinColumns = @JoinColumn(name = "book_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
+    //@OnDelete(action = OnDeleteAction.CASCADE)
     private Set<AuthorEntity> authors = new HashSet<>();
 
     public BookEntity() {

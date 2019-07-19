@@ -1,11 +1,14 @@
 package com.skb.course.apis.libraryapis.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.io.Serializable;
 import java.time.LocalDate;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Author implements Serializable {
 
-    private int authorId;
+    private Integer authorId;
     private String firstName;
     private String lastName;
     private LocalDate dateOfBirth;
@@ -27,6 +30,12 @@ public class Author implements Serializable {
         this.lastName = lastName;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
+    }
+
+    public Author(Integer authorId, String firstName, String lastName) {
+        this.authorId = authorId;
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public Integer getAuthorId() {

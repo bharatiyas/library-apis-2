@@ -4,14 +4,20 @@ import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.UserService;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path="/users")
 public class UserController {
+
+    private static Logger logger = LoggerFactory.getLogger(UserController.class);
 
     private UserService userService;
 
@@ -24,6 +30,7 @@ public class UserController {
         try {
             libraryUser = userService.addUser(libraryUser);
         } catch (DataIntegrityViolationException e) {
+            logger.error(e.getMessage());
             if(e.getMessage().contains("constraint [Username]")) {
                 return new ResponseEntity<>("Username already exists!! Please use different Username.", HttpStatus.CONFLICT);
             } else {
@@ -31,6 +38,7 @@ public class UserController {
                         HttpStatus.CONFLICT);
             }
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(libraryUser, HttpStatus.CREATED);
@@ -49,8 +57,10 @@ public class UserController {
         try {
             libraryUser = userService.getUserByUserId(userId);
         } catch (UserNotFoundException e) {
-            return new ResponseEntity<>("LibraryUser Not Found", HttpStatus.NOT_FOUND);
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(libraryUser, HttpStatus.OK);
@@ -82,8 +92,10 @@ public class UserController {
         try {
             libraryUser = userService.updateUser(libraryUser);
         } catch (UserNotFoundException e) {
-            return new ResponseEntity<>("LibraryUser Not Found", HttpStatus.NOT_FOUND);
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(libraryUser, HttpStatus.OK);
@@ -108,8 +120,33 @@ public class UserController {
         try {
             userService.deleteUserByUserId(userId);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping(path = "/search")
+    public ResponseEntity<?> searchUsers(@RequestParam String firstName, @RequestParam String lastName,
+                                        @RequestParam(defaultValue = "0") Integer pageNo,
+                                        @RequestParam(defaultValue = "10") Integer pageSize,
+                                        @RequestParam(defaultValue = "userId") String sortBy
+                                        ) {
+
+
+        List<LibraryUser> libraryUsers = null;
+        try {
+            if(!LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
+                return new ResponseEntity<>("Please enter at least one search criteria", HttpStatus.BAD_REQUEST);
+            }
+            libraryUsers = userService.searchUsers(firstName, lastName, pageNo, pageSize, sortBy);
+        } catch (UserNotFoundException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(libraryUsers, HttpStatus.OK);
     }
 }

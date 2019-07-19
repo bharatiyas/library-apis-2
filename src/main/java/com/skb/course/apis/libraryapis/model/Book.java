@@ -1,21 +1,23 @@
 package com.skb.course.apis.libraryapis.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Book implements Serializable {
 
-    private int bookId;
+    private Integer bookId;
     private String isbn;
     private String title;
     private int publisherId;
     private Integer yearPublished;
     private String edition;
     private BookStatus bookStatus;
-    private Set<AuthorEntity> authors = new HashSet<>();
+    private Set<Author> authors = new HashSet<>();
 
     public Book() {
     }
@@ -83,11 +85,11 @@ public class Book implements Serializable {
         this.bookStatus = bookStatus;
     }
 
-    public Set<AuthorEntity> getAuthors() {
+    public Set<Author> getAuthors() {
         return authors;
     }
 
-    public void setAuthors(Set<AuthorEntity> authors) {
+    public void setAuthors(Set<Author> authors) {
         this.authors = authors;
     }
 

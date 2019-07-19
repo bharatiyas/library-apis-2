@@ -6,6 +6,7 @@ import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
 import com.skb.course.apis.libraryapis.entity.PublisherEntity;
 import com.skb.course.apis.libraryapis.exception.BookNotFoundException;
 import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
+import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.BookStatus;
 import com.skb.course.apis.libraryapis.repository.AuthorRepository;
@@ -132,12 +133,27 @@ public class BookService {
     }
 
     private Book createBookFromEntity(BookEntity be) {
-        return new Book(be.getBookId(), be.getIsbn(), be.getTitle(), be.getPublisher().getPublisherId() , be.getYearPublished(), be.getEdition()
+        Book book = new Book(be.getBookId(), be.getIsbn(), be.getTitle(), be.getPublisher().getPublisherId() , be.getYearPublished(), be.getEdition()
                 ,createBookStatusFromEntity(bookStatusRepository.findById(be.getBookId()).get())
         );
+
+        if(be.getAuthors() != null && be.getAuthors().size() > 0) {
+            Set<Author> authors = be.getAuthors().stream()
+                    .map(authorEntity -> {
+                        AuthorEntity ae = authorRepository.findById(authorEntity.getAuthorId()).get();
+                        return createAuthorFromAuthorEntity(ae);
+                    })
+                    .collect(Collectors.toSet());
+            book.setAuthors(authors);
+        }
+        return book;
     }
 
     private BookStatus createBookStatusFromEntity(BookStatusEntity bse) {
         return new BookStatus(bse.getState(), bse.getNumberOfCopiesAvailable(), bse.getNumberOfCopiesIssued());
+    }
+
+    private Author createAuthorFromAuthorEntity(AuthorEntity ae) {
+        return new Author(ae.getAuthorId(), ae.getFirstName(), ae.getLastName());
     }
 }

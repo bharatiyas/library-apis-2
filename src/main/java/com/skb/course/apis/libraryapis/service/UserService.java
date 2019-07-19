@@ -7,15 +7,22 @@ import com.skb.course.apis.libraryapis.model.Role;
 import com.skb.course.apis.libraryapis.repository.UserRepository;
 import com.skb.course.apis.libraryapis.security.SecurityConstants;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
 
-
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private UserRepository userRepository;
@@ -60,7 +67,7 @@ public class UserService {
         UserEntity userEntity = userRepository.findByUsername(username);
         LibraryUser libraryUser = null;
         if(userEntity != null) {
-            libraryUser = createUserFromEntity(userEntity);
+            libraryUser = createUserFromEntityForLogin(userEntity);
         } else {
             throw new UserNotFoundException("LibraryUsername: " + username + " Not Found");
         }
@@ -79,7 +86,7 @@ public class UserService {
                 ue.setPhoneNumber(libraryUserToBeUpdated.getPhoneNumber());
             }
             if(LibraryApiUtils.doesStringValueExist(libraryUserToBeUpdated.getPassword())) {
-                ue.setPassword(libraryUserToBeUpdated.getPassword());
+                ue.setPassword(bCryptPasswordEncoder.encode(libraryUserToBeUpdated.getPassword()));
             }
             userRepository.save(ue);
             libraryUser = createUserFromEntity(ue);
@@ -93,8 +100,37 @@ public class UserService {
         userRepository.deleteById(userId);
     }
 
+    public List<LibraryUser> searchUsers(String firstName, String lastName, Integer pageNo, Integer pageSize,
+                                         String sortBy) throws UserNotFoundException {
+        //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        List<UserEntity> userEntities = null;
+        if(LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
+            userEntities = userRepository.findByLastNameAndFirstName(lastName, firstName);
+        } else if(LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
+            userEntities = userRepository.findByFirstName(firstName);
+        } else if(!LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
+            userEntities = userRepository.findByLastName(lastName);
+        }
+        if(userEntities != null && userEntities.size() > 0) {
+            return createUsersForSearchResponse(userEntities);
+        } else {
+            throw new UserNotFoundException("No Users found with First name: " + firstName + " and Last name: " + lastName);
+        }
+    }
+
     private LibraryUser createUserFromEntity(UserEntity ue) {
         return new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
                 ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
+    }
+
+    private LibraryUser createUserFromEntityForLogin(UserEntity ue) {
+        return new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getPassword(), ue.getFirstName(), ue.getLastName(),
+                ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
+    }
+
+    private List<LibraryUser> createUsersForSearchResponse(List<UserEntity> userEntities) {
+        return userEntities.stream()
+                .map(ue -> new LibraryUser(ue.getUsername(), ue.getFirstName(), ue.getLastName()))
+                .collect(Collectors.toList());
     }
 }

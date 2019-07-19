@@ -4,6 +4,8 @@ import com.skb.course.apis.libraryapis.exception.BookNotFoundException;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.service.BookService;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +15,8 @@ import java.util.Set;
 @RestController
 @RequestMapping(path="/books")
 public class BookController {
+
+    private static Logger logger = LoggerFactory.getLogger(BookController.class);
 
     private BookService bookService;
 
@@ -28,6 +32,7 @@ public class BookController {
         try {
             book = bookService.addBook(book);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(book, HttpStatus.CREATED);
@@ -40,7 +45,8 @@ public class BookController {
         try {
             book = bookService.getBook(bookId);
         } catch (BookNotFoundException e) {
-            return new ResponseEntity<>("Book Not Found", HttpStatus.NOT_FOUND);
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -59,8 +65,10 @@ public class BookController {
         try {
             book = bookService.updateBook(book);
         } catch (BookNotFoundException e) {
-            return new ResponseEntity<>("Book Not Found", HttpStatus.NOT_FOUND);
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(book, HttpStatus.OK);
@@ -79,10 +87,13 @@ public class BookController {
         try {
             book = bookService.addBookAuhors(bookId, authorIds);
         } catch (BookNotFoundException e) {
-            return new ResponseEntity<>("Book Not Found", HttpStatus.NOT_FOUND);
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(book, HttpStatus.OK);
     }
+
 }

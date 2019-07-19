@@ -1,18 +1,26 @@
 package com.skb.course.apis.libraryapis.controller;
 
+import com.skb.course.apis.libraryapis.exception.AuthorNotFoundException;
 import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
+import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.service.PublisherService;
 import com.skb.course.apis.libraryapis.service.PublisherService;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping(path="/publishers")
 public class PublisherController {
+
+    private static Logger logger = LoggerFactory.getLogger(PublisherController.class);
 
     @Autowired
     private PublisherService publisherService;
@@ -26,6 +34,7 @@ public class PublisherController {
         try {
             publisher = publisherService.addPublisher(publisher);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(publisher, HttpStatus.CREATED);
@@ -38,7 +47,8 @@ public class PublisherController {
         try {
             publisher = publisherService.getPublisher(publisherId);
         } catch (PublisherNotFoundException e) {
-            return new ResponseEntity<>("Publisher Not Found", HttpStatus.NOT_FOUND);
+            logger.error(e.getMessage(), e);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -57,8 +67,9 @@ public class PublisherController {
         try {
             publisher = publisherService.updatePublisher(publisher);
         } catch (PublisherNotFoundException e) {
-            return new ResponseEntity<>("Publisher Not Found", HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(publisher, HttpStatus.OK);
@@ -72,8 +83,33 @@ public class PublisherController {
         try {
             publisherService.deletePublisher(publisherId);
         } catch (Exception e) {
+            logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
+    }
+
+    @GetMapping(path = "/search")
+    public ResponseEntity<?> searchPublishers(@RequestParam String name,
+                                           @RequestParam(defaultValue = "0") Integer pageNo,
+                                           @RequestParam(defaultValue = "10") Integer pageSize,
+                                           @RequestParam(defaultValue = "userId") String sortBy
+    ) {
+
+
+        List<Publisher> publishers = null;
+        try {
+            if(!LibraryApiUtils.doesStringValueExist(name)) {
+                return new ResponseEntity<>("Please enter a search criteria", HttpStatus.BAD_REQUEST);
+            }
+            publishers = publisherService.searchPublishers(name, pageNo, pageSize, sortBy);
+        } catch (PublisherNotFoundException e) {
+            logger.error(e.getMessage());
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(publishers, HttpStatus.OK);
     }
 }

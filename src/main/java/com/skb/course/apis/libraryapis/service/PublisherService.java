@@ -2,13 +2,16 @@ package com.skb.course.apis.libraryapis.service;
 
 import com.skb.course.apis.libraryapis.entity.PublisherEntity;
 import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
+import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PublisherService {
@@ -63,7 +66,27 @@ public class PublisherService {
         publisherRepository.deleteById(authorId);
     }
 
+    public List<Publisher> searchPublishers(String name, Integer pageNo, Integer pageSize,
+                                      String sortBy) throws PublisherNotFoundException {
+        //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+        List<PublisherEntity> publisherEntities = null;
+        if(LibraryApiUtils.doesStringValueExist(name)) {
+            publisherEntities = publisherRepository.findByName(name);
+        }
+        if(publisherEntities != null && publisherEntities.size() > 0) {
+            return createPublishersForSearchResponse(publisherEntities);
+        } else {
+            throw new PublisherNotFoundException("No Publishers found with Name: " + name);
+        }
+    }
+
     private Publisher createPublisherFromEntity(PublisherEntity pe) {
         return new Publisher(pe.getPublisherId(), pe.getName(), pe.getEmailId(), pe.getPhoneNumber());
+    }
+
+    private List<Publisher> createPublishersForSearchResponse(List<PublisherEntity> publisherEntities) {
+        return publisherEntities.stream()
+                .map(pe -> new Publisher(pe.getPublisherId(), pe.getName(), pe.getEmailId(), pe.getPhoneNumber()))
+                .collect(Collectors.toList());
     }
 }
