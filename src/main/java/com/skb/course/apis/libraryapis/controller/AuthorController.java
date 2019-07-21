@@ -4,6 +4,7 @@ import com.skb.course.apis.libraryapis.exception.AuthorNotFoundException;
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
 import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
+import com.skb.course.apis.libraryapis.model.LibraryApiError;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.AuthorService;
 import com.skb.course.apis.libraryapis.service.BookService;
@@ -29,7 +30,7 @@ public class AuthorController {
     @PostMapping(path = "/")
     public ResponseEntity<?> addAuthor(@RequestBody Author author, @RequestHeader("Authorization") String bearerToken) {
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot add an author", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You cannot add an author"), HttpStatus.UNAUTHORIZED);
         }
         try {
             author = authorService.addAuthor(author);
@@ -48,7 +49,7 @@ public class AuthorController {
             author = authorService.getAuthor(authorId);
         } catch (AuthorNotFoundException e) {
             logger.error(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -60,16 +61,16 @@ public class AuthorController {
     public ResponseEntity<?> updateAuthor(@PathVariable int authorID, @RequestBody Author author,
                                           @RequestHeader("Authorization") String bearerToken) {
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot update Author details", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You cannot update Author details"), HttpStatus.UNAUTHORIZED);
         }
         if((author.getAuthorId() != null) && (author.getAuthorId() != authorID)) {
-            return new ResponseEntity<>("Invalid Author Id", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new LibraryApiError("Invalid Author Id"), HttpStatus.BAD_REQUEST);
         }
         try {
             author = authorService.updateAuthor(author);
         } catch (AuthorNotFoundException e) {
             logger.error(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -80,7 +81,7 @@ public class AuthorController {
     @DeleteMapping(path = "/{authorID}")
     public ResponseEntity<?> deleteAuthor(@PathVariable int authorId, @RequestHeader("Authorization") String bearerToken) {
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot delete an author", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You cannot delete an author"), HttpStatus.UNAUTHORIZED);
         }
         try {
             authorService.deleteAuthor(authorId);
@@ -102,7 +103,7 @@ public class AuthorController {
         List<Author> authors = null;
         try {
             if(!LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
-                return new ResponseEntity<>("Please enter at least one search criteria", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(new LibraryApiError("Please enter at least one search criteria"), HttpStatus.BAD_REQUEST);
             }
             authors = authorService.searchAuthors(firstName, lastName, pageNo, pageSize, sortBy);
         } catch (AuthorNotFoundException e) {

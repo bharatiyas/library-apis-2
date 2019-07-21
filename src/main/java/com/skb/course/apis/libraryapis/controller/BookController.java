@@ -2,6 +2,7 @@ package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.BookNotFoundException;
 import com.skb.course.apis.libraryapis.model.Book;
+import com.skb.course.apis.libraryapis.model.LibraryApiError;
 import com.skb.course.apis.libraryapis.service.BookService;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.slf4j.Logger;
@@ -27,7 +28,7 @@ public class BookController {
     @PostMapping(path = "/")
     private ResponseEntity<?> addBook(@RequestBody Book book, @RequestHeader("Authorization") String bearerToken) {
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot add a Book", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You cannot add a Book"), HttpStatus.UNAUTHORIZED);
         }
         try {
             book = bookService.addBook(book);
@@ -46,7 +47,7 @@ public class BookController {
             book = bookService.getBook(bookId);
         } catch (BookNotFoundException e) {
             logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -57,16 +58,16 @@ public class BookController {
     public ResponseEntity<?> updateBook(@PathVariable int bookId, @RequestBody Book book,
                                         @RequestHeader("Authorization") String bearerToken) {
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot update the Book details", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You cannot update the Book details"), HttpStatus.UNAUTHORIZED);
         }
         if((book.getBookId() != null) && (book.getBookId() != bookId)) {
-            return new ResponseEntity<>("Invalid Book Id", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new LibraryApiError("Invalid Book Id"), HttpStatus.BAD_REQUEST);
         }
         try {
             book = bookService.updateBook(book);
         } catch (BookNotFoundException e) {
             logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -78,20 +79,21 @@ public class BookController {
     public ResponseEntity<?> addBookAuhors(@PathVariable int bookId, @RequestBody Set<Integer> authorIds,
                                            @RequestHeader("Authorization") String bearerToken) {
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot add Authors to the Book", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You cannot add Authors to the Book"), HttpStatus.UNAUTHORIZED);
         }
         if(authorIds == null || authorIds.size() == 0) {
-            throw new IllegalArgumentException("Invalid Authors list");
+            return new ResponseEntity<>(new LibraryApiError("Invalid Authors list"), HttpStatus.BAD_REQUEST);
         }
         Book book = null;
         try {
             book = bookService.addBookAuhors(bookId, authorIds);
         } catch (BookNotFoundException e) {
             logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            new ResponseEntity<>(new LibraryApiError("Server encountered an error while processing your request"),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(book, HttpStatus.OK);
     }

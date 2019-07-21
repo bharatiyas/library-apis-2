@@ -1,6 +1,7 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
+import com.skb.course.apis.libraryapis.model.LibraryApiError;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.UserService;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
@@ -32,9 +33,9 @@ public class UserController {
         } catch (DataIntegrityViolationException e) {
             logger.error(e.getMessage());
             if(e.getMessage().contains("constraint [Username]")) {
-                return new ResponseEntity<>("Username already exists!! Please use different Username.", HttpStatus.CONFLICT);
+                return new ResponseEntity<>(new LibraryApiError("Username already exists!! Please use different Username."), HttpStatus.CONFLICT);
             } else {
-                return new ResponseEntity<>("EmailId already exists!! You cannot register with same Email address",
+                return new ResponseEntity<>(new LibraryApiError("EmailId already exists!! You cannot register with same Email address"),
                         HttpStatus.CONFLICT);
             }
         } catch (Exception e) {
@@ -50,7 +51,7 @@ public class UserController {
         int userIdFromClaim = LibraryApiUtils.getUserIdFromClaim(bearerToken);
         String roleFromClaim = LibraryApiUtils.getRoleFromClaim(bearerToken);
         if(roleFromClaim.equals("USER") && userId != userIdFromClaim)   {
-            return new ResponseEntity<>("You cannot get details for userId: " + userId,
+            return new ResponseEntity<>(new LibraryApiError("You cannot get details for userId: " + userId),
                     HttpStatus.UNAUTHORIZED);
         }
         LibraryUser libraryUser = null;
@@ -76,16 +77,16 @@ public class UserController {
 
         // Even if you are admin you cannot update a User
         if(LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot update a User", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You (admin) cannot update a User"), HttpStatus.UNAUTHORIZED);
         }
 
         // Check for User validity. A User can update ONLY its details, not anyone else's
         if(roleFromClaim.equals("USER") && (userId != userIdFromClaim))   {
-            return new ResponseEntity<>("You cannot update details for userId: " + userId,
+            return new ResponseEntity<>(new LibraryApiError("You cannot update details for userId: " + userId),
                     HttpStatus.UNAUTHORIZED);
         }
         if((libraryUser.getUserId() != null) && (libraryUser.getUserId() != userId)) {
-            return new ResponseEntity<>("Invalid LibraryUser Id", HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new LibraryApiError("Invalid LibraryUser Id"), HttpStatus.BAD_REQUEST);
         }
 
         // Sanity check done. You are good to go.
@@ -109,12 +110,12 @@ public class UserController {
 
         // Even if you are admin you cannot delete a User
         if(LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot delete a User", HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(new LibraryApiError("You cannot delete a User"), HttpStatus.UNAUTHORIZED);
         }
 
         // Check for User validity. A User can delete ONLY itself
         if(roleFromClaim.equals("USER") && userId != userIdFromClaim)   {
-            return new ResponseEntity<>("You cannot delete User with userId: " + userId,
+            return new ResponseEntity<>(new LibraryApiError("You cannot delete User with userId: " + userId),
                     HttpStatus.UNAUTHORIZED);
         }
         try {
@@ -137,12 +138,12 @@ public class UserController {
         List<LibraryUser> libraryUsers = null;
         try {
             if(!LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
-                return new ResponseEntity<>("Please enter at least one search criteria", HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(new LibraryApiError("Please enter at least one search criteria"), HttpStatus.BAD_REQUEST);
             }
             libraryUsers = userService.searchUsers(firstName, lastName, pageNo, pageSize, sortBy);
         } catch (UserNotFoundException e) {
             logger.error(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
             new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
