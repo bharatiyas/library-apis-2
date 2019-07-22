@@ -1,7 +1,6 @@
 package com.skb.course.apis.libraryapis.controller;
 
-import com.skb.course.apis.libraryapis.exception.AuthorNotFoundException;
-import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
+import com.skb.course.apis.libraryapis.exception.*;
 import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.LibraryApiError;
@@ -17,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path="/authors")
@@ -28,90 +28,107 @@ public class AuthorController {
     private AuthorService authorService;
 
     @PostMapping(path = "/")
-    public ResponseEntity<?> addAuthor(@RequestBody Author author, @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<Author> addAuthor(@RequestBody Author author, @RequestHeader("Authorization") String bearerToken,
+                                       @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceUnauthorizedException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>(new LibraryApiError("You cannot add an author"), HttpStatus.UNAUTHORIZED);
+            // Logging UserId for security audit trail.
+            logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to add an Author. Disallowed. " +
+                    "User is not a Admin.");
+            throw new LibraryResourceUnauthorizedException(traceId, "You cannot update Author details");
         }
-        try {
-            author = authorService.addAuthor(author);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        author = authorService.addAuthor(author, traceId);
+
         return new ResponseEntity<>(author, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/{authorId}")
-    public ResponseEntity<?> getAuthor(@PathVariable int authorId) {
+    public ResponseEntity<Author> getAuthor(@PathVariable int authorId,
+                                            @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceNotFoundException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
 
         Author author = null;
         try {
-            author = authorService.getAuthor(authorId);
-        } catch (AuthorNotFoundException e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            author = authorService.getAuthor(authorId, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
         }
         return new ResponseEntity<>(author, HttpStatus.OK);
     }
 
     @PutMapping(path = "/{authorID}")
-    public ResponseEntity<?> updateAuthor(@PathVariable int authorID, @RequestBody Author author,
-                                          @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<Author> updateAuthor(@PathVariable int authorID, @RequestBody Author author,
+                                          @RequestHeader("Authorization") String bearerToken,
+                                          @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceNotFoundException, LibraryResourceBadRequestException, LibraryResourceUnauthorizedException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>(new LibraryApiError("You cannot update Author details"), HttpStatus.UNAUTHORIZED);
+            // Logging UserId for security audit trail.
+            logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to update an Author. Disallowed. " +
+                    "User is not a Admin.");
+            throw new LibraryResourceUnauthorizedException(traceId, "You cannot update Author details.");
         }
         if((author.getAuthorId() != null) && (author.getAuthorId() != authorID)) {
-            return new ResponseEntity<>(new LibraryApiError("Invalid Author Id"), HttpStatus.BAD_REQUEST);
+            logger.error(traceId + " Invalid Author Id. Author Id in the request and URL do not match.");
+            throw new LibraryResourceBadRequestException(traceId, "Invalid Author Id. Author Id in the request and URL do not match.");
         }
         try {
-            author = authorService.updateAuthor(author);
-        } catch (AuthorNotFoundException e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>(new LibraryApiError(e.getMessage()), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            author = authorService.updateAuthor(author, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
         }
         return new ResponseEntity<>(author, HttpStatus.OK);
     }
 
     @DeleteMapping(path = "/{authorID}")
-    public ResponseEntity<?> deleteAuthor(@PathVariable int authorId, @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<?> deleteAuthor(@PathVariable int authorId, @RequestHeader("Authorization") String bearerToken,
+                                          @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceUnauthorizedException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>(new LibraryApiError("You cannot delete an author"), HttpStatus.UNAUTHORIZED);
+            // Logging UserId for security audit trail.
+            logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to delete an Author. Disallowed. " +
+                    "User is not a Admin.");
+            throw new LibraryResourceUnauthorizedException(traceId, "You cannot delete an Author.");
         }
-        try {
-            authorService.deleteAuthor(authorId);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        authorService.deleteAuthor(authorId, traceId);
+
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping(path = "/search")
-    public ResponseEntity<?> searchAuthors(@RequestParam String firstName, @RequestParam String lastName,
-                                         @RequestParam(defaultValue = "0") Integer pageNo,
+    public ResponseEntity<List<Author>> searchAuthors(@RequestParam String firstName, @RequestParam String lastName,
+                                         /*@RequestParam(defaultValue = "0") Integer pageNo,
                                          @RequestParam(defaultValue = "10") Integer pageSize,
-                                         @RequestParam(defaultValue = "userId") String sortBy
-    ) {
+                                         @RequestParam(defaultValue = "userId") String sortBy,*/
+                                         @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceNotFoundException, LibraryResourceBadRequestException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
 
-
+        if(!LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
+            logger.error(traceId + " Please enter at least one search criteria to search Authors.");
+            throw new LibraryResourceBadRequestException(traceId, "Please enter at least one search criteria to search Authors.");
+        }
         List<Author> authors = null;
         try {
-            if(!LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
-                return new ResponseEntity<>(new LibraryApiError("Please enter at least one search criteria"), HttpStatus.BAD_REQUEST);
-            }
-            authors = authorService.searchAuthors(firstName, lastName, pageNo, pageSize, sortBy);
-        } catch (AuthorNotFoundException e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            authors = authorService.searchAuthors(firstName, lastName, /*pageNo, pageSize, sortBy,*/ traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
         }
         return new ResponseEntity<>(authors, HttpStatus.OK);
     }

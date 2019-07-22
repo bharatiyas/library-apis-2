@@ -1,8 +1,7 @@
 package com.skb.course.apis.libraryapis.service;
 
 import com.skb.course.apis.libraryapis.entity.PublisherEntity;
-import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
-import com.skb.course.apis.libraryapis.model.Author;
+import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
@@ -31,19 +30,19 @@ public class PublisherService {
         return publisherToBeAdded;
     }
 
-    public Publisher getPublisher(int publisherId) throws PublisherNotFoundException {
+    public Publisher getPublisher(int publisherId, String traceId) throws LibraryResourceNotFoundException {
         Optional<PublisherEntity> publisherEntity = publisherRepository.findById(publisherId);
         Publisher publisher = null;
         if(publisherEntity.isPresent()) {
             PublisherEntity ue = publisherEntity.get();
             publisher = createPublisherFromEntity(ue);
         } else {
-            throw new PublisherNotFoundException("Publisher Id: " + publisherId + " Not Found");
+            throw new LibraryResourceNotFoundException(traceId, "Publisher Id: " + publisherId + " Not Found");
         }
         return publisher;
     }
 
-    public Publisher updatePublisher(Publisher publisherToBeUpdated) throws PublisherNotFoundException {
+    public Publisher updatePublisher(Publisher publisherToBeUpdated, String traceId) throws LibraryResourceNotFoundException {
         Optional<PublisherEntity> publisherEntity = publisherRepository.findById(publisherToBeUpdated.getPublisherId());
         Publisher publisher = null;
         if(publisherEntity.isPresent()) {
@@ -57,7 +56,7 @@ public class PublisherService {
             publisherRepository.save(pe);
             publisher = createPublisherFromEntity(pe);
         } else {
-            throw new PublisherNotFoundException("Publisher Id: " + publisherToBeUpdated.getPublisherId() + " Not Found");
+            throw new LibraryResourceNotFoundException(traceId, "Publisher Id: " + publisherToBeUpdated.getPublisherId() + " Not Found");
         }
         return publisher;
     }
@@ -67,7 +66,7 @@ public class PublisherService {
     }
 
     public List<Publisher> searchPublishers(String name, Integer pageNo, Integer pageSize,
-                                      String sortBy) throws PublisherNotFoundException {
+                                            String sortBy, String traceId) throws LibraryResourceNotFoundException {
         //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         List<PublisherEntity> publisherEntities = null;
         if(LibraryApiUtils.doesStringValueExist(name)) {
@@ -76,7 +75,7 @@ public class PublisherService {
         if(publisherEntities != null && publisherEntities.size() > 0) {
             return createPublishersForSearchResponse(publisherEntities);
         } else {
-            throw new PublisherNotFoundException("No Publishers found with Name: " + name);
+            throw new LibraryResourceNotFoundException(traceId, "No Publishers found with Name: " + name);
         }
     }
 
