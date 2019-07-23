@@ -6,6 +6,7 @@ import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -61,8 +62,13 @@ public class PublisherService {
         return publisher;
     }
 
-    public void deletePublisher(int authorId) {
-        publisherRepository.deleteById(authorId);
+    public void deletePublisher(int publisherId, String traceId) throws LibraryResourceNotFoundException {
+
+        try {
+            publisherRepository.deleteById(publisherId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new LibraryResourceNotFoundException(traceId, "Publisher Id: " + publisherId + " Not Found");
+        }
     }
 
     public List<Publisher> searchPublishers(String name, Integer pageNo, Integer pageSize,

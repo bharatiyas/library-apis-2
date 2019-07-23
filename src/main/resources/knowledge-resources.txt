@@ -15,3 +15,6 @@
         https://stackoverflow.com/questions/16748969/java-net-httpretryexception-cannot-retry-due-to-server-authentication-in-strea
         https://github.com/spring-projects/spring-framework/issues/21321
 
+6.   Error Handling:
+        https://www.springboottutorial.com/spring-boot-exception-handling-for-rest-services
+

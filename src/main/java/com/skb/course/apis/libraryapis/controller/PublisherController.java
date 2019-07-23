@@ -26,7 +26,7 @@ public class PublisherController {
     @Autowired
     private PublisherService publisherService;
 
-    @PostMapping(path = "/")
+    @PostMapping
     public ResponseEntity<Publisher> addPublisher(@RequestBody Publisher publisher,
                                           @RequestHeader("Authorization") String bearerToken,
                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
@@ -91,10 +91,10 @@ public class PublisherController {
         return new ResponseEntity<>(publisher, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/{publisherID}")
+    @DeleteMapping(path = "/{publisherId}")
     public ResponseEntity<?> deletePublisher(@PathVariable int publisherId, @RequestHeader("Authorization") String bearerToken,
                                              @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
-            throws LibraryResourceUnauthorizedException {
+            throws LibraryResourceUnauthorizedException, LibraryResourceNotFoundException {
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
@@ -104,7 +104,12 @@ public class PublisherController {
                     "User is not a Admin.");
             throw new LibraryResourceUnauthorizedException(traceId, "You cannot delete an Publisher.");
         }
-        publisherService.deletePublisher(publisherId);
+        try {
+            publisherService.deletePublisher(publisherId, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
+        }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 

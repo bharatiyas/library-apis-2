@@ -27,7 +27,7 @@ public class AuthorController {
     @Autowired
     private AuthorService authorService;
 
-    @PostMapping(path = "/")
+    @PostMapping
     public ResponseEntity<Author> addAuthor(@RequestBody Author author, @RequestHeader("Authorization") String bearerToken,
                                        @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceUnauthorizedException {
@@ -90,10 +90,10 @@ public class AuthorController {
         return new ResponseEntity<>(author, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/{authorID}")
+    @DeleteMapping(path = "/{authorId}")
     public ResponseEntity<?> deleteAuthor(@PathVariable int authorId, @RequestHeader("Authorization") String bearerToken,
                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
-            throws LibraryResourceUnauthorizedException {
+            throws LibraryResourceUnauthorizedException, LibraryResourceNotFoundException {
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
@@ -103,13 +103,18 @@ public class AuthorController {
                     "User is not a Admin.");
             throw new LibraryResourceUnauthorizedException(traceId, "You cannot delete an Author.");
         }
-        authorService.deleteAuthor(authorId, traceId);
+        try {
+            authorService.deleteAuthor(authorId, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
+        }
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping(path = "/search")
-    public ResponseEntity<List<Author>> searchAuthors(@RequestParam String firstName, @RequestParam String lastName,
+    public ResponseEntity<?> searchAuthors(@RequestParam String firstName, @RequestParam String lastName,
                                          /*@RequestParam(defaultValue = "0") Integer pageNo,
                                          @RequestParam(defaultValue = "10") Integer pageSize,
                                          @RequestParam(defaultValue = "userId") String sortBy,*/

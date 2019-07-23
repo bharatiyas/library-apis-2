@@ -6,6 +6,7 @@ import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.repository.AuthorRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -63,8 +64,12 @@ public class AuthorService {
         return author;
     }
 
-    public void deleteAuthor(int authorId, String traceId) {
-        authorRepository.deleteById(authorId);
+    public void deleteAuthor(int authorId, String traceId) throws LibraryResourceNotFoundException {
+        try {
+            authorRepository.deleteById(authorId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new LibraryResourceNotFoundException(traceId, "Auhtor Id: " + authorId + " Not Found");
+        }
     }
 
     public List<Author> searchAuthors(String firstName, String lastName, /*Integer pageNo, Integer pageSize,

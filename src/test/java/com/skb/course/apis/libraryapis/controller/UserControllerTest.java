@@ -29,9 +29,11 @@ import java.time.LocalDate;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTest {
 
-
     @Autowired
     private TestRestTemplate testRestTemplate;
+
+    @Autowired
+    private LibraryApiTestUtil libraryApiTestUtil;
 
     private static int userCtr;
 
@@ -47,15 +49,15 @@ public class UserControllerTest {
 
         ResponseEntity<LibraryUser> response = registerNewUser();
 
-        Assert.assertEquals(201, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         LibraryUser responseLibraryUser = response.getBody();
         Assert.assertNotNull(responseLibraryUser);
         Assert.assertNotNull(responseLibraryUser.getUserId());
         Assert.assertNotNull(responseLibraryUser.getPassword());
         Assert.assertEquals("test.user" + userCtr, responseLibraryUser.getUsername());
-        Assert.assertEquals("TestFn", responseLibraryUser.getFirstName());
-        Assert.assertEquals("TestLn", responseLibraryUser.getLastName());
+        Assert.assertEquals(TestConstants.TEST_USER_FIRST_NAME, responseLibraryUser.getFirstName());
+        Assert.assertEquals(TestConstants.TEST_USER_LAST_NAME, responseLibraryUser.getLastName());
         Assert.assertNull(responseLibraryUser.getRole());
 
     }
@@ -68,16 +70,16 @@ public class UserControllerTest {
         // First we register a user
         ResponseEntity<LibraryUser> response = registerNewUser();
 
-        Assert.assertEquals(201, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         LibraryUser responseLibraryUser = response.getBody();
         Assert.assertNotNull(responseLibraryUser);
         Integer userId = responseLibraryUser.getUserId();
 
         // Login with the credentials
-        ResponseEntity<String> loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
 
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // Now we get the registered user
         URI getUserUri = null;
@@ -93,12 +95,12 @@ public class UserControllerTest {
                 getUserUri, HttpMethod.GET, new HttpEntity<Object>(headers),
                 LibraryUser.class);
 
-        Assert.assertEquals(200, libUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.OK, libUserResponse.getStatusCode());
         LibraryUser libraryUser = libUserResponse.getBody();
         Assert.assertNotNull(libraryUser.getUserId());
         Assert.assertTrue(libraryUser.getUsername().contains("test.user"));
-        Assert.assertEquals("TestFn", libraryUser.getFirstName());
-        Assert.assertEquals("TestLn", libraryUser.getLastName());
+        Assert.assertEquals(TestConstants.TEST_USER_FIRST_NAME, libraryUser.getFirstName());
+        Assert.assertEquals(TestConstants.TEST_USER_LAST_NAME, libraryUser.getLastName());
         Assert.assertNull(libraryUser.getRole());
     }
 
@@ -109,14 +111,14 @@ public class UserControllerTest {
 
         // First we register a user
         ResponseEntity<LibraryUser> response = registerNewUser();
-        Assert.assertEquals(201, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         LibraryUser responseLibraryUser = response.getBody();
         Integer userId = responseLibraryUser.getUserId() + 1;
 
         // Login with the credentials
-        ResponseEntity<String> loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // Now we get the registered user
         URI getUserUri = null;
@@ -133,7 +135,7 @@ public class UserControllerTest {
                 String.class);
 
         // Unauthorized to get another user details
-        Assert.assertEquals(401, libUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.FORBIDDEN, libUserResponse.getStatusCode());
     }
 
     @Test
@@ -144,16 +146,16 @@ public class UserControllerTest {
         // First we register a user
         ResponseEntity<LibraryUser> response = registerNewUser();
 
-        Assert.assertEquals(201, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         LibraryUser responseLibraryUser = response.getBody();
         Assert.assertNotNull(responseLibraryUser);
         Integer userId = responseLibraryUser.getUserId();
 
         // Login with the credentials
-        ResponseEntity<String> loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
 
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // Set the values to be updated
         responseLibraryUser.setPassword("NewPassword");
@@ -175,11 +177,11 @@ public class UserControllerTest {
                 userUri, HttpMethod.PUT, request,
                 LibraryUser.class);
 
-        Assert.assertEquals(200, libUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.OK, libUserResponse.getStatusCode());
 
         // Now login with changed password
-        loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // Now we get the user. Should have update email and phone number
         // Put the new Auth token
@@ -189,7 +191,7 @@ public class UserControllerTest {
                userUri, HttpMethod.GET, new HttpEntity<Object>(headers),
                 LibraryUser.class);
 
-        Assert.assertEquals(200, libUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.OK, libUserResponse.getStatusCode());
         LibraryUser libraryUser = libUserResponse.getBody();
         Assert.assertEquals("newemailaddress@email.com", libraryUser.getEmailId());
         Assert.assertEquals("23423523", libraryUser.getPhoneNumber());
@@ -202,7 +204,7 @@ public class UserControllerTest {
 
         // First we register a user
         ResponseEntity<LibraryUser> response = registerNewUser();
-        Assert.assertEquals(201, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         LibraryUser responseLibraryUser = response.getBody();
         Assert.assertNotNull(responseLibraryUser);
@@ -210,8 +212,8 @@ public class UserControllerTest {
         Integer userId = responseLibraryUser.getUserId() + 1;
 
         // Login with the credentials to perform update
-        ResponseEntity<String> loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // Set the values to be updated
         responseLibraryUser.setPassword("NewPassword");
@@ -245,7 +247,7 @@ public class UserControllerTest {
                 String.class);
 
         // Update for another user ID should not be allowed
-        Assert.assertEquals(401, libUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.FORBIDDEN, libUserResponse.getStatusCode());
     }
 
     @Test
@@ -255,15 +257,15 @@ public class UserControllerTest {
 
         // First we register a user
         ResponseEntity<LibraryUser> response = registerNewUser();
-        Assert.assertEquals(201, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         LibraryUser responseLibraryUser = response.getBody();
         Assert.assertNotNull(responseLibraryUser);
         Integer userId = responseLibraryUser.getUserId();
 
         // Login with the credentials
-        ResponseEntity<String> loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // Delete the user
         URI userUri = null;
@@ -280,11 +282,11 @@ public class UserControllerTest {
         ResponseEntity<String> libUserResponse = testRestTemplate.exchange(
                 userUri, HttpMethod.DELETE, request, String.class);
 
-        Assert.assertEquals(202, libUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.ACCEPTED, libUserResponse.getStatusCode());
 
         // Now login again. You should not be able to login
-        loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
-        Assert.assertEquals(403, loginResponse.getStatusCodeValue());
+        loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        Assert.assertEquals(HttpStatus.FORBIDDEN, loginResponse.getStatusCode());
 
     }
 
@@ -295,7 +297,7 @@ public class UserControllerTest {
 
         // First we register a user
         ResponseEntity<LibraryUser> response = registerNewUser();
-        Assert.assertEquals(201, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         LibraryUser responseLibraryUser = response.getBody();
         Assert.assertNotNull(responseLibraryUser);
@@ -303,8 +305,8 @@ public class UserControllerTest {
         Integer userId = responseLibraryUser.getUserId() + 1;
 
         // Login with the credentials
-        ResponseEntity<String> loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         // Delete the user
         URI userUri = null;
@@ -321,7 +323,7 @@ public class UserControllerTest {
         ResponseEntity<String> libUserResponse = testRestTemplate.exchange(
                 userUri, HttpMethod.DELETE, request, String.class);
 
-        Assert.assertEquals(401, libUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.FORBIDDEN, libUserResponse.getStatusCode());
 
     }
 
@@ -343,8 +345,9 @@ public class UserControllerTest {
 
         ResponseEntity<LibraryUser[]> response = testRestTemplate.getForEntity(searchUri, LibraryUser[].class);
 
-        Assert.assertEquals(200, response.getStatusCodeValue());
-        Assert.assertEquals(10, response.getBody().length);
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+        // Comparing with >= 10 because depending upon which other test methods run the number of users may vary
+        Assert.assertTrue(response.getBody().length >= 10);
         for(LibraryUser libraryUser : response.getBody()) {
             Assert.assertEquals(TestConstants.TEST_USER_FIRST_NAME, libraryUser.getFirstName());
             Assert.assertEquals(TestConstants.TEST_USER_LAST_NAME, libraryUser.getLastName());
@@ -367,7 +370,7 @@ public class UserControllerTest {
         }
 
         ResponseEntity<String> response = testRestTemplate.getForEntity(searchUri, String.class);
-        Assert.assertEquals(404, response.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     private ResponseEntity<LibraryUser> registerNewUser() {
@@ -395,15 +398,15 @@ public class UserControllerTest {
         // First we register a user
         ResponseEntity<LibraryUser> registerUserResponse = registerNewUser();
 
-        Assert.assertEquals(201, registerUserResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.CREATED, registerUserResponse.getStatusCode());
 
         LibraryUser responseLibraryUser = registerUserResponse.getBody();
         Assert.assertNotNull(responseLibraryUser);
 
         // Login with supplied username and default password
-        ResponseEntity<String> loginResponse = loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
 
-        Assert.assertEquals(200, loginResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
         String authToken = loginResponse.getHeaders().get("Authorization").get(0);
         Assert.assertNotNull(authToken);
         Assert.assertTrue(authToken.length() > 0);
@@ -413,29 +416,10 @@ public class UserControllerTest {
     public void test_login_unsuccessful() {
 
         // Login with wrong credentials
-        ResponseEntity<String> loginResponse = loginUser("blahblah", "blahblah");
+        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser("blahblah", "blahblah");
 
-        Assert.assertEquals(403, loginResponse.getStatusCodeValue());
+        Assert.assertEquals(HttpStatus.FORBIDDEN, loginResponse.getStatusCode());
         Assert.assertNull(loginResponse.getHeaders().get("Authorization"));
-    }
-
-    private ResponseEntity<String> loginUser(String username, String password) {
-
-        String loginUrl = TestConstants.LOGIN_URL;
-        URI loginUri = null;
-        try {
-            loginUri = new URI(loginUrl);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        HttpEntity<String> userLoginRequest = new HttpEntity<>(createLoginBody(username, password));
-        return testRestTemplate.postForEntity(loginUri, userLoginRequest, String.class);
-
-    }
-
-    private String createLoginBody(String username, String password) {
-        return "{ \"username\": \"" + username + "\", \"password\": \"" +  password + "\"}";
     }
 
 }
