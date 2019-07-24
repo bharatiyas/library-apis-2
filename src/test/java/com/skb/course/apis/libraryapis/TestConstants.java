@@ -24,11 +24,22 @@ public class TestConstants {
 
     // Publisher API URLs
     public static final String PUBLISHER_API_BASE_URL = "/publishers";
-    public static final String PUBLISHER_API_SEARCH_URL = USER_API_BASE_URL + "/search";
+    public static final String PUBLISHER_API_SEARCH_URL = PUBLISHER_API_BASE_URL + "/search";
 
-    // Test Author Details
+    // Test Publisher Details
     public static final String TEST_PUBLISHER_NAME = "TestPublisherName";
     public static final String TEST_PUBLISHER_EMAIL = "TestPublisher@email.com";
+
+    // Publisher API URLs
+    public static final String BOOK_API_BASE_URL = "/books";
+    public static final String BOOK_API_SEARCH_URL = USER_API_BASE_URL + "/search";
+
+    // Test Publisher Details
+    public static final String TEST_BOOK_ISBN = "978-3-16-148410-";
+    public static final String TEST_BOOK_TITLE = "SpringBoot Is Fun";
+    public static final int TEST_BOOK_YEAR_PUBLISHED = 2010;
+    public static final String TEST_BOOK_EDITION = "First Edition";
+
 
     // Login URL
     public static final String LOGIN_URL = "/login";

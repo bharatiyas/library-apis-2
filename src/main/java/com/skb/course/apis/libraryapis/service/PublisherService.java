@@ -71,8 +71,8 @@ public class PublisherService {
         }
     }
 
-    public List<Publisher> searchPublishers(String name, Integer pageNo, Integer pageSize,
-                                            String sortBy, String traceId) throws LibraryResourceNotFoundException {
+    public List<Publisher> searchPublishers(String name, /*Integer pageNo, Integer pageSize,
+                                            String sortBy,*/ String traceId) throws LibraryResourceNotFoundException {
         //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         List<PublisherEntity> publisherEntities = null;
         if(LibraryApiUtils.doesStringValueExist(name)) {

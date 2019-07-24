@@ -110,6 +110,7 @@ public class UserController {
 
         // Sanity check done. You are good to go.
         try {
+            libraryUser.setUserId(userIdFromClaim);
             libraryUser = userService.updateUser(libraryUser, traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + e.getMessage());

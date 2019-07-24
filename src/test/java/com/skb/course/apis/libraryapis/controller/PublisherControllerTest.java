@@ -2,7 +2,6 @@ package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.TestConstants;
 import com.skb.course.apis.libraryapis.model.Publisher;
-import com.skb.course.apis.libraryapis.model.Gender;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import org.junit.Assert;
 import org.junit.Before;
@@ -23,7 +22,6 @@ import org.springframework.util.MultiValueMap;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -33,7 +31,7 @@ public class PublisherControllerTest {
     private TestRestTemplate testRestTemplate;
 
     @Autowired
-    private LibraryApiTestUtil libraryApiTestUtil;
+    private LibraryApiIntegrationTestUtil libraryApiIntegrationTestUtil;
 
     @Value("${library.api.user.admin.username}")
     private String adminUsername;
@@ -54,7 +52,7 @@ public class PublisherControllerTest {
     public void test_admin_login_successful() {
 
         // Login with admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
 
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
         String authToken = loginResponse.getHeaders().get("Authorization").get(0);
@@ -66,7 +64,7 @@ public class PublisherControllerTest {
     public void test_admin_login_unsuccessful() {
 
         // Login with wrong credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser("blahblah", "blahblah");
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser("blahblah", "blahblah");
 
         Assert.assertEquals(HttpStatus.FORBIDDEN, loginResponse.getStatusCode());
         Assert.assertNull(loginResponse.getHeaders().get("Authorization"));
@@ -76,10 +74,10 @@ public class PublisherControllerTest {
     public void addPublisher_success() {
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
-        ResponseEntity<Publisher> response = addNewPublisher(
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(
                 createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0)));
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
@@ -96,12 +94,12 @@ public class PublisherControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Now we get the Publisher
@@ -127,20 +125,20 @@ public class PublisherControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Create a normal user
-        ResponseEntity<LibraryUser> responseEntity = libraryApiTestUtil.registerNewUser();
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("get.publisher.success.normal.user");
         LibraryUser libraryUser = responseEntity.getBody();
 
         // Login with normal user credentials
-        ResponseEntity<String> userLoginResponse = libraryApiTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
+        ResponseEntity<String> userLoginResponse = libraryApiIntegrationTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
         header = createAuthorizationHeader(userLoginResponse.getHeaders().get("Authorization").get(0));
 
         URI getPublisherUri = null;
@@ -165,12 +163,12 @@ public class PublisherControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Now we get the Publisher with and PublisherID that doesnot exist
@@ -194,12 +192,12 @@ public class PublisherControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         Publisher responsePublisher = response.getBody();
@@ -237,17 +235,54 @@ public class PublisherControllerTest {
     }
 
     @Test
+    public void updatePublisher_failure_update_wrong_publisher() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+        // Add a Publisher
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        Publisher responsePublisher = response.getBody();
+        Assert.assertNotNull(responsePublisher);
+
+        // Set the values to be updated
+        responsePublisher.setEmailId("publishernewemail@email.com");
+        responsePublisher.setPhoneNumber("99887766");
+
+        URI authorUri = null;
+        try {
+            authorUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.PUBLISHER_API_BASE_URL + "/1234");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        HttpEntity<Publisher> request = new HttpEntity<>(responsePublisher, header);
+        ResponseEntity<Publisher> libPublisherResponse = testRestTemplate.exchange(
+                authorUri, HttpMethod.PUT, request,
+                Publisher.class);
+        // Check if update was successful
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, libPublisherResponse.getStatusCode());
+
+    }
+
+    @Test
     public void updatePublisher_normal_user_unauthorized() {
 
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Update the Publisher. Set the values to be updated
@@ -256,11 +291,11 @@ public class PublisherControllerTest {
         responsePublisher.setPhoneNumber("99887766");
 
         // Create a normal user
-        ResponseEntity<LibraryUser> responseEntity = libraryApiTestUtil.registerNewUser();
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("update.publisher.success.normal.user");
         LibraryUser libraryUser = responseEntity.getBody();
 
         // Login with normal user credentials
-        ResponseEntity<String> userLoginResponse = libraryApiTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
+        ResponseEntity<String> userLoginResponse = libraryApiIntegrationTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
         header = createAuthorizationHeader(userLoginResponse.getHeaders().get("Authorization").get(0));
 
         URI authorUri = null;
@@ -285,12 +320,12 @@ public class PublisherControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         Publisher responsePublisher = response.getBody();
@@ -326,12 +361,12 @@ public class PublisherControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         Publisher responsePublisher = response.getBody();
@@ -359,23 +394,23 @@ public class PublisherControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publisher
-        ResponseEntity<Publisher> response = addNewPublisher(header);
+        ResponseEntity<Publisher> response = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Update the Publisher. Set the values to be updated
         Publisher responsePublisher = response.getBody();
 
         // Create a normal user
-        ResponseEntity<LibraryUser> responseEntity = libraryApiTestUtil.registerNewUser();
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("delete.publisher.success.normal.user");
         LibraryUser libraryUser = responseEntity.getBody();
 
         // Login with normal user credentials
-        ResponseEntity<String> userLoginResponse = libraryApiTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
+        ResponseEntity<String> userLoginResponse = libraryApiIntegrationTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
         header = createAuthorizationHeader(userLoginResponse.getHeaders().get("Authorization").get(0));
 
         URI authorUri = null;
@@ -394,124 +429,66 @@ public class PublisherControllerTest {
         Assert.assertEquals(HttpStatus.FORBIDDEN, libPublisherResponse.getStatusCode());
     }
 
-    //@Test
+    @Test
     public void searchPublisher_success() {
 
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Publishers
         for(int i=0; i<10; i++) {
-            addNewPublisher(header);
+            libraryApiIntegrationTestUtil.addNewPublisher(header);
         }
 
-        URI authorSearchUri = null;
+        URI publisherSearchUri = null;
         try {
-            authorSearchUri = new URI(TestConstants.PUBLISHER_API_SEARCH_URL +
+            publisherSearchUri = new URI(TestConstants.PUBLISHER_API_SEARCH_URL +
                     "?name=" + TestConstants.TEST_PUBLISHER_NAME + 1);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
-        ResponseEntity<Publisher[]> response = testRestTemplate.exchange(authorSearchUri, HttpMethod.GET,
+        ResponseEntity<Publisher[]> response = testRestTemplate.exchange(publisherSearchUri, HttpMethod.GET,
                 new HttpEntity<Object>(header), Publisher[].class);
 
         Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
         // Comparing with >= 10 because depending upon which other test methods run the number of Publishers may vary
-        Assert.assertTrue(response.getBody().length >= 10);
+        Assert.assertTrue(response.getBody().length == 1);
         for(Publisher Publisher : response.getBody()) {
-            Assert.assertEquals(TestConstants.TEST_PUBLISHER_NAME, Publisher.getName());
+            Assert.assertTrue(Publisher.getName().contains(TestConstants.TEST_PUBLISHER_NAME));
         }
 
-    }
-
-    /*
-
-    @Test
-    public void searchPublishers_success() {
-
-        // Login with the admin credentials
-        ResponseEntity<String> loginResponse = loginUtil.loginUser(adminUsername, adminPassword);
-        Assert.assertEquals(200, loginResponse.getStatusCode());
-
-        // Register 10 Publishers
-        for(int i=0; i<10; i++) {
-            addNewPublisher(loginResponse.getHeaders().get("Authorization").get(0));
-        }
-
-        URI searchUri = null;
-        try {
-            searchUri = new URI(TestConstants.PUBLISHER_API_SEARCH_URL + "?firstName=" + TestConstants.TEST_PUBLISHER_NAME
-            + "&lastName=" + TestConstants.TEST_PUBLISHER_LAST_NAME);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        ResponseEntity<Publisher[]> response = testRestTemplate.getForEntity(searchUri, Publisher[].class);
-
-        Assert.assertEquals(200, response.getStatusCode());
-        // Comparing with >= 10 because depending upon which other test methods run the number of Publishers may vary
-        Assert.assertTrue(response.getBody().length >= 10);
-        for(Publisher Publisher : response.getBody()) {
-            Assert.assertEquals(TestConstants.TEST_PUBLISHER_NAME, Publisher.getName());
-            Assert.assertEquals(TestConstants.TEST_PUBLISHER_LAST_NAME, Publisher.getLastName());
-        }
     }
 
     @Test
     public void searchPublishers_no_Publishers() {
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = loginUtil.loginUser(adminUsername, adminPassword);
-        Assert.assertEquals(200, loginResponse.getStatusCode());
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
-        // Register 10 Publishers
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+        // Add a Publishers
         for(int i=0; i<10; i++) {
-            addNewPublisher(loginResponse.getHeaders().get("Authorization").get(0));
+            libraryApiIntegrationTestUtil.addNewPublisher(header);
         }
 
-        URI searchUri = null;
+        URI publisherSearchUri = null;
         try {
-            searchUri = new URI(TestConstants.PUBLISHER_API_SEARCH_URL + "?firstName=BlahFn&lastName=BlahLn");
+            publisherSearchUri = new URI(TestConstants.PUBLISHER_API_SEARCH_URL +
+                    "?name=BlahBlah");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
-        ResponseEntity<String> response = testRestTemplate.getForEntity(searchUri, String.class);
-        Assert.assertEquals(404, response.getStatusCode());
-    }*/
+        ResponseEntity<String> response = testRestTemplate.exchange(publisherSearchUri, HttpMethod.GET,
+                new HttpEntity<Object>(header), String.class);
 
-    private ResponseEntity<Publisher> addNewPublisher(MultiValueMap<String, String> headers) {
-
-        publisherCtr++;
-        URI publisherUri = null;
-        try {
-            publisherUri = new URI(TestConstants.PUBLISHER_API_BASE_URL);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        // Create a new Publisher object
-        Publisher newPublisher = new Publisher(TestConstants.TEST_PUBLISHER_NAME + publisherCtr,
-                TestConstants.TEST_PUBLISHER_EMAIL, "12344556");
-
-        // Add Authorization Token and create request entity
-        HttpEntity<Publisher> newPublisherRequest = new HttpEntity<>(newPublisher, headers);
-
-        // Finally send the request
-        return testRestTemplate.exchange(publisherUri, HttpMethod.POST, newPublisherRequest, Publisher.class);
-
-
-
-        /*HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerToken);
-        HttpEntity<Publisher> newPublisherRequest = new HttpEntity<>(newPublisher, headers);*/
-
-        //return testRestTemplate.postForEntity(authorUri, newPublisherRequest, Publisher.class);
+        Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     private MultiValueMap<String, String> createAuthorizationHeader(String bearerToken) {

@@ -30,7 +30,7 @@ public class AuthorControllerTest {
     private TestRestTemplate testRestTemplate;
 
     @Autowired
-    private LibraryApiTestUtil libraryApiTestUtil;
+    private LibraryApiIntegrationTestUtil libraryApiIntegrationTestUtil;
 
     @Value("${library.api.user.admin.username}")
     private String adminUsername;
@@ -51,7 +51,7 @@ public class AuthorControllerTest {
     public void test_admin_login_successful() {
 
         // Login with admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
 
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
         String authToken = loginResponse.getHeaders().get("Authorization").get(0);
@@ -63,7 +63,7 @@ public class AuthorControllerTest {
     public void test_admin_login_unsuccessful() {
 
         // Login with wrong credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser("blahblah", "blahblah");
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser("blahblah", "blahblah");
 
         Assert.assertEquals(HttpStatus.FORBIDDEN, loginResponse.getStatusCode());
         Assert.assertNull(loginResponse.getHeaders().get("Authorization"));
@@ -73,10 +73,10 @@ public class AuthorControllerTest {
     public void addAuthor_success() {
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
-        ResponseEntity<Author> response = addNewAuthor(
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(
                 createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0)));
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
@@ -94,12 +94,12 @@ public class AuthorControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Now we get the Author
@@ -126,20 +126,20 @@ public class AuthorControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Create a normal user
-        ResponseEntity<LibraryUser> responseEntity = libraryApiTestUtil.registerNewUser();
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("get.author.success.normal.user");
         LibraryUser libraryUser = responseEntity.getBody();
 
         // Login with normal user credentials
-        ResponseEntity<String> userLoginResponse = libraryApiTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
+        ResponseEntity<String> userLoginResponse = libraryApiIntegrationTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
         header = createAuthorizationHeader(userLoginResponse.getHeaders().get("Authorization").get(0));
 
         URI getAuthorUri = null;
@@ -165,12 +165,12 @@ public class AuthorControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Now we get the Author with and AuthorID that doesnot exist
@@ -194,12 +194,12 @@ public class AuthorControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         Author responseAuthor = response.getBody();
@@ -238,17 +238,55 @@ public class AuthorControllerTest {
     }
 
     @Test
+    public void updateAuthor_failure_update_wrong_author() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+        // Add a Author
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        Author responseAuthor = response.getBody();
+        Assert.assertNotNull(responseAuthor);
+
+        // Set the values to be updated
+        responseAuthor.setGender(Gender.Female);
+        LocalDate updatedDob = responseAuthor.getDateOfBirth().minusMonths(2);
+        responseAuthor.setDateOfBirth(updatedDob);
+
+        URI authorUri = null;
+        try {
+            authorUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.AUTHOR_API_BASE_URL + "/1234");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        HttpEntity<Author> request = new HttpEntity<>(responseAuthor, header);
+        ResponseEntity<Author> libAuthorResponse = testRestTemplate.exchange(
+                authorUri, HttpMethod.PUT, request,
+                Author.class);
+        // Check if update was successful
+        Assert.assertEquals(HttpStatus.BAD_REQUEST, libAuthorResponse.getStatusCode());
+
+    }
+
+    @Test
     public void updateAuthor_normal_user_unauthorized() {
 
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Update the Author. Set the values to be updated
@@ -258,11 +296,11 @@ public class AuthorControllerTest {
         responseAuthor.setDateOfBirth(updatedDob);
 
         // Create a normal user
-        ResponseEntity<LibraryUser> responseEntity = libraryApiTestUtil.registerNewUser();
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("update.author.normal.user.unauthorized");
         LibraryUser libraryUser = responseEntity.getBody();
 
         // Login with normal user credentials
-        ResponseEntity<String> userLoginResponse = libraryApiTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
+        ResponseEntity<String> userLoginResponse = libraryApiIntegrationTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
         header = createAuthorizationHeader(userLoginResponse.getHeaders().get("Authorization").get(0));
 
         URI authorUri = null;
@@ -287,12 +325,12 @@ public class AuthorControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         Author responseAuthor = response.getBody();
@@ -328,12 +366,12 @@ public class AuthorControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         Author responseAuthor = response.getBody();
@@ -361,23 +399,23 @@ public class AuthorControllerTest {
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Author
-        ResponseEntity<Author> response = addNewAuthor(header);
+        ResponseEntity<Author> response = libraryApiIntegrationTestUtil.addNewAuthor(header);
         Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         // Update the Author. Set the values to be updated
         Author responseAuthor = response.getBody();
 
         // Create a normal user
-        ResponseEntity<LibraryUser> responseEntity = libraryApiTestUtil.registerNewUser();
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("delete.author.normal.user.unauthorized");
         LibraryUser libraryUser = responseEntity.getBody();
 
         // Login with normal user credentials
-        ResponseEntity<String> userLoginResponse = libraryApiTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
+        ResponseEntity<String> userLoginResponse = libraryApiIntegrationTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
         header = createAuthorizationHeader(userLoginResponse.getHeaders().get("Authorization").get(0));
 
         URI authorUri = null;
@@ -396,25 +434,25 @@ public class AuthorControllerTest {
         Assert.assertEquals(HttpStatus.FORBIDDEN, libAuthorResponse.getStatusCode());
     }
 
-    //@Test
+    @Test
     public void searchAuthor_success() {
 
         String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = libraryApiTestUtil.loginUser(adminUsername, adminPassword);
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         // Add a Authors
         for(int i=0; i<10; i++) {
-            addNewAuthor(header);
+            libraryApiIntegrationTestUtil.addNewAuthor(header);
         }
 
         URI authorSearchUri = null;
         try {
             authorSearchUri = new URI(TestConstants.AUTHOR_API_SEARCH_URL +
-                    "?firstName=" + TestConstants.TEST_AUTHOR_LAST_NAME + 1 + "&lastName=" + TestConstants.TEST_AUTHOR_LAST_NAME);
+                    "?firstName=&lastName=" + TestConstants.TEST_AUTHOR_LAST_NAME);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -426,96 +464,37 @@ public class AuthorControllerTest {
         // Comparing with >= 10 because depending upon which other test methods run the number of Authors may vary
         Assert.assertTrue(response.getBody().length >= 10);
         for(Author Author : response.getBody()) {
-            Assert.assertEquals(TestConstants.TEST_AUTHOR_FIRST_NAME, Author.getFirstName());
-            Assert.assertEquals(TestConstants.TEST_AUTHOR_LAST_NAME, Author.getLastName());
+            Assert.assertTrue(Author.getFirstName().contains(TestConstants.TEST_AUTHOR_FIRST_NAME));
+            Assert.assertTrue(Author.getLastName().contains(TestConstants.TEST_AUTHOR_LAST_NAME));
         }
 
-    }
-
-    /*
-
-    @Test
-    public void searchAuthors_success() {
-
-        // Login with the admin credentials
-        ResponseEntity<String> loginResponse = loginUtil.loginUser(adminUsername, adminPassword);
-        Assert.assertEquals(200, loginResponse.getStatusCode());
-
-        // Register 10 Authors
-        for(int i=0; i<10; i++) {
-            addNewAuthor(loginResponse.getHeaders().get("Authorization").get(0));
-        }
-
-        URI searchUri = null;
-        try {
-            searchUri = new URI(TestConstants.AUTHOR_API_SEARCH_URL + "?firstName=" + TestConstants.TEST_AUTHOR_FIRST_NAME
-            + "&lastName=" + TestConstants.TEST_AUTHOR_LAST_NAME);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        ResponseEntity<Author[]> response = testRestTemplate.getForEntity(searchUri, Author[].class);
-
-        Assert.assertEquals(200, response.getStatusCode());
-        // Comparing with >= 10 because depending upon which other test methods run the number of Authors may vary
-        Assert.assertTrue(response.getBody().length >= 10);
-        for(Author Author : response.getBody()) {
-            Assert.assertEquals(TestConstants.TEST_AUTHOR_FIRST_NAME, Author.getFirstName());
-            Assert.assertEquals(TestConstants.TEST_AUTHOR_LAST_NAME, Author.getLastName());
-        }
     }
 
     @Test
     public void searchAuthors_no_Authors() {
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = loginUtil.loginUser(adminUsername, adminPassword);
-        Assert.assertEquals(200, loginResponse.getStatusCode());
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
-        // Register 10 Authors
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+        // Add a Authors
         for(int i=0; i<10; i++) {
-            addNewAuthor(loginResponse.getHeaders().get("Authorization").get(0));
+            libraryApiIntegrationTestUtil.addNewAuthor(header);
         }
 
-        URI searchUri = null;
+        URI authorSearchUri = null;
         try {
-            searchUri = new URI(TestConstants.AUTHOR_API_SEARCH_URL + "?firstName=BlahFn&lastName=BlahLn");
+            authorSearchUri = new URI(TestConstants.AUTHOR_API_SEARCH_URL +
+                    "?firstName=&lastName=BlahBlah");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
-        ResponseEntity<String> response = testRestTemplate.getForEntity(searchUri, String.class);
-        Assert.assertEquals(404, response.getStatusCode());
-    }*/
+        ResponseEntity<String> response = testRestTemplate.exchange(authorSearchUri, HttpMethod.GET,
+                new HttpEntity<Object>(header), String.class);
 
-    private ResponseEntity<Author> addNewAuthor(MultiValueMap<String, String> headers) {
-
-        authorCtr++;
-        Gender gender = authorCtr % 2 == 1 ? Gender.Male : Gender.Female;
-        URI authorUri = null;
-        try {
-            authorUri = new URI(TestConstants.AUTHOR_API_BASE_URL);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        // Create a new Author object
-        Author newAuthor = new Author(TestConstants.TEST_AUTHOR_FIRST_NAME + authorCtr,
-                TestConstants.TEST_AUTHOR_LAST_NAME, LocalDate.now().minusYears(30 + authorCtr), gender);
-
-        // Add Authorization Token and create request entity
-        HttpEntity<Author> newAuthorRequest = new HttpEntity<>(newAuthor, headers);
-
-        // Finally send the request
-        return testRestTemplate.exchange(authorUri, HttpMethod.POST, newAuthorRequest, Author.class);
-
-
-
-        /*HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", bearerToken);
-        HttpEntity<Author> newAuthorRequest = new HttpEntity<>(newAuthor, headers);*/
-
-        //return testRestTemplate.postForEntity(authorUri, newAuthorRequest, Author.class);
+        Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     private MultiValueMap<String, String> createAuthorizationHeader(String bearerToken) {

@@ -83,6 +83,7 @@ public class PublisherController {
             throw new LibraryResourceBadRequestException(traceId, "Invalid Publisher Id. Publisher Id in the request and URL do not match.");
         }
         try {
+            publisher.setPublisherId(publisherId);
             publisher = publisherService.updatePublisher(publisher, traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + e.getMessage());
@@ -115,9 +116,9 @@ public class PublisherController {
 
     @GetMapping(path = "/search")
     public ResponseEntity<?> searchPublishers(@RequestParam String name,
-                                           @RequestParam(defaultValue = "0") Integer pageNo,
+                                           /*@RequestParam(defaultValue = "0") Integer pageNo,
                                            @RequestParam(defaultValue = "10") Integer pageSize,
-                                           @RequestParam(defaultValue = "userId") String sortBy,
+                                           @RequestParam(defaultValue = "userId") String sortBy,*/
                                               @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceNotFoundException, LibraryResourceBadRequestException {
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
@@ -130,7 +131,7 @@ public class PublisherController {
                 logger.error(traceId + " Please enter at least one search criteria to search Publisher.");
                 throw new LibraryResourceBadRequestException(traceId, "Please enter at least one search criteria to search Publisher.");
             }
-            publishers = publisherService.searchPublishers(name, pageNo, pageSize, sortBy, traceId);
+            publishers = publisherService.searchPublishers(name, /*pageNo, pageSize, sortBy, */traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + ": " + e.getMessage());
             throw e;

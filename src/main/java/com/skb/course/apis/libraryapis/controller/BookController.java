@@ -27,7 +27,7 @@ public class BookController {
         this.bookService = bookService;
     }
 
-    @PostMapping(path = "/")
+    @PostMapping
     private ResponseEntity<Book> addBook(@RequestBody Book book, @RequestHeader("Authorization") String bearerToken,
                                       @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceUnauthorizedException, LibraryResourceNotFoundException, LibraryResourceAlreadyExistException {
@@ -85,6 +85,7 @@ public class BookController {
             throw new LibraryResourceBadRequestException(traceId, "Invalid Book Id. Book Id in the request and URL do not match.");
         }
         try {
+            book.setBookId(bookId);
             book = bookService.updateBook(book, traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + e.getMessage());
@@ -96,7 +97,7 @@ public class BookController {
     @DeleteMapping(path = "/{bookId}")
     public ResponseEntity<?> deleteBook(@PathVariable int bookId, @RequestHeader("Authorization") String bearerToken,
                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
-            throws LibraryResourceUnauthorizedException {
+            throws LibraryResourceUnauthorizedException, LibraryResourceNotFoundException {
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
@@ -106,7 +107,12 @@ public class BookController {
                     "User is not a Admin.");
             throw new LibraryResourceUnauthorizedException(traceId, "You cannot delete an Book.");
         }
-        bookService.deleteAuthor(bookId, traceId);
+        try {
+            bookService.deleteAuthor(bookId, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
+        }
 
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }

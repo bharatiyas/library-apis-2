@@ -82,6 +82,7 @@ public class AuthorController {
             throw new LibraryResourceBadRequestException(traceId, "Invalid Author Id. Author Id in the request and URL do not match.");
         }
         try {
+            author.setAuthorId(authorID);
             author = authorService.updateAuthor(author, traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + e.getMessage());

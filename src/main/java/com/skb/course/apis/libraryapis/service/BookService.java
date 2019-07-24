@@ -13,6 +13,7 @@ import com.skb.course.apis.libraryapis.repository.BookRepository;
 import com.skb.course.apis.libraryapis.repository.BookStatusRepository;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -107,9 +108,14 @@ public class BookService {
         return book;
     }
 
-    public void deleteAuthor(int bookId, String traceId) {
+    public void deleteAuthor(int bookId, String traceId) throws LibraryResourceNotFoundException {
 
-        bookRepository.deleteById(bookId);
+        try {
+            bookRepository.deleteById(bookId);
+        } catch (
+            EmptyResultDataAccessException e) {
+            throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " Not Found");
+        }
     }
 
     public Book addBookAuhors(int bookId, Set<Integer> authorIds, String traceId) throws LibraryResourceNotFoundException {

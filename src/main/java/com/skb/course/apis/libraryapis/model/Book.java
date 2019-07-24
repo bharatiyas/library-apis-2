@@ -77,6 +77,10 @@ public class Book implements Serializable {
         return publisherId;
     }
 
+    public void setPublisherId(int publisherId) {
+        this.publisherId = publisherId;
+    }
+
     public BookStatus getBookStatus() {
         return bookStatus;
     }
