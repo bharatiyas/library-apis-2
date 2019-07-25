@@ -4,8 +4,7 @@ import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 import com.skb.course.apis.libraryapis.entity.BookEntity;
 import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
 import com.skb.course.apis.libraryapis.entity.PublisherEntity;
-import com.skb.course.apis.libraryapis.exception.BookNotFoundException;
-import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
+import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.BookStatus;
@@ -14,6 +13,7 @@ import com.skb.course.apis.libraryapis.repository.BookRepository;
 import com.skb.course.apis.libraryapis.repository.BookStatusRepository;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -35,7 +35,7 @@ public class BookService {
         this.publisherRepository = publisherRepository;
     }
 
-    public Book addBook(Book bookToBeAdded) throws PublisherNotFoundException {
+    public Book addBook(Book bookToBeAdded, String traceId) throws LibraryResourceNotFoundException {
         BookEntity bookEntity = new BookEntity(
                 bookToBeAdded.getIsbn(),
                 bookToBeAdded.getTitle(),
@@ -47,7 +47,7 @@ public class BookService {
         if(publisherEntity.isPresent()) {
             bookEntity.setPublisher(publisherEntity.get());
         } else {
-            throw new PublisherNotFoundException("Publisher mentioned for the book does not exist");
+            throw new LibraryResourceNotFoundException(traceId, "Publisher mentioned for the book does not exist");
         }
 
         // Save book to DB
@@ -69,19 +69,19 @@ public class BookService {
         return bookToBeAdded;
     }
 
-    public Book getBook(int bookId) throws BookNotFoundException {
+    public Book getBook(int bookId, String traceId) throws LibraryResourceNotFoundException {
         Optional<BookEntity> bookEntity = bookRepository.findById(bookId);
         Book book = null;
         if(bookEntity.isPresent()) {
             BookEntity ue = bookEntity.get();
             book = createBookFromEntity(ue);
         } else {
-            throw new BookNotFoundException("Book Id: " + bookId + " Not Found");
+            throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " Not Found");
         }
         return book;
     }
 
-    public Book updateBook(Book bookToBeUpdated) throws BookNotFoundException, PublisherNotFoundException {
+    public Book updateBook(Book bookToBeUpdated, String traceId) throws LibraryResourceNotFoundException {
         Optional<BookEntity> bookEntity = bookRepository.findById(bookToBeUpdated.getBookId());
         Book book = null;
         if(bookEntity.isPresent()) {
@@ -97,18 +97,28 @@ public class BookService {
                 if(publisherEntity.isPresent()) {
                     be.setPublisher(publisherEntity.get());
                 } else {
-                    throw new PublisherNotFoundException("Publisher mentioned for the book does not exist");
+                    throw new LibraryResourceNotFoundException(traceId, "Publisher mentioned for the book does not exist");
                 }
             }
             bookRepository.save(be);
             book = createBookFromEntity(be);
         } else {
-            throw new BookNotFoundException("Book Id: " + bookToBeUpdated.getBookId() + " Not Found");
+            throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookToBeUpdated.getBookId() + " Not Found");
         }
         return book;
     }
 
-    public Book addBookAuhors(int bookId, Set<Integer> authorIds) throws BookNotFoundException {
+    public void deleteAuthor(int bookId, String traceId) throws LibraryResourceNotFoundException {
+
+        try {
+            bookRepository.deleteById(bookId);
+        } catch (
+            EmptyResultDataAccessException e) {
+            throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " Not Found");
+        }
+    }
+
+    public Book addBookAuhors(int bookId, Set<Integer> authorIds, String traceId) throws LibraryResourceNotFoundException {
         if(authorIds == null || authorIds.size() == 0) {
             throw new IllegalArgumentException("Invalid Authors list");
         }
@@ -123,11 +133,19 @@ public class BookService {
                     .filter(ae -> ae.isPresent() == true)
                     .map(ae -> ae.get())
                     .collect(Collectors.toSet());
+
+            if(authors.size() == 0) {
+                String authorsList = authorIds.stream()
+                                            .map(authorId -> authorId.toString().concat(" "))
+                                            .reduce("", String::concat);
+
+                throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + ". None of the authors - " + authorsList + " found.");
+            }
             be.setAuthors(authors);
             bookRepository.save(be);
             book = createBookFromEntity(be);
         } else {
-            throw new BookNotFoundException("Book Id: " + bookId + " Not Found");
+            throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " Not Found");
         }
         return book;
     }

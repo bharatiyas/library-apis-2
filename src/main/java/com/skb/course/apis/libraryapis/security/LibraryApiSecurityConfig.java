@@ -23,11 +23,8 @@ public class LibraryApiSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) {
         try {
             httpSecurity.cors().and().csrf().disable().authorizeRequests()
-                    .antMatchers(HttpMethod.POST, SecurityConstants.getNewUserRegisterationUrl()).permitAll()
+                    .antMatchers(HttpMethod.POST, SecurityConstants.NEW_USER_REGISTERATION_URL).permitAll()
                     .antMatchers(HttpMethod.GET, "/users/search").permitAll()
-                    .antMatchers(HttpMethod.GET, "/books/search").permitAll()
-                    .antMatchers(HttpMethod.GET, "/authors/search").permitAll()
-                    .antMatchers(HttpMethod.GET, "/publishers/search").permitAll()
                     .anyRequest().authenticated()
                     .and()
                     .addFilter(new JwtAuthenticationFilter(authenticationManager()))

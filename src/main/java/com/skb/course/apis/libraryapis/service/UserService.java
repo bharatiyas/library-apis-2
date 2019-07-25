@@ -1,6 +1,7 @@
 package com.skb.course.apis.libraryapis.service;
 
 import com.skb.course.apis.libraryapis.entity.UserEntity;
+import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.model.Role;
@@ -36,7 +37,7 @@ public class UserService {
         UserEntity userEntity = new UserEntity(
                 // Saving password as plain text isn't a good idea therefore encrypt it
                 libraryUserToBeAdded.getUsername(),
-                bCryptPasswordEncoder.encode(SecurityConstants.getNewUserDefaultPassword()),
+                bCryptPasswordEncoder.encode(SecurityConstants.NEW_USER_DEFAULT_PASSWORD),
                 libraryUserToBeAdded.getFirstName(),
                 libraryUserToBeAdded.getLastName(),
                 libraryUserToBeAdded.getDateOfBirth(),
@@ -45,20 +46,20 @@ public class UserService {
                 libraryUserToBeAdded.getEmailId(),
                 "USER");
 
-        libraryUserToBeAdded.setPassword(SecurityConstants.getNewUserDefaultPassword());
+        libraryUserToBeAdded.setPassword(SecurityConstants.NEW_USER_DEFAULT_PASSWORD);
         UserEntity addedUser = userRepository.save(userEntity);
         libraryUserToBeAdded.setUserId(addedUser.getUserId());
         return libraryUserToBeAdded;
     }
 
-    public LibraryUser getUserByUserId(int userId) throws UserNotFoundException {
+    public LibraryUser getUserByUserId(int userId, String traceId) throws LibraryResourceNotFoundException {
         Optional<UserEntity> userEntity = userRepository.findById(userId);
         LibraryUser libraryUser = null;
         if(userEntity.isPresent()) {
             UserEntity ue = userEntity.get();
             libraryUser = createUserFromEntity(ue);
         } else {
-            throw new UserNotFoundException("LibraryUser Id: " + userId + " Not Found");
+            throw new LibraryResourceNotFoundException(traceId, "LibraryUser Id: " + userId + " Not Found");
         }
         return libraryUser;
     }
@@ -74,7 +75,7 @@ public class UserService {
         return libraryUser;
     }
 
-    public LibraryUser updateUser(LibraryUser libraryUserToBeUpdated) throws UserNotFoundException {
+    public LibraryUser updateUser(LibraryUser libraryUserToBeUpdated, String traceId) throws LibraryResourceNotFoundException {
         Optional<UserEntity> userEntity = userRepository.findById(libraryUserToBeUpdated.getUserId());
         LibraryUser libraryUser = null;
         if(userEntity.isPresent()) {
@@ -91,17 +92,17 @@ public class UserService {
             userRepository.save(ue);
             libraryUser = createUserFromEntity(ue);
         } else {
-            throw new UserNotFoundException("LibraryUser Id: " + libraryUserToBeUpdated.getUserId() + " Not Found");
+            throw new LibraryResourceNotFoundException(traceId, "LibraryUser Id: " + libraryUserToBeUpdated.getUserId() + " Not Found");
         }
         return libraryUser;
     }
 
-    public void deleteUserByUserId(int userId) throws UserNotFoundException {
+    public void deleteUserByUserId(int userId, String traceId) throws LibraryResourceNotFoundException {
         userRepository.deleteById(userId);
     }
 
     public List<LibraryUser> searchUsers(String firstName, String lastName, Integer pageNo, Integer pageSize,
-                                         String sortBy) throws UserNotFoundException {
+                                         String sortBy, String traceId) throws LibraryResourceNotFoundException {
         //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         List<UserEntity> userEntities = null;
         if(LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
@@ -114,7 +115,7 @@ public class UserService {
         if(userEntities != null && userEntities.size() > 0) {
             return createUsersForSearchResponse(userEntities);
         } else {
-            throw new UserNotFoundException("No Users found with First name: " + firstName + " and Last name: " + lastName);
+            throw new LibraryResourceNotFoundException(traceId, "No Users found with First name: " + firstName + " and Last name: " + lastName);
         }
     }
 

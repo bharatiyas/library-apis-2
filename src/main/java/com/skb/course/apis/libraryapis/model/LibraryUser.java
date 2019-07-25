@@ -18,16 +18,11 @@ public class LibraryUser implements UserDetails {
 
     private String username;
     private String password;
-
-    @NotNull(message = "First Name cannot be null")
     private String firstName;
-
-    @NotNull(message = "Last Name cannot be null")
     private String lastName;
 
     @Past
     private LocalDate dateOfBirth;
-
     private Gender gender;
     private String phoneNumber;
     private String emailId;
@@ -63,6 +58,17 @@ public class LibraryUser implements UserDetails {
         this.phoneNumber = phoneNumber;
         this.emailId = emailId;
         this.role = role;
+    }
+
+    public LibraryUser(String username,String firstName, String lastName, LocalDate dateOfBirth, Gender gender,
+                       String phoneNumber, String emailId) {
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+        this.phoneNumber = phoneNumber;
+        this.emailId = emailId;
     }
 
     public LibraryUser(String username, String firstName, String lastName) {

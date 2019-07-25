@@ -4,6 +4,8 @@ import com.skb.course.apis.libraryapis.entity.UserEntity;
 import com.skb.course.apis.libraryapis.model.Gender;
 import com.skb.course.apis.libraryapis.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,9 @@ import java.time.LocalDate;
 @Component
 public class ApplicationInitializer {
 
+    @Autowired
+    Environment env;
+
     UserRepository userRepository;
 
     BCryptPasswordEncoder bCryptPasswordEncoder;
@@ -24,12 +29,21 @@ public class ApplicationInitializer {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
+    @Value("${library.api.user.admin.username:lib-admin}")
+    private String adminUsername;
+
+    @Value("${library.api.user.admin.password:@6m1n!23}")
+    private String adminPassword;
+
     @PostConstruct
     private void init() {
+
+
+
         // insert admin user on application start up, only for the first time
         UserEntity admin = userRepository.findByUsername("admin");
         if(admin == null) {
-            UserEntity userEntity = new UserEntity("admin", bCryptPasswordEncoder.encode("admin!23"),
+            UserEntity userEntity = new UserEntity(adminUsername, bCryptPasswordEncoder.encode(adminPassword),
                     "Library", "Admin", LocalDate.now().minusYears(30), Gender.Female, "000-000000", "library.admin@email.com", "ADMIN");
 
             userRepository.save(userEntity);

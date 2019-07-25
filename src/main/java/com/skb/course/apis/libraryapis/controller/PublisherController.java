@@ -1,8 +1,8 @@
 package com.skb.course.apis.libraryapis.controller;
 
-import com.skb.course.apis.libraryapis.exception.AuthorNotFoundException;
-import com.skb.course.apis.libraryapis.exception.PublisherNotFoundException;
+import com.skb.course.apis.libraryapis.exception.*;
 import com.skb.course.apis.libraryapis.model.Author;
+import com.skb.course.apis.libraryapis.model.LibraryApiError;
 import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.service.PublisherService;
 import com.skb.course.apis.libraryapis.service.PublisherService;
@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(path="/publishers")
@@ -25,90 +26,115 @@ public class PublisherController {
     @Autowired
     private PublisherService publisherService;
 
-    @PostMapping(path = "/")
-    public ResponseEntity<?> addPublisher(@RequestBody Publisher publisher,
-                                          @RequestHeader("Authorization") String bearerToken) {
+    @PostMapping
+    public ResponseEntity<Publisher> addPublisher(@RequestBody Publisher publisher,
+                                          @RequestHeader("Authorization") String bearerToken,
+                                          @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceUnauthorizedException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot add a Publisher", HttpStatus.UNAUTHORIZED);
+            // Logging UserId for security audit trail.
+            logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to add an Publisher. Disallowed. " +
+                    "User is not a Admin.");
+            throw new LibraryResourceUnauthorizedException(traceId, "You cannot update Publisher details");
         }
-        try {
-            publisher = publisherService.addPublisher(publisher);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        publisher = publisherService.addPublisher(publisher);
+
         return new ResponseEntity<>(publisher, HttpStatus.CREATED);
     }
 
     @GetMapping(path = "/{publisherId}")
-    public ResponseEntity<?> getPublisher(@PathVariable int publisherId) {
+    public ResponseEntity<Publisher> getPublisher(@PathVariable int publisherId,
+                                                  @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceNotFoundException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
 
         Publisher publisher = null;
         try {
-            publisher = publisherService.getPublisher(publisherId);
-        } catch (PublisherNotFoundException e) {
-            logger.error(e.getMessage(), e);
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            publisher = publisherService.getPublisher(publisherId, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
         }
+
         return new ResponseEntity<>(publisher, HttpStatus.OK);
     }
 
     @PutMapping(path = "/{publisherId}")
-    public ResponseEntity<?> updatePublisher(@PathVariable int publisherId, @RequestBody Publisher publisher,
-                                             @RequestHeader("Authorization") String bearerToken) {
+    public ResponseEntity<Publisher> updatePublisher(@PathVariable int publisherId, @RequestBody Publisher publisher,
+                                             @RequestHeader("Authorization") String bearerToken,
+                                             @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceUnauthorizedException, LibraryResourceBadRequestException, LibraryResourceNotFoundException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot update Publisher details", HttpStatus.UNAUTHORIZED);
+            // Logging UserId for security audit trail.
+            logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to update an Publisher. Disallowed. " +
+                    "User is not a Admin.");
+            throw new LibraryResourceUnauthorizedException(traceId, "You cannot update Publisher details.");
         }
         if(((publisher.getPublisherId() != null) ) && (publisher.getPublisherId() != publisherId)) {
-            return new ResponseEntity<>("Invalid Publisher Id", HttpStatus.BAD_REQUEST);
+            logger.error(traceId + " Invalid Publisher Id. Publisher Id in the request and URL do not match.");
+            throw new LibraryResourceBadRequestException(traceId, "Invalid Publisher Id. Publisher Id in the request and URL do not match.");
         }
         try {
-            publisher = publisherService.updatePublisher(publisher);
-        } catch (PublisherNotFoundException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            publisher.setPublisherId(publisherId);
+            publisher = publisherService.updatePublisher(publisher, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
         }
         return new ResponseEntity<>(publisher, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/{publisherID}")
-    public ResponseEntity<?> deletePublisher(@PathVariable int publisherId, @RequestHeader("Authorization") String bearerToken) {
+    @DeleteMapping(path = "/{publisherId}")
+    public ResponseEntity<?> deletePublisher(@PathVariable int publisherId, @RequestHeader("Authorization") String bearerToken,
+                                             @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceUnauthorizedException, LibraryResourceNotFoundException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
         if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
-            return new ResponseEntity<>("You cannot delete an publisher", HttpStatus.UNAUTHORIZED);
+            // Logging UserId for security audit trail.
+            logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to delete an Publisher. Disallowed. " +
+                    "User is not a Admin.");
+            throw new LibraryResourceUnauthorizedException(traceId, "You cannot delete an Publisher.");
         }
         try {
-            publisherService.deletePublisher(publisherId);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            publisherService.deletePublisher(publisherId, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
         }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping(path = "/search")
     public ResponseEntity<?> searchPublishers(@RequestParam String name,
-                                           @RequestParam(defaultValue = "0") Integer pageNo,
+                                           /*@RequestParam(defaultValue = "0") Integer pageNo,
                                            @RequestParam(defaultValue = "10") Integer pageSize,
-                                           @RequestParam(defaultValue = "userId") String sortBy
-    ) {
-
+                                           @RequestParam(defaultValue = "userId") String sortBy,*/
+                                              @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceNotFoundException, LibraryResourceBadRequestException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
 
         List<Publisher> publishers = null;
         try {
             if(!LibraryApiUtils.doesStringValueExist(name)) {
-                return new ResponseEntity<>("Please enter a search criteria", HttpStatus.BAD_REQUEST);
+                logger.error(traceId + " Please enter at least one search criteria to search Publisher.");
+                throw new LibraryResourceBadRequestException(traceId, "Please enter at least one search criteria to search Publisher.");
             }
-            publishers = publisherService.searchPublishers(name, pageNo, pageSize, sortBy);
-        } catch (PublisherNotFoundException e) {
-            logger.error(e.getMessage());
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
-        } catch (Exception e) {
-            logger.error(e.getMessage(), e);
-            new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            publishers = publisherService.searchPublishers(name, /*pageNo, pageSize, sortBy, */traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + ": " + e.getMessage());
+            throw e;
         }
         return new ResponseEntity<>(publishers, HttpStatus.OK);
     }
