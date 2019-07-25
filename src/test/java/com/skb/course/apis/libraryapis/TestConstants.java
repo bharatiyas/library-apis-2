@@ -32,6 +32,7 @@ public class TestConstants {
 
     // Publisher API URLs
     public static final String BOOK_API_BASE_URL = "/books";
+    public static final String BOOK_ADD_AUTHOR_API_URL = "/authors";
     public static final String BOOK_API_SEARCH_URL = USER_API_BASE_URL + "/search";
 
     // Test Publisher Details

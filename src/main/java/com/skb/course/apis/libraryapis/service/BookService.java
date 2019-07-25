@@ -133,6 +133,14 @@ public class BookService {
                     .filter(ae -> ae.isPresent() == true)
                     .map(ae -> ae.get())
                     .collect(Collectors.toSet());
+
+            if(authors.size() == 0) {
+                String authorsList = authorIds.stream()
+                                            .map(authorId -> authorId.toString().concat(" "))
+                                            .reduce("", String::concat);
+
+                throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + ". None of the authors - " + authorsList + " found.");
+            }
             be.setAuthors(authors);
             bookRepository.save(be);
             book = createBookFromEntity(be);

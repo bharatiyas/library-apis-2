@@ -3,6 +3,7 @@ package com.skb.course.apis.libraryapis.controller;
 import com.skb.course.apis.libraryapis.TestConstants;
 import com.skb.course.apis.libraryapis.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -25,7 +26,19 @@ public class LibraryApiIntegrationTestUtil {
     private static int publisherCtr;
     private static int bookCtr;
 
+    @Value("${library.api.user.admin.username}")
+    private String adminUsername;
+
+    @Value("${library.api.user.admin.password}")
+    private String adminPassword;
+
+    private ResponseEntity<String> adminLoginResponse = null;
+
     public ResponseEntity<String> loginUser(String username, String password) {
+
+        if(username.equals("adminUsername") && (adminLoginResponse != null)) {
+            return adminLoginResponse;
+        }
 
         String loginUrl = TestConstants.LOGIN_URL;
         URI loginUri = null;
@@ -36,8 +49,13 @@ public class LibraryApiIntegrationTestUtil {
         }
 
         HttpEntity<String> loginRequest = new HttpEntity<>(createLoginBody(username, password));
-        return testRestTemplate.postForEntity(loginUri, loginRequest, String.class);
+        ResponseEntity<String> responseEntity = testRestTemplate.postForEntity(loginUri, loginRequest, String.class);
 
+        if(username.equals("adminUsername")) {
+            adminLoginResponse = responseEntity;
+        }
+
+        return responseEntity;
     }
 
     public ResponseEntity<LibraryUser> registerNewUser(String username) {

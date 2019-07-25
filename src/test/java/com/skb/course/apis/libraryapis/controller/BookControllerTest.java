@@ -1,6 +1,7 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.TestConstants;
+import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.model.Publisher;
@@ -218,7 +219,7 @@ public class BookControllerTest {
 
         URI bookUri = null;
         try {
-            bookUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.BOOK_API_BASE_URL + "/" + response.getBody().getBookId());
+            bookUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.BOOK_API_BASE_URL + "/" + responseBook.getBookId());
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -464,6 +465,166 @@ public class BookControllerTest {
                 Book.class);
         // Check if update was successful
         Assert.assertEquals(HttpStatus.FORBIDDEN, libBookResponse.getStatusCode());
+    }
+
+    @Test
+    public void addBookAuhors_success() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+
+        // First we need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(header);
+
+        // Now add a book
+        ResponseEntity<Book> response = libraryApiIntegrationTestUtil.addNewBook(header, publisherResponseEntity.getBody().getPublisherId());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        Book responseBook = response.getBody();
+        Assert.assertNotNull(responseBook);
+
+        // Response should not have any Authors
+        Assert.assertEquals(0, responseBook.getAuthors().size());
+
+        // Add an Author
+        ResponseEntity<Author> authorResponseEntity = libraryApiIntegrationTestUtil.addNewAuthor(header);
+
+        String bookUrl = TestConstants.API_BASE_URL + port + TestConstants.BOOK_API_BASE_URL + "/" + responseBook.getBookId() ;
+
+        URI bookAddAuthorUri = null;
+        try {
+            bookAddAuthorUri = new URI(bookUrl + TestConstants.BOOK_ADD_AUTHOR_API_URL);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        Integer[] authorsOfTheBook = new Integer[]{authorResponseEntity.getBody().getAuthorId()};
+        HttpEntity<Integer[]> request = new HttpEntity<>(authorsOfTheBook, header);
+        ResponseEntity<Book> libBookResponse = testRestTemplate.exchange(
+                bookAddAuthorUri, HttpMethod.PUT, request,
+                Book.class);
+        // Check if update was successful
+        Assert.assertEquals(HttpStatus.OK, libBookResponse.getStatusCode());
+
+        URI bookUri = null;
+        try {
+            bookUri = new URI(bookUrl);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        // Get the updated Book
+        libBookResponse = testRestTemplate.exchange(
+                bookUri, HttpMethod.GET, new HttpEntity<Object>(header),
+                Book.class);
+
+        Assert.assertEquals(HttpStatus.OK, libBookResponse.getStatusCode());
+        Book book = libBookResponse.getBody();
+
+        // Check if the response has Author details
+        Assert.assertEquals(1, book.getAuthors().size());
+        Assert.assertNotNull(book.getAuthors().stream()
+                .filter(author -> author.getLastName().contains(TestConstants.TEST_AUTHOR_LAST_NAME)));
+    }
+
+    @Test
+    public void addBookAuhors_normal_user_unauthorized() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+
+        // First we need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(header);
+
+        // Now add a book
+        ResponseEntity<Book> response = libraryApiIntegrationTestUtil.addNewBook(header, publisherResponseEntity.getBody().getPublisherId());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        Book responseBook = response.getBody();
+        Assert.assertNotNull(responseBook);
+
+        // Create a normal user
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("add.book.authors.normal.user.unauthorized");
+        LibraryUser libraryUser = responseEntity.getBody();
+
+        // Login with normal user credentials
+        ResponseEntity<String> userLoginResponse = libraryApiIntegrationTestUtil.loginUser(libraryUser.getUsername(), libraryUser.getPassword());
+        header = createAuthorizationHeader(userLoginResponse.getHeaders().get("Authorization").get(0));
+
+        // Response should not have any Authors
+        Assert.assertEquals(0, responseBook.getAuthors().size());
+
+        // Add an Author
+        ResponseEntity<Author> authorResponseEntity = libraryApiIntegrationTestUtil.addNewAuthor(header);
+
+        String bookUrl = TestConstants.API_BASE_URL + port + TestConstants.BOOK_API_BASE_URL + "/" + responseBook.getBookId() ;
+
+        URI bookAddAuthorUri = null;
+        try {
+            bookAddAuthorUri = new URI(bookUrl + TestConstants.BOOK_ADD_AUTHOR_API_URL);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        Integer[] authorsOfTheBook = new Integer[]{authorResponseEntity.getBody().getAuthorId()};
+        HttpEntity<Integer[]> request = new HttpEntity<>(authorsOfTheBook, header);
+        ResponseEntity<Book> libBookResponse = testRestTemplate.exchange(
+                bookAddAuthorUri, HttpMethod.PUT, request,
+                Book.class);
+        // Check if update was successful
+        Assert.assertEquals(HttpStatus.FORBIDDEN, libBookResponse.getStatusCode());
+    }
+
+    @Test
+    public void addBookAuhors_author_doesnot_exist() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+
+        // First we need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(header);
+
+        // Now add a book
+        ResponseEntity<Book> response = libraryApiIntegrationTestUtil.addNewBook(header, publisherResponseEntity.getBody().getPublisherId());
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        Book responseBook = response.getBody();
+        Assert.assertNotNull(responseBook);
+
+        // Response should not have any Authors
+        Assert.assertEquals(0, responseBook.getAuthors().size());
+
+        // Add an Author
+        ResponseEntity<Author> authorResponseEntity = libraryApiIntegrationTestUtil.addNewAuthor(header);
+
+        String bookUrl = TestConstants.API_BASE_URL + port + TestConstants.BOOK_API_BASE_URL + "/" + responseBook.getBookId() ;
+
+        URI bookAddAuthorUri = null;
+        try {
+            bookAddAuthorUri = new URI(bookUrl + TestConstants.BOOK_ADD_AUTHOR_API_URL);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        Integer[] authorsOfTheBook = new Integer[]{1234, 5678};
+        HttpEntity<Integer[]> request = new HttpEntity<>(authorsOfTheBook, header);
+        ResponseEntity<Book> libBookResponse = testRestTemplate.exchange(
+                bookAddAuthorUri, HttpMethod.PUT, request,
+                Book.class);
+        // Check if update was successful
+        Assert.assertEquals(HttpStatus.NOT_FOUND, libBookResponse.getStatusCode());
     }
 
     /*
