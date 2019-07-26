@@ -79,9 +79,9 @@ public class AuthorService {
         if(LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
             authorEntities = authorRepository.findByLastNameAndFirstName(lastName, firstName);
         } else if(LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
-            authorEntities = authorRepository.findByFirstName(firstName);
+            authorEntities = authorRepository.findByFirstNameContaining(firstName);
         } else if(!LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
-            authorEntities = authorRepository.findByLastName(lastName);
+            authorEntities = authorRepository.findByLastNameContaining(lastName);
         }
         if(authorEntities != null && authorEntities.size() > 0) {
             return createUsersForSearchResponse(authorEntities);

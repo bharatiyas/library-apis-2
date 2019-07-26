@@ -153,11 +153,11 @@ public class UserController {
 
     @GetMapping(path = "/search")
     public ResponseEntity<?> searchUsers(@RequestParam String firstName, @RequestParam String lastName,
-                                        @RequestParam(defaultValue = "0") Integer pageNo,
-                                        @RequestParam(defaultValue = "10") Integer pageSize,
-                                        @RequestParam(defaultValue = "userId") String sortBy,
-                                        @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId
-                                        ) throws LibraryResourceNotFoundException {
+                                         @RequestParam(defaultValue = "0") Integer pageNo,
+                                         @RequestParam(defaultValue = "10") Integer pageSize,
+                                         @RequestParam(defaultValue = "userId") String sortBy,
+                                         @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId
+    ) throws LibraryResourceNotFoundException {
 
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
             traceId = UUID.randomUUID().toString();

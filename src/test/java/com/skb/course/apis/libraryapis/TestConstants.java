@@ -30,12 +30,13 @@ public class TestConstants {
     public static final String TEST_PUBLISHER_NAME = "TestPublisherName";
     public static final String TEST_PUBLISHER_EMAIL = "TestPublisher@email.com";
 
-    // Publisher API URLs
+    // Book API URLs
     public static final String BOOK_API_BASE_URL = "/books";
     public static final String BOOK_ADD_AUTHOR_API_URL = "/authors";
-    public static final String BOOK_API_SEARCH_URL = USER_API_BASE_URL + "/search";
+    public static final String BOOK_API_GET_BY_ISBN_URL = BOOK_API_BASE_URL + "/isbn/";
+    public static final String BOOK_API_SEARCH_URL = BOOK_API_BASE_URL + "/search";
 
-    // Test Publisher Details
+    // Test Book Details
     public static final String TEST_BOOK_ISBN = "978-3-16-148410-";
     public static final String TEST_BOOK_TITLE = "SpringBoot Is Fun";
     public static final int TEST_BOOK_YEAR_PUBLISHED = 2010;

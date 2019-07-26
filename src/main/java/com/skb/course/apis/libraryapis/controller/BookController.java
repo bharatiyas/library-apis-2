@@ -1,8 +1,10 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.*;
+import com.skb.course.apis.libraryapis.model.Author;
 import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.LibraryApiError;
+import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.BookService;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.slf4j.Logger;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -143,6 +146,56 @@ public class BookController {
             throw e;
         }
         return new ResponseEntity<>(book, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/isbn/{isbn}")
+    public ResponseEntity<?> searchBookByIsbn(@PathVariable String isbn,
+                                         /*@RequestParam(defaultValue = "0") Integer pageNo,
+                                         @RequestParam(defaultValue = "10") Integer pageSize,
+                                         @RequestParam(defaultValue = "userId") String sortBy,*/
+                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceNotFoundException, LibraryResourceBadRequestException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
+
+        if(!LibraryApiUtils.doesStringValueExist(isbn)) {
+            logger.error(traceId + " Please enter a ISBN number to search Books.");
+            throw new LibraryResourceBadRequestException(traceId, "Please enter a ISBN number to search Books.");
+        }
+        Book book = null;
+        try {
+            book = bookService.searchBookByIsbn(isbn, /*pageNo, pageSize, sortBy,*/ traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
+        }
+        return new ResponseEntity<>(book, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/search")
+    public ResponseEntity<?> searchBookByTitle(@RequestParam String title,
+                                         /*@RequestParam(defaultValue = "0") Integer pageNo,
+                                         @RequestParam(defaultValue = "10") Integer pageSize,
+                                         @RequestParam(defaultValue = "userId") String sortBy,*/
+                                              @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceNotFoundException, LibraryResourceBadRequestException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
+
+        if(!LibraryApiUtils.doesStringValueExist(title)) {
+            logger.error(traceId + " Please enter a search criteria for Books.");
+            throw new LibraryResourceBadRequestException(traceId, "Please enter a search criteria for Books.");
+        }
+        List<Book> books = null;
+        try {
+            books = bookService.searchBookByTitle(title, /*pageNo, pageSize, sortBy,*/ traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
+        }
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
 }
