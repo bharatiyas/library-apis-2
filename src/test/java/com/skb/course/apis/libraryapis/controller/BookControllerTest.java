@@ -627,9 +627,9 @@ public class BookControllerTest {
         Assert.assertEquals(HttpStatus.NOT_FOUND, libBookResponse.getStatusCode());
     }
 
-    /*
-    //@Test
-    public void searchBook_success() {
+
+    @Test
+    public void searchBookByIsbn_success() {
 
         String port = environment.getProperty("local.server.port");
 
@@ -638,89 +638,100 @@ public class BookControllerTest {
         Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
         MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+
+        // We need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(header);
+        Publisher publisher = publisherResponseEntity.getBody();
+
         // Add a Books
-        for(int i=0; i<10; i++) {
-            addNewBook(header);
+        for(int i=0; i<5; i++) {
+            libraryApiIntegrationTestUtil.addNewBook(header, publisher.getPublisherId());
         }
 
-        URI authorSearchUri = null;
+        URI bookSearchUri = null;
         try {
-            authorSearchUri = new URI(TestConstants.BOOK_API_SEARCH_URL +
-                    "?name=" + TestConstants.TEST_BOOK_ISBN + 1);
+            bookSearchUri = new URI(TestConstants.BOOK_API_GET_BY_ISBN_URL + TestConstants.TEST_BOOK_ISBN + 1);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
-        ResponseEntity<Book[]> response = testRestTemplate.exchange(authorSearchUri, HttpMethod.GET,
-                new HttpEntity<Object>(header), Book[].class);
+        ResponseEntity<Book> response = testRestTemplate.exchange(bookSearchUri, HttpMethod.GET,
+                new HttpEntity<Object>(header), Book.class);
 
         Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
-        // Comparing with >= 10 because depending upon which other test methods run the number of Books may vary
-        Assert.assertTrue(response.getBody().length >= 10);
-        for(Book Book : response.getBody()) {
-            Assert.assertEquals(TestConstants.TEST_BOOK_ISBN, Book.getName());
-        }
 
-    }*/
+        Book book = response.getBody();
+        Assert.assertNotNull(book);
+        Assert.assertTrue(book.getTitle().contains(TestConstants.TEST_BOOK_TITLE));
+        Assert.assertEquals(TestConstants.TEST_BOOK_ISBN + 1, book.getIsbn());
 
-
-    //////////////////////////////////////////////////////
-
-    /*
-
-    @Test
-    public void searchBooks_success() {
-
-        // Login with the admin credentials
-        ResponseEntity<String> loginResponse = loginUtil.loginUser(adminUsername, adminPassword);
-        Assert.assertEquals(200, loginResponse.getStatusCode());
-
-        // Register 10 Books
-        for(int i=0; i<10; i++) {
-            addNewBook(loginResponse.getHeaders().get("Authorization").get(0));
-        }
-
-        URI searchUri = null;
-        try {
-            searchUri = new URI(TestConstants.BOOK_API_SEARCH_URL + "?firstName=" + TestConstants.TEST_BOOK_ISBN
-            + "&lastName=" + TestConstants.TEST_BOOK_LAST_NAME);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        ResponseEntity<Book[]> response = testRestTemplate.getForEntity(searchUri, Book[].class);
-
-        Assert.assertEquals(200, response.getStatusCode());
-        // Comparing with >= 10 because depending upon which other test methods run the number of Books may vary
-        Assert.assertTrue(response.getBody().length >= 10);
-        for(Book Book : response.getBody()) {
-            Assert.assertEquals(TestConstants.TEST_BOOK_ISBN, Book.getName());
-            Assert.assertEquals(TestConstants.TEST_BOOK_LAST_NAME, Book.getLastName());
-        }
     }
 
     @Test
-    public void searchBooks_no_Books() {
+    public void searchBookByIsbn_book_doesnot_exist() {
+
+        String port = environment.getProperty("local.server.port");
 
         // Login with the admin credentials
-        ResponseEntity<String> loginResponse = loginUtil.loginUser(adminUsername, adminPassword);
-        Assert.assertEquals(200, loginResponse.getStatusCode());
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
 
-        // Register 10 Books
-        for(int i=0; i<10; i++) {
-            addNewBook(loginResponse.getHeaders().get("Authorization").get(0));
-        }
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
 
-        URI searchUri = null;
+        // We need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(header);
+        Publisher publisher = publisherResponseEntity.getBody();
+
+        // Add a Books
+        libraryApiIntegrationTestUtil.addNewBook(header, publisher.getPublisherId());
+
+        URI bookSearchUri = null;
         try {
-            searchUri = new URI(TestConstants.BOOK_API_SEARCH_URL + "?firstName=BlahFn&lastName=BlahLn");
+            bookSearchUri = new URI(TestConstants.BOOK_API_GET_BY_ISBN_URL + 1234);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
 
-        ResponseEntity<String> response = testRestTemplate.getForEntity(searchUri, String.class);
-        Assert.assertEquals(404, response.getStatusCode());
-    }*/
+        ResponseEntity<Book> response = testRestTemplate.exchange(bookSearchUri, HttpMethod.GET,
+                new HttpEntity<Object>(header), Book.class);
+        Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+    }
+
+    @Test
+    public void searchBookByTitle_success() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+
+        MultiValueMap<String, String> header = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
+
+        // We need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(header);
+        Publisher publisher = publisherResponseEntity.getBody();
+
+        // Add a Books
+        for(int i=0; i<5; i++) {
+            libraryApiIntegrationTestUtil.addNewBook(header, publisher.getPublisherId());
+        }
+
+        URI bookSearchUri = null;
+        try {
+            bookSearchUri = new URI(TestConstants.BOOK_API_SEARCH_URL +
+                    "?title=" + "SpringBoot");
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        ResponseEntity<Book[]> response = testRestTemplate.exchange(bookSearchUri, HttpMethod.GET,
+                new HttpEntity<Object>(header), Book[].class);
+
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+        Assert.assertTrue(response.getBody().length > 5);
+    }
 
 
     private MultiValueMap<String, String> createAuthorizationHeader(String bearerToken) {

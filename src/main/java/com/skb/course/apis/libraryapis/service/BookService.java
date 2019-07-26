@@ -16,6 +16,7 @@ import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -148,6 +149,27 @@ public class BookService {
             throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " Not Found");
         }
         return book;
+    }
+
+    public Book searchBookByIsbn(String isbn, String traceId) throws LibraryResourceNotFoundException {
+
+        BookEntity book = bookRepository.findByIsbn(isbn);
+        if(book == null) {
+            throw new LibraryResourceNotFoundException(traceId, "No book found for ISBN: " + isbn);
+        }
+        return createBookFromEntity(book);
+
+    }
+
+    public List<Book> searchBookByTitle(String title, String traceId) throws LibraryResourceNotFoundException {
+        List<BookEntity> books = bookRepository.findByTitleContaining(title);
+        if(books == null || books.size() ==0) {
+            throw new LibraryResourceNotFoundException(traceId, "No book found matching/having: " + title);
+        }
+
+        return books.stream()
+                .map(book -> createBookFromEntity(book))
+                .collect(Collectors.toList());
     }
 
     private Book createBookFromEntity(BookEntity be) {
