@@ -1,23 +1,24 @@
 package com.skb.course.apis.libraryapis.service;
 
+import com.skb.course.apis.libraryapis.entity.BookEntity;
+import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
 import com.skb.course.apis.libraryapis.entity.UserEntity;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
-import com.skb.course.apis.libraryapis.model.LibraryUser;
-import com.skb.course.apis.libraryapis.model.Role;
+import com.skb.course.apis.libraryapis.model.*;
+import com.skb.course.apis.libraryapis.repository.BookRepository;
+import com.skb.course.apis.libraryapis.repository.BookStatusRepository;
 import com.skb.course.apis.libraryapis.repository.UserRepository;
 import com.skb.course.apis.libraryapis.security.SecurityConstants;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,10 +28,18 @@ public class UserService {
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private UserRepository userRepository;
+    private BookRepository bookRepository;
+    private BookStatusRepository bookStatusRepository;
+    private BookService bookService;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.userRepository = userRepository;
+    public UserService(BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository,
+                       BookRepository bookRepository, BookStatusRepository bookStatusRepository,
+                       BookService bookService) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.userRepository = userRepository;
+        this.bookRepository = bookRepository;
+        this.bookStatusRepository = bookStatusRepository;
+        this.bookService = bookService;
     }
 
     public LibraryUser addUser(LibraryUser libraryUserToBeAdded) {
@@ -119,9 +128,61 @@ public class UserService {
         }
     }
 
+    public LibraryUser issueBook(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
+
+        Optional<UserEntity> userEntity = userRepository.findById(userId);
+        LibraryUser libraryUser;
+        Book book = null;
+        if(userEntity.isPresent()) {
+            UserEntity ue = userEntity.get();
+            Set<BookEntity> books = bookIds.stream()
+                    .map(bookId ->
+                            bookRepository.findById(bookId)
+                    ).collect(Collectors.toSet()).stream()
+                    .filter(be -> be.isPresent() == true)
+                    .map(be -> be.get())
+                    .collect(Collectors.toSet());
+
+            if(books.size() == 0) {
+                String booksList = bookIds.stream()
+                        .map(bookId -> bookId.toString().concat(" "))
+                        .reduce("", String::concat);
+
+                throw new LibraryResourceNotFoundException(traceId, "User Id: " + userId + ". None of the books - " + booksList + " found.");
+            }
+
+            Set<BookStatusEntity> booksThatCanBeIssued = books.stream().map(bookEntity -> bookEntity.getBookStatus())
+                    .filter(bse -> (bse.getTotalNumberOfCopies() - bse.getNumberOfCopiesIssued()) > 0)
+                    .collect(Collectors.toSet());
+
+            if(booksThatCanBeIssued.size() == 0) {
+                throw new LibraryResourceNotFoundException(traceId, "User Id: " + userId + ". None of the books could be issued because copies are not available");
+            }
+
+            ue.setBooks(books);
+            userRepository.save(ue);
+            books.stream().map(bookEntity -> bookEntity.getBookStatus())
+                    .forEach(bse -> {
+                        bse.setTotalNumberOfCopies(bse.getTotalNumberOfCopies() - 1);
+                        bse.se
+                    });
+            libraryUser = createUserFromEntity(ue);
+        } else {
+            throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
+        }
+        return libraryUser;
+    }
+
     private LibraryUser createUserFromEntity(UserEntity ue) {
-        return new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
+        LibraryUser libraryUser = new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
                 ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
+
+        libraryUser.setIssuesBooks(ue.getBooks().stream()
+                                        .map(be -> bookService.createBookFromEntity(be))
+                                        .collect(Collectors.toSet())
+        );
+
+        return libraryUser;
     }
 
     private LibraryUser createUserFromEntityForLogin(UserEntity ue) {
@@ -134,4 +195,5 @@ public class UserService {
                 .map(ue -> new LibraryUser(ue.getUsername(), ue.getFirstName(), ue.getLastName()))
                 .collect(Collectors.toList());
     }
+
 }

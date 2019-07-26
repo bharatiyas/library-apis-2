@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Set;
 
 // Spring Security will use the information stored in the LibraryUser object to perform authentication and authorization.
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -29,6 +30,8 @@ public class LibraryUser implements UserDetails {
 
     @JsonIgnore
     private Role role;
+
+    private Set<Book> issuesBooks;
 
     public LibraryUser() {
     }
@@ -131,6 +134,14 @@ public class LibraryUser implements UserDetails {
 
     public void setRole(Role role) {
         this.role = role;
+    }
+
+    public Set<Book> getIssuesBooks() {
+        return issuesBooks;
+    }
+
+    public void setIssuesBooks(Set<Book> issuesBooks) {
+        this.issuesBooks = issuesBooks;
     }
 
     @Override

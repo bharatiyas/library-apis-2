@@ -1,6 +1,7 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.*;
+import com.skb.course.apis.libraryapis.model.Book;
 import com.skb.course.apis.libraryapis.model.LibraryApiError;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.UserService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -174,5 +176,33 @@ public class UserController {
             throw e;
         }
         return new ResponseEntity<>(libraryUsers, HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/{userId}/books")
+    public ResponseEntity<?> issueBook(@PathVariable int userId, @RequestBody Set<Integer> bookIds,
+                                           @RequestHeader("Authorization") String bearerToken,
+                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+            throws LibraryResourceUnauthorizedException, LibraryResourceBadRequestException, LibraryResourceNotFoundException {
+        if(!LibraryApiUtils.doesStringValueExist(traceId)) {
+            traceId = UUID.randomUUID().toString();
+        }
+        if(!LibraryApiUtils.isUserAdmin(bearerToken)) {
+            // Logging UserId for security audit trail.
+            logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to issue Books. Disallowed. " +
+                    "User is not a Admin.");
+            throw new LibraryResourceUnauthorizedException(traceId, " attempted to issue Books. Disallowed.");
+        }
+        if(bookIds == null || bookIds.size() == 0) {
+            logger.error(traceId + " Invalid Book list. List is either not present or empty.");
+            throw new LibraryResourceBadRequestException(traceId, "Invalid Book list. List is either not present or empty.");
+        }
+        Book book = null;
+        try {
+            book = userService.issueBook(userId, bookIds, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
+        }
+        return new ResponseEntity<>(book, HttpStatus.OK);
     }
 }

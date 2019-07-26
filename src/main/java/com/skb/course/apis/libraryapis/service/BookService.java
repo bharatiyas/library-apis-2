@@ -57,7 +57,7 @@ public class BookService {
         // Manage 1-1 relationship
         // 1-1 relationship: Create the (Child) BookStatusEntity object
         BookStatusEntity bookStatusEntity = new BookStatusEntity(addedBook.getBookId(), bookToBeAdded.getBookStatus().getState(),
-                bookToBeAdded.getBookStatus().getNumberOfCopiesAvailable(), 0);
+                bookToBeAdded.getBookStatus().getTotalNumberOfCopies(), 0);
 
         // 1-1 relationship: Set parent reference(BookEntity) in child entity(BookStatusEntity)
         bookStatusEntity.setBookEntity(bookEntity);
@@ -172,7 +172,7 @@ public class BookService {
                 .collect(Collectors.toList());
     }
 
-    private Book createBookFromEntity(BookEntity be) {
+    public Book createBookFromEntity(BookEntity be) {
         Book book = new Book(be.getBookId(), be.getIsbn(), be.getTitle(), be.getPublisher().getPublisherId() , be.getYearPublished(), be.getEdition()
                 ,createBookStatusFromEntity(bookStatusRepository.findById(be.getBookId()).get())
         );
@@ -190,7 +190,7 @@ public class BookService {
     }
 
     private BookStatus createBookStatusFromEntity(BookStatusEntity bse) {
-        return new BookStatus(bse.getState(), bse.getNumberOfCopiesAvailable(), bse.getNumberOfCopiesIssued());
+        return new BookStatus(bse.getState(), bse.getTotalNumberOfCopies(), bse.getNumberOfCopiesIssued());
     }
 
     private Author createAuthorFromAuthorEntity(AuthorEntity ae) {

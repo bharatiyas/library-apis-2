@@ -353,6 +353,65 @@ public class UserControllerTest {
     }
 
     @Test
+    public void issueBooks_success() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // First we register a user
+        ResponseEntity<LibraryUser> response = libraryApiIntegrationTestUtil.registerNewUser("update.user.success");
+
+        Assert.assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        LibraryUser responseLibraryUser = response.getBody();
+        Assert.assertNotNull(responseLibraryUser);
+        Integer userId = responseLibraryUser.getUserId();
+
+        // Login with the credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+
+        // Set the values to be updated
+        responseLibraryUser.setPassword("NewPassword");
+        responseLibraryUser.setEmailId("newemailaddress@email.com");
+        responseLibraryUser.setPhoneNumber("23423523");
+
+        URI userUri = null;
+        try {
+            userUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.USER_API_BASE_URL + "/" + userId);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Authorization", loginResponse.getHeaders().get("Authorization").get(0));
+
+        HttpEntity<LibraryUser> request = new HttpEntity<>(responseLibraryUser, headers);
+        ResponseEntity<LibraryUser> libUserResponse = testRestTemplate.exchange(
+                userUri, HttpMethod.PUT, request,
+                LibraryUser.class);
+
+        Assert.assertEquals(HttpStatus.OK, libUserResponse.getStatusCode());
+
+        // Now login with changed password
+        loginResponse = libraryApiIntegrationTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+
+        // Now we get the user. Should have update email and phone number
+        // Put the new Auth token
+        headers.replace("Authorization", loginResponse.getHeaders().get("Authorization"));
+
+        libUserResponse = testRestTemplate.exchange(
+                userUri, HttpMethod.GET, new HttpEntity<Object>(headers),
+                LibraryUser.class);
+
+        Assert.assertEquals(HttpStatus.OK, libUserResponse.getStatusCode());
+        LibraryUser libraryUser = libUserResponse.getBody();
+        Assert.assertEquals("newemailaddress@email.com", libraryUser.getEmailId());
+        Assert.assertEquals("23423523", libraryUser.getPhoneNumber());
+    }
+
+    @Test
     public void searchUsers_no_users() {
 
         // Register 10 users
