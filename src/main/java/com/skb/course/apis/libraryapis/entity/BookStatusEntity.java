@@ -22,8 +22,8 @@ public class BookStatusEntity {
     @Enumerated(EnumType.STRING)
     private BookStatusState state;
 
-    @Column(name = "Number_Of_Copies_Available")
-    private int numberOfCopiesAvailable;
+    @Column(name = "Total_Number_Of_Copies")
+    private int totalNumberOfCopies;
 
     @Column(name = "Number_Of_Copies_Issued")
     private int numberOfCopiesIssued;
@@ -31,10 +31,10 @@ public class BookStatusEntity {
     public BookStatusEntity() {
     }
 
-    public BookStatusEntity(int bookId, BookStatusState state, int numberOfCopiesAvailable, int numberOfCopiesIssued) {
+    public BookStatusEntity(int bookId, BookStatusState state, int totalNumberOfCopies, int numberOfCopiesIssued) {
         this.bookId = bookId;
         this.state = state;
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
+        this.totalNumberOfCopies = totalNumberOfCopies;
         this.numberOfCopiesIssued = numberOfCopiesIssued;
     }
 
@@ -46,12 +46,12 @@ public class BookStatusEntity {
         this.state = state;
     }
 
-    public int getNumberOfCopiesAvailable() {
-        return numberOfCopiesAvailable;
+    public int getTotalNumberOfCopies() {
+        return totalNumberOfCopies;
     }
 
-    public void setNumberOfCopiesAvailable(int numberOfCopiesAvailable) {
-        this.numberOfCopiesAvailable = numberOfCopiesAvailable;
+    public void setTotalNumberOfCopies(int totalNumberOfCopies) {
+        this.totalNumberOfCopies = totalNumberOfCopies;
     }
 
     public int getNumberOfCopiesIssued() {

@@ -63,6 +63,13 @@ public class BookEntity {
     //@OnDelete(action = OnDeleteAction.CASCADE)
     private Set<AuthorEntity> authors = new HashSet<>();
 
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            mappedBy = "books"
+    )
+    private Set<UserEntity> users = new HashSet<>();
+
     public BookEntity() {
     }
 

@@ -151,6 +151,6 @@ public class LibraryApiIntegrationTestUtil {
     }
 
     private BookStatus createBookStatus() {
-        return new BookStatus(BookStatusState.Active, 5, 0);
+        return new BookStatus(BookStatusState.Active, 3, 0);
     }
 }

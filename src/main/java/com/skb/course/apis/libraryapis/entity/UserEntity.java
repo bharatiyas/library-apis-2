@@ -4,6 +4,8 @@ import com.skb.course.apis.libraryapis.model.Gender;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "USER")
@@ -42,6 +44,13 @@ public class UserEntity {
 
     @Column(name = "Role")
     private String role;
+
+    @ManyToMany(fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL
+    )
+
+    @JoinTable(name = "user_book", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
+    private Set<BookEntity> books = new HashSet<>();
 
     public UserEntity() {
     }
@@ -113,6 +122,14 @@ public class UserEntity {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public Set<BookEntity> getBooks() {
+        return books;
+    }
+
+    public void setBooks(Set<BookEntity> books) {
+        this.books = books;
     }
 }
 

@@ -87,7 +87,7 @@ CREATE TABLE BOOK_AUTHOR (
 CREATE TABLE BOOK_STATUS (
 		Book_Id INT PRIMARY KEY,
 		State ENUM('Active', 'Inactive') NOT NULL,
-		Number_Of_Copies_Available INT NOT NULL,
+		Total_Number_Of_Copies INT NOT NULL,
 		Number_Of_Copies_Issued INT DEFAULT 0,
 		FOREIGN KEY fk_book(Book_Id) REFERENCES BOOK(Book_Id)
 	);

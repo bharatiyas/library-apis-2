@@ -1,12 +1,13 @@
 package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.TestConstants;
-import com.skb.course.apis.libraryapis.model.LibraryUser;
+import com.skb.course.apis.libraryapis.model.*;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.env.Environment;
@@ -22,6 +23,9 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -35,12 +39,48 @@ public class UserControllerTest {
 
     private static int userCtr;
 
+    @Value("${library.api.user.admin.username}")
+    private String adminUsername;
+
+    @Value("${library.api.user.admin.password}")
+    private String adminPassword;
+
     @Before
     public void setUp() throws Exception {
     }
 
     @Autowired
     Environment environment;
+
+    @Test
+    public void test_login_successful() {
+
+        // First we register a user
+        ResponseEntity<LibraryUser> registerUserResponse = libraryApiIntegrationTestUtil.registerNewUser("test.login.successful");
+
+        Assert.assertEquals(HttpStatus.CREATED, registerUserResponse.getStatusCode());
+
+        LibraryUser responseLibraryUser = registerUserResponse.getBody();
+        Assert.assertNotNull(responseLibraryUser);
+
+        // Login with supplied username and default password
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
+
+        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
+        String authToken = loginResponse.getHeaders().get("Authorization").get(0);
+        Assert.assertNotNull(authToken);
+        Assert.assertTrue(authToken.length() > 0);
+    }
+
+    @Test
+    public void test_login_unsuccessful() {
+
+        // Login with wrong credentials
+        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser("blahblah", "blahblah");
+
+        Assert.assertEquals(HttpStatus.FORBIDDEN, loginResponse.getStatusCode());
+        Assert.assertNull(loginResponse.getHeaders().get("Authorization"));
+    }
 
     @Test
     public void registerUser_success() {
@@ -87,8 +127,7 @@ public class UserControllerTest {
             e.printStackTrace();
         }
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Authorization", loginResponse.getHeaders().get("Authorization").get(0));
+        MultiValueMap<String, String> headers = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         ResponseEntity<LibraryUser> libUserResponse = testRestTemplate.exchange(
                 getUserUri, HttpMethod.GET, new HttpEntity<Object>(headers),
                 LibraryUser.class);
@@ -126,8 +165,7 @@ public class UserControllerTest {
             e.printStackTrace();
         }
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Authorization", loginResponse.getHeaders().get("Authorization").get(0));
+        MultiValueMap<String, String> headers = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         ResponseEntity<String> libUserResponse = testRestTemplate.exchange(
                 getUserUri, HttpMethod.GET, new HttpEntity<Object>(headers),
                 String.class);
@@ -167,8 +205,7 @@ public class UserControllerTest {
             e.printStackTrace();
         }
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Authorization", loginResponse.getHeaders().get("Authorization").get(0));
+        MultiValueMap<String, String> headers = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
 
         HttpEntity<LibraryUser> request = new HttpEntity<>(responseLibraryUser, headers);
         ResponseEntity<LibraryUser> libUserResponse = testRestTemplate.exchange(
@@ -225,8 +262,7 @@ public class UserControllerTest {
             e.printStackTrace();
         }
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Authorization", loginResponse.getHeaders().get("Authorization").get(0));
+        MultiValueMap<String, String> headers = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
         HttpEntity<LibraryUser> request = new HttpEntity<>(responseLibraryUser, headers);
 
         // We need to use RestTemplate because we need to set the ErrorHandler becaue TestRestTemplate
@@ -273,8 +309,7 @@ public class UserControllerTest {
             e.printStackTrace();
         }
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Authorization", loginResponse.getHeaders().get("Authorization").get(0));
+        MultiValueMap<String, String> headers = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
 
         HttpEntity<LibraryUser> request = new HttpEntity<>(responseLibraryUser, headers);
         ResponseEntity<String> libUserResponse = testRestTemplate.exchange(
@@ -314,8 +349,7 @@ public class UserControllerTest {
             e.printStackTrace();
         }
 
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add("Authorization", loginResponse.getHeaders().get("Authorization").get(0));
+        MultiValueMap<String, String> headers = createAuthorizationHeader(loginResponse.getHeaders().get("Authorization").get(0));
 
         HttpEntity<LibraryUser> request = new HttpEntity<>(responseLibraryUser, headers);
         ResponseEntity<String> libUserResponse = testRestTemplate.exchange(
@@ -353,6 +387,148 @@ public class UserControllerTest {
     }
 
     @Test
+    public void issueBooks_success() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> adminLoginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, adminLoginResponse.getStatusCode());
+        MultiValueMap<String, String> adminAuthHeader = createAuthorizationHeader(adminLoginResponse.getHeaders().get("Authorization").get(0));
+
+        // First we need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(adminAuthHeader);
+        Publisher publisher = publisherResponseEntity.getBody();
+
+        Set<Integer> bookIds = new HashSet<>(5);
+        // Add few Books
+        for(int i=0; i<5; i++) {
+            bookIds.add(
+                    libraryApiIntegrationTestUtil.addNewBook(adminAuthHeader, publisher.getPublisherId()).getBody().getBookId());
+        }
+
+        // Create a normal user
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("issue.books.success");
+        LibraryUser libraryUser = responseEntity.getBody();
+
+        URI issueBooksUri = null;
+        try {
+            issueBooksUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.USER_API_BASE_URL + "/" +
+                    libraryUser.getUserId() + TestConstants.USER_API_ISSUE_BOOK_URL);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        HttpEntity<Set<Integer>> issueBooksRequest = new HttpEntity<>(bookIds, adminAuthHeader);
+        ResponseEntity<IssueBookResponse> issueBookResponseEntity = testRestTemplate.exchange(issueBooksUri, HttpMethod.PUT,
+                issueBooksRequest, IssueBookResponse.class);
+
+        Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
+        IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
+        Assert.assertEquals(bookIds.size(), issueBookResponse.getIssueBookStatusMap().keySet().size());
+    }
+
+    @Test
+    public void issueBooks_book_does_not_exist() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> adminLoginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, adminLoginResponse.getStatusCode());
+        MultiValueMap<String, String> adminAuthHeader = createAuthorizationHeader(adminLoginResponse.getHeaders().get("Authorization").get(0));
+
+        // First we need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(adminAuthHeader);
+        Publisher publisher = publisherResponseEntity.getBody();
+
+        Set<Integer> bookIds = new HashSet<>(5);
+        // Add few Books
+        for(int i=0; i<5; i++) {
+            bookIds.add(
+                    libraryApiIntegrationTestUtil.addNewBook(adminAuthHeader, publisher.getPublisherId()).getBody().getBookId());
+        }
+
+        // These book Ids do not exist
+        bookIds.add(999);
+        bookIds.add(998);
+        // Create a normal user
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("issue.books.book.does.not.exist");
+        LibraryUser libraryUser = responseEntity.getBody();
+
+        URI issueBooksUri = null;
+        try {
+            issueBooksUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.USER_API_BASE_URL + "/" +
+                    libraryUser.getUserId() + TestConstants.USER_API_ISSUE_BOOK_URL);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        HttpEntity<Set<Integer>> issueBooksRequest = new HttpEntity<>(bookIds, adminAuthHeader);
+        ResponseEntity<IssueBookResponse> issueBookResponseEntity = testRestTemplate.exchange(issueBooksUri, HttpMethod.PUT,
+                issueBooksRequest, IssueBookResponse.class);
+
+        Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
+        IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
+        Collection<IssueBookStatus> issueBookStatuses = issueBookResponse.getIssueBookStatusMap().values();
+        Assert.assertEquals(bookIds.size(), issueBookStatuses.size());
+
+        Assert.assertEquals(2, issueBookStatuses.stream()
+                .filter(issueBookStatus -> issueBookStatus.getRemarks().equals("Book Not Found"))
+                .count());
+    }
+
+    @Test
+    public void issueBooks_no_copies_available() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> adminLoginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, adminLoginResponse.getStatusCode());
+        MultiValueMap<String, String> adminAuthHeader = createAuthorizationHeader(adminLoginResponse.getHeaders().get("Authorization").get(0));
+
+        // First we need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(adminAuthHeader);
+        Publisher publisher = publisherResponseEntity.getBody();
+
+        // Add a Books
+        Integer[] bookIds = new Integer[]{libraryApiIntegrationTestUtil.addNewBook(adminAuthHeader, publisher.getPublisherId()).getBody().getBookId()};
+
+        // Create three normal user and issue books to them
+        URI issueBooksUri = null;
+        Set<Integer> userIds = new HashSet<>(3);
+        for(int i=0;i<4;i++) {
+            ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("issue.books.no.copies.available.1");
+            LibraryUser libraryUser = responseEntity.getBody();
+            try {
+                issueBooksUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.USER_API_BASE_URL + "/" +
+                        libraryUser.getUserId() + TestConstants.USER_API_ISSUE_BOOK_URL);
+            } catch (URISyntaxException e) {
+                e.printStackTrace();
+            }
+
+            HttpEntity<Integer[]> issueBooksRequest = new HttpEntity<>(bookIds, adminAuthHeader);
+            ResponseEntity<IssueBookResponse> issueBookResponseEntity = testRestTemplate.exchange(issueBooksUri, HttpMethod.PUT,
+                    issueBooksRequest, IssueBookResponse.class);
+            Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
+            IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
+            Collection<IssueBookStatus> issueBookStatuses = issueBookResponse.getIssueBookStatusMap().values();
+            Assert.assertEquals(bookIds.length, issueBookStatuses.size());
+            if(i < 3) {
+                Assert.assertEquals(bookIds.length, issueBookStatuses.stream().
+                        filter(issueBookStatus -> issueBookStatus.getRemarks().equals("Book Issued"))
+                        .count());
+            } else {
+                Assert.assertEquals(1, issueBookStatuses.stream().
+                        filter(issueBookStatus -> issueBookStatus.getRemarks().equals("No copies available"))
+                        .count());
+            }
+        }
+
+    }
+
+    @Test
     public void searchUsers_no_users() {
 
         // Register 10 users
@@ -371,34 +547,10 @@ public class UserControllerTest {
         Assert.assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
-    @Test
-    public void test_login_successful() {
+    private MultiValueMap<String, String> createAuthorizationHeader(String bearerToken) {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add("Authorization", bearerToken);
 
-        // First we register a user
-        ResponseEntity<LibraryUser> registerUserResponse = libraryApiIntegrationTestUtil.registerNewUser("test.login.successful");
-
-        Assert.assertEquals(HttpStatus.CREATED, registerUserResponse.getStatusCode());
-
-        LibraryUser responseLibraryUser = registerUserResponse.getBody();
-        Assert.assertNotNull(responseLibraryUser);
-
-        // Login with supplied username and default password
-        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser(responseLibraryUser.getUsername(), responseLibraryUser.getPassword());
-
-        Assert.assertEquals(HttpStatus.OK, loginResponse.getStatusCode());
-        String authToken = loginResponse.getHeaders().get("Authorization").get(0);
-        Assert.assertNotNull(authToken);
-        Assert.assertTrue(authToken.length() > 0);
+        return headers;
     }
-
-    @Test
-    public void test_login_unsuccessful() {
-
-        // Login with wrong credentials
-        ResponseEntity<String> loginResponse = libraryApiIntegrationTestUtil.loginUser("blahblah", "blahblah");
-
-        Assert.assertEquals(HttpStatus.FORBIDDEN, loginResponse.getStatusCode());
-        Assert.assertNull(loginResponse.getHeaders().get("Authorization"));
-    }
-
 }

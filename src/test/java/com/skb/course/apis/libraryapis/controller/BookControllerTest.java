@@ -107,7 +107,6 @@ public class BookControllerTest {
         Assert.assertTrue(responseBook.getIsbn().contains(TestConstants.TEST_BOOK_ISBN));
     }
 
-
     @Test
     public void getBook_success_normal_user() {
 
@@ -713,7 +712,7 @@ public class BookControllerTest {
         ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(header);
         Publisher publisher = publisherResponseEntity.getBody();
 
-        // Add a Books
+        // Add few Books
         for(int i=0; i<5; i++) {
             libraryApiIntegrationTestUtil.addNewBook(header, publisher.getPublisherId());
         }

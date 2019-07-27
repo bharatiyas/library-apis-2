@@ -43,6 +43,13 @@ public class LibraryControllersExceptionHandler extends ResponseEntityExceptionH
         return new ResponseEntity<>(new LibraryApiError(e.getTraceId(), e.getMessage()), HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(BookNotIssuedException.class)
+    public final ResponseEntity<LibraryApiError> handleBookNotIssuedException(
+            BookNotIssuedException e, WebRequest webRequest) {
+
+        return new ResponseEntity<>(new LibraryApiError(e.getTraceId(), e.getMessage()), HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(Exception.class)
     public final ResponseEntity<LibraryApiError> handleAllExceptions(
             Exception e, WebRequest webRequest) {
