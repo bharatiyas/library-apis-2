@@ -9,6 +9,7 @@ public class TestConstants {
     public static final String USER_API_BASE_URL = "/users";
     public static final String USER_API_REGISTER_URL = USER_API_BASE_URL + "/register";
     public static final String USER_API_SEARCH_URL = USER_API_BASE_URL + "/search";
+    public static final String USER_API_ISSUE_BOOK_URL = "/books";
 
     // Test User Details
     public static final String TEST_USER_FIRST_NAME = "TestUserFn";

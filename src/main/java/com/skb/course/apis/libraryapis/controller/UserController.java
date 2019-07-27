@@ -2,6 +2,7 @@ package com.skb.course.apis.libraryapis.controller;
 
 import com.skb.course.apis.libraryapis.exception.*;
 import com.skb.course.apis.libraryapis.model.Book;
+import com.skb.course.apis.libraryapis.model.IssueBookResponse;
 import com.skb.course.apis.libraryapis.model.LibraryApiError;
 import com.skb.course.apis.libraryapis.model.LibraryUser;
 import com.skb.course.apis.libraryapis.service.UserService;
@@ -179,7 +180,7 @@ public class UserController {
     }
 
     @PutMapping(path = "/{userId}/books")
-    public ResponseEntity<?> issueBook(@PathVariable int userId, @RequestBody Set<Integer> bookIds,
+    public ResponseEntity<?> issueBooks(@PathVariable int userId, @RequestBody Set<Integer> bookIds,
                                            @RequestHeader("Authorization") String bearerToken,
                                            @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceUnauthorizedException, LibraryResourceBadRequestException, LibraryResourceNotFoundException {
@@ -196,13 +197,13 @@ public class UserController {
             logger.error(traceId + " Invalid Book list. List is either not present or empty.");
             throw new LibraryResourceBadRequestException(traceId, "Invalid Book list. List is either not present or empty.");
         }
-        Book book = null;
+        IssueBookResponse issueBookResponse = null;
         try {
-            book = userService.issueBook(userId, bookIds, traceId);
+            issueBookResponse = userService.issueBooks(userId, bookIds, traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + e.getMessage());
             throw e;
         }
-        return new ResponseEntity<>(book, HttpStatus.OK);
+        return new ResponseEntity<>(issueBookResponse, HttpStatus.OK);
     }
 }

@@ -10,26 +10,16 @@ public class IssueBookResponse {
     public IssueBookResponse() {
     }
 
+    public IssueBookResponse(Map<Integer, IssueBookStatus> issueBookStatusMap) {
+        this.issueBookStatusMap = issueBookStatusMap;
+    }
+
     public Map<Integer, IssueBookStatus> getIssueBookStatusMap() {
         return issueBookStatusMap;
     }
 
     public void setIssueBookStatusMap(Map<Integer, IssueBookStatus> issueBookStatusMap) {
         this.issueBookStatusMap = issueBookStatusMap;
-    }
-
-    private class IssueBookStatus {
-
-        private String status;
-        private String remarks;
-
-        public IssueBookStatus() {
-        }
-
-        public IssueBookStatus(String status, String remarks) {
-            this.status = status;
-            this.remarks = remarks;
-        }
     }
 }
 

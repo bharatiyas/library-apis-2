@@ -16,9 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -128,49 +126,51 @@ public class UserService {
         }
     }
 
-    public LibraryUser issueBook(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
+    public IssueBookResponse issueBooks(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
 
         Optional<UserEntity> userEntity = userRepository.findById(userId);
-        LibraryUser libraryUser;
-        Book book = null;
+
         if(userEntity.isPresent()) {
+            Map<Integer, IssueBookStatus> issueBookStatusMap = new HashMap<>(bookIds.size());
             UserEntity ue = userEntity.get();
-            Set<BookEntity> books = bookIds.stream()
-                    .map(bookId ->
-                            bookRepository.findById(bookId)
-                    ).collect(Collectors.toSet()).stream()
-                    .filter(be -> be.isPresent() == true)
-                    .map(be -> be.get())
-                    .collect(Collectors.toSet());
-
-            if(books.size() == 0) {
-                String booksList = bookIds.stream()
-                        .map(bookId -> bookId.toString().concat(" "))
-                        .reduce("", String::concat);
-
-                throw new LibraryResourceNotFoundException(traceId, "User Id: " + userId + ". None of the books - " + booksList + " found.");
-            }
-
-            Set<BookStatusEntity> booksThatCanBeIssued = books.stream().map(bookEntity -> bookEntity.getBookStatus())
-                    .filter(bse -> (bse.getTotalNumberOfCopies() - bse.getNumberOfCopiesIssued()) > 0)
-                    .collect(Collectors.toSet());
-
-            if(booksThatCanBeIssued.size() == 0) {
-                throw new LibraryResourceNotFoundException(traceId, "User Id: " + userId + ". None of the books could be issued because copies are not available");
-            }
-
-            ue.setBooks(books);
-            userRepository.save(ue);
-            books.stream().map(bookEntity -> bookEntity.getBookStatus())
-                    .forEach(bse -> {
-                        bse.setTotalNumberOfCopies(bse.getTotalNumberOfCopies() - 1);
-                        bse.se
+            Set<BookEntity> issueableBooks = new HashSet<>();
+            // Find out if the supplied list of books is issue-able or not
+            bookIds.stream()
+                    .forEach(bookId -> {
+                        Optional<BookEntity> be = bookRepository.findById(bookId);
+                        IssueBookStatus bookStatus;
+                        if (be.isPresent() == false) {
+                            bookStatus = new IssueBookStatus(bookId, "Not Issued", "Book Not Found");
+                        } else {
+                            BookStatusEntity bse = be.get().getBookStatus();
+                            if ((bse.getTotalNumberOfCopies() - bse.getNumberOfCopiesIssued()) == 0) {
+                                bookStatus = new IssueBookStatus(bookId,"Not Issued", "No copies available");
+                            } else {
+                                bookStatus = new IssueBookStatus(bookId,"Issued", "Book Issued");
+                                issueableBooks.add(be.get());
+                            }
+                        }
+                        issueBookStatusMap.put(bookId, bookStatus);
                     });
-            libraryUser = createUserFromEntity(ue);
+
+            // If there are issue-able books then finally issue them
+            if(issueableBooks.size() > 0) {
+                ue.setBooks(issueableBooks);
+                userRepository.save(ue);
+                // Manage the number of issued copies
+                issueableBooks.stream()
+                        .forEach(be -> {
+                            BookStatusEntity bs = be.getBookStatus();
+                            bs.setNumberOfCopiesIssued(bs.getNumberOfCopiesIssued() + 1);
+                            bookStatusRepository.save(bs);
+                        });
+            }
+
+            // Set and return final response
+            return new IssueBookResponse(issueBookStatusMap);
         } else {
             throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
         }
-        return libraryUser;
     }
 
     private LibraryUser createUserFromEntity(UserEntity ue) {
