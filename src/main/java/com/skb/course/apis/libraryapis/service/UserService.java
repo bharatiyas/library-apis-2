@@ -139,7 +139,7 @@ public class UserService {
                     .forEach(bookId -> {
                         Optional<BookEntity> be = bookRepository.findById(bookId);
                         IssueBookStatus bookStatus;
-                        if (be.isPresent() == false) {
+                        if (!be.isPresent()) {
                             bookStatus = new IssueBookStatus(bookId, "Not Issued", "Book Not Found");
                         } else {
                             BookStatusEntity bse = be.get().getBookStatus();
@@ -173,6 +173,34 @@ public class UserService {
         }
     }
 
+    public void returnBooks(int userId, Integer bookId, String traceId) throws LibraryResourceNotFoundException {
+
+        Optional<UserEntity> userEntity = userRepository.findById(userId);
+
+        if(userEntity.isPresent()) {
+            UserEntity ue = userEntity.get();
+            boolean wasBookIssued = ue.getBooks().stream()
+                    .map(bookEntity -> bookEntity.getBookId())
+                    .anyMatch(bid -> bid == bookId);
+
+            Optional<BookEntity> be = bookRepository.findById(bookId);
+            if (!wasBookIssued) {
+                throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " was not issued to the user");
+            } else {
+                ue.getBooks().
+                BookStatusEntity bse = be.get().getBookStatus();
+                if ((bse.getTotalNumberOfCopies() - bse.getNumberOfCopiesIssued()) == 0) {
+                    bookStatus = new IssueBookStatus(bookId,"Not Issued", "No copies available");
+                } else {
+                    bookStatus = new IssueBookStatus(bookId,"Issued", "Book Issued");
+                    issueableBooks.add(be.get());
+                }
+            }
+        } else {
+            throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
+        }
+    }
+
     private LibraryUser createUserFromEntity(UserEntity ue) {
         LibraryUser libraryUser = new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
                 ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
@@ -195,5 +223,4 @@ public class UserService {
                 .map(ue -> new LibraryUser(ue.getUsername(), ue.getFirstName(), ue.getLastName()))
                 .collect(Collectors.toList());
     }
-
 }

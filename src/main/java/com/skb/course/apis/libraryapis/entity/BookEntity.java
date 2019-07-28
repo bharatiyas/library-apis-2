@@ -46,6 +46,7 @@ public class BookEntity {
     @OneToOne(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             mappedBy = "bookEntity")
+    @OnDelete()
     private BookStatusEntity bookStatus;
 
     // In a bi-directional association, the @ManyToMany annotation is used on both the entities but only one entity can
