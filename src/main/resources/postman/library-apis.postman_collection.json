@@ -1,11 +1,15 @@
 {
 	"info": {
-		"_postman_id": "0c5d40b1-27d1-4240-b0bf-acc9437e8fbc",
+		"_postman_id": "5a7cb3ab-569a-420c-bfd9-85d1251fb4bd",
 		"name": "library-apis",
 		"description": "Collection to test library APIs",
-		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
+		{
+			"name": "author-apis",
+			"item": []
+		},
 		{
 			"name": "user-register",
 			"request": {
@@ -22,27 +26,18 @@
 					"mode": "raw",
 					"raw": "{\r\n\t\"username\": \"james.richard\",\r\n    \"firstName\": \"James\",\r\n    \"lastName\": \"Richard\",\r\n    \"dateOfBirth\": \"1980-01-12\",\r\n    \"gender\": \"Male\",\r\n    \"phoneNumber\": \"12457630\",\r\n    \"emailId\": \"james.richard@gmail.com\"\r\n}"
 				},
-				"url": "http://localhost:8080/users/register"
-			},
-			"response": []
-		},
-		{
-			"name": "user-change-password",
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "Content-Type",
-						"name": "Content-Type",
-						"type": "text",
-						"value": "application/json"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n\t\"username\": \"james.richard\",\r\n    \"password\": \"changedIt\"\r\n}"
-				},
-				"url": "http://localhost:8080/users/4213"
+				"url": {
+					"raw": "http://localhost:8080/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"register"
+					]
+				}
 			},
 			"response": []
 		},
@@ -65,7 +60,17 @@
 					"mode": "raw",
 					"raw": "{\n\t\"username\": \"james.anderson\",\n    \"password\": \"Password123\"\n}"
 				},
-				"url": "http://localhost:8080/login"
+				"url": {
+					"raw": "http://localhost:8080/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"login"
+					]
+				}
 			},
 			"response": []
 		},
@@ -85,7 +90,17 @@
 					"mode": "raw",
 					"raw": "{\n\t\"password\": \"admin!23\",\n\t\"username\": \"admin\"\n}"
 				},
-				"url": "http://localhost:8080/login"
+				"url": {
+					"raw": "http://localhost:8080/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"login"
+					]
+				}
 			},
 			"response": []
 		},
@@ -94,9 +109,13 @@
 			"request": {
 				"auth": {
 					"type": "oauth2",
-					"oauth2": {
-						"addTokenTo": "header"
-					}
+					"oauth2": [
+						{
+							"key": "addTokenTo",
+							"value": "header",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [
@@ -107,7 +126,18 @@
 						"type": "text"
 					}
 				],
-				"url": "http://localhost:8080/users/4212"
+				"url": {
+					"raw": "http://localhost:8080/users/4212",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"4212"
+					]
+				}
 			},
 			"response": []
 		},
@@ -153,13 +183,58 @@
 			"response": []
 		},
 		{
+			"name": "user-change-password",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmFkeS5ib29jaDEiLCJyb2xlIjoiVVNFUiIsImV4cCI6MTU2NDc5NDcxMCwidXNlcklkIjo0MjE5fQ.f8oRhM_QY1yMpHwLCVjZ4Rot0qxXvQSH8gXznWnWZ68APAxq-ADBTDL4A7120BN1PI9wZ-I-GNFjIhRLlaKsLw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"username\": \"grady.booch1\",\r\n    \"password\": \"changedIt\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/4219",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"4219"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "author-add",
 			"request": {
 				"auth": {
 					"type": "bearer",
-					"bearer": {
-						"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ"
-					}
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ",
+							"type": "string"
+						}
+					]
 				},
 				"method": "POST",
 				"header": [
@@ -174,7 +249,18 @@
 					"mode": "raw",
 					"raw": "{\r\n\t\"firstName\": \"Robert\",\r\n    \"lastName\": \"Perterson\",\r\n    \"dateOfBirth\": \"1956-03-13\",\r\n    \"gender\": \"Male\"\r\n}"
 				},
-				"url": "http://localhost:8080/authors/"
+				"url": {
+					"raw": "http://localhost:8080/authors/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"authors",
+						""
+					]
+				}
 			},
 			"response": []
 		},
@@ -183,7 +269,18 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost:8080/authors/3065"
+				"url": {
+					"raw": "http://localhost:8080/authors/3065",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"authors",
+						"3065"
+					]
+				}
 			},
 			"response": []
 		},
@@ -192,9 +289,13 @@
 			"request": {
 				"auth": {
 					"type": "bearer",
-					"bearer": {
-						"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ"
-					}
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
@@ -228,9 +329,13 @@
 			"request": {
 				"auth": {
 					"type": "bearer",
-					"bearer": {
-						"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ"
-					}
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ",
+							"type": "string"
+						}
+					]
 				},
 				"method": "POST",
 				"header": [
@@ -245,7 +350,18 @@
 					"mode": "raw",
 					"raw": "{\r\n\t\"name\": \"Pearson\",\r\n    \"emailId\": \"pearson@email.com\",\r\n    \"phoneNumber\": \"196876724\"\r\n}"
 				},
-				"url": "http://localhost:8080/publishers/"
+				"url": {
+					"raw": "http://localhost:8080/publishers/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"publishers",
+						""
+					]
+				}
 			},
 			"response": []
 		},
@@ -254,7 +370,18 @@
 			"request": {
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost:8080/publishers/953"
+				"url": {
+					"raw": "http://localhost:8080/publishers/953",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"publishers",
+						"953"
+					]
+				}
 			},
 			"response": []
 		},
@@ -263,9 +390,13 @@
 			"request": {
 				"auth": {
 					"type": "bearer",
-					"bearer": {
-						"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ"
-					}
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
@@ -295,9 +426,13 @@
 			"request": {
 				"auth": {
 					"type": "bearer",
-					"bearer": {
-						"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4NTEwMSwidXNlcklkIjo0MjExfQ.pvk2y6bCROyAC3CtXrbcXAtd3PvoZi-iA_lRo4jjjp42WDIEuDawrSRfb-we7BMFs7g6vKe0uN3A-P7OEESSag"
-					}
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4NTEwMSwidXNlcklkIjo0MjExfQ.pvk2y6bCROyAC3CtXrbcXAtd3PvoZi-iA_lRo4jjjp42WDIEuDawrSRfb-we7BMFs7g6vKe0uN3A-P7OEESSag",
+							"type": "string"
+						}
+					]
 				},
 				"method": "POST",
 				"header": [
@@ -312,7 +447,18 @@
 					"mode": "raw",
 					"raw": "{\r\n\t\"isbn\": \"978-3-16-148410-4\",\r\n    \"title\": \"Java for Beginners\",\r\n    \"publisherId\": 956,\r\n    \"yearPublished\": 2005,\r\n    \"edition\": \"First\",\r\n    \"bookStatus\": {\r\n    \t\"state\": \"Active\",\r\n    \t\"numberOfCopiesAvailable\": 3\r\n    }\r\n}"
 				},
-				"url": "http://localhost:8080/books/"
+				"url": {
+					"raw": "http://localhost:8080/books/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"books",
+						""
+					]
+				}
 			},
 			"response": []
 		},
@@ -321,9 +467,13 @@
 			"request": {
 				"auth": {
 					"type": "bearer",
-					"bearer": {
-						"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ"
-					}
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ",
+							"type": "string"
+						}
+					]
 				},
 				"method": "PUT",
 				"header": [
@@ -338,7 +488,19 @@
 					"mode": "raw",
 					"raw": "[3063, 3064]"
 				},
-				"url": "http://localhost:8080/books/2002/authors"
+				"url": {
+					"raw": "http://localhost:8080/books/2002/authors",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"books",
+						"2002",
+						"authors"
+					]
+				}
 			},
 			"response": []
 		},
@@ -347,13 +509,111 @@
 			"request": {
 				"auth": {
 					"type": "bearer",
-					"bearer": {
-						"token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ"
-					}
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsInJvbGUiOiJBRE1JTiIsImV4cCI6MTU2NDI4ODkwNSwidXNlcklkIjo0MjExfQ.nxtBtxCLy20O7ZrF6MlRNNiISEhMkKuTKgi70pLCmUfUcozIZOWRg2uLwYpfZ1E7jhPFWQjtzKS7xTBJAJPOqQ",
+							"type": "string"
+						}
+					]
 				},
 				"method": "GET",
 				"header": [],
-				"url": "http://localhost:8080/books/2005"
+				"url": {
+					"raw": "http://localhost:8080/books/2005",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"books",
+						"2005"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "user-issue-books",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJsaWItYWRtaW4iLCJyb2xlIjoiQURNSU4iLCJleHAiOjE1NjUzMTE1NTIsInVzZXJJZCI6NDIxMX0.NGJkl4N7yMJE6pBLr-kSiWGwojfJ_2BGTs4MzkFTLFrB6BoOUi_zjRVWI3zAZJdq73WYB-6b4muKiqk1PPNTrg",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[2002]"
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/4212/books",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"4212",
+						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "user-return-book",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJncmFkeS5ib29jaDEiLCJyb2xlIjoiVVNFUiIsImV4cCI6MTU2NDc5NDcxMCwidXNlcklkIjo0MjE5fQ.f8oRhM_QY1yMpHwLCVjZ4Rot0qxXvQSH8gXznWnWZ68APAxq-ADBTDL4A7120BN1PI9wZ-I-GNFjIhRLlaKsLw",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\"username\": \"grady.booch1\",\r\n    \"password\": \"changedIt\"\r\n}"
+				},
+				"url": {
+					"raw": "http://localhost:8080/users/4219",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"users",
+						"4219"
+					]
+				}
 			},
 			"response": []
 		}

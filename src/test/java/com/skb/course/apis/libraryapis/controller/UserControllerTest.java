@@ -529,6 +529,60 @@ public class UserControllerTest {
     }
 
     @Test
+    public void returnBooks_success() {
+
+        String port = environment.getProperty("local.server.port");
+
+        // Login with the admin credentials
+        ResponseEntity<String> adminLoginResponse = libraryApiIntegrationTestUtil.loginUser(adminUsername, adminPassword);
+        Assert.assertEquals(HttpStatus.OK, adminLoginResponse.getStatusCode());
+        MultiValueMap<String, String> adminAuthHeader = createAuthorizationHeader(adminLoginResponse.getHeaders().get("Authorization").get(0));
+
+        // First we need to add a Publisher because we need to add a book
+        ResponseEntity<Publisher> publisherResponseEntity = libraryApiIntegrationTestUtil.addNewPublisher(adminAuthHeader);
+        Publisher publisher = publisherResponseEntity.getBody();
+
+        // Add a Book to issue
+        int bookId = libraryApiIntegrationTestUtil.addNewBook(adminAuthHeader, publisher.getPublisherId()).getBody().getBookId();
+        Integer[] bookIds = new Integer[]{bookId};
+
+        // Create a normal user
+        ResponseEntity<LibraryUser> responseEntity = libraryApiIntegrationTestUtil.registerNewUser("return.books.success");
+        LibraryUser libraryUser = responseEntity.getBody();
+
+        URI issueBooksUri = null;
+        try {
+            issueBooksUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.USER_API_BASE_URL + "/" +
+                    libraryUser.getUserId() + TestConstants.USER_API_ISSUE_BOOK_URL);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        // Issue the book to the user
+        HttpEntity<Integer[]> issueBooksRequest = new HttpEntity<>(bookIds, adminAuthHeader);
+        ResponseEntity<IssueBookResponse> issueBookResponseEntity = testRestTemplate.exchange(issueBooksUri, HttpMethod.PUT,
+                issueBooksRequest, IssueBookResponse.class);
+
+        Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
+        IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
+        Assert.assertEquals(bookIds.length, issueBookResponse.getIssueBookStatusMap().keySet().size());
+
+        // Return the book
+        URI returnBooksUri = null;
+        try {
+            returnBooksUri = new URI(TestConstants.API_BASE_URL + port + TestConstants.USER_API_BASE_URL + "/" +
+                    libraryUser.getUserId() + TestConstants.USER_API_ISSUE_BOOK_URL + "/" + bookIds[0]);
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        HttpEntity<LibraryUser> request = new HttpEntity<>(adminAuthHeader);
+        ResponseEntity<String> returnBookResponse = testRestTemplate.exchange(
+                returnBooksUri, HttpMethod.DELETE, request, String.class);
+
+        Assert.assertEquals(HttpStatus.ACCEPTED, returnBookResponse.getStatusCode());
+    }
+
+    @Test
     public void searchUsers_no_users() {
 
         // Register 10 users
