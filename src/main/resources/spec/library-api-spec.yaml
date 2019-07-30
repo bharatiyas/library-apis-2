@@ -1,0 +1,596 @@
+openapi: 3.0.0
+servers:
+  - description: API Auto Mocking
+    url: https://virtserver.swaggerhub.com/bharatiyas/library-api/1.0.0
+info:
+  description: |
+    This is API specification for library APIs.
+  version: "1.0.0"
+  title: Library API
+  contact:
+    email: sanjayfromgomi@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: books
+    description: Manage the books of the Library
+  - name: user
+    description: Operations about user
+
+paths:
+  /books:
+    post:
+      tags:
+        - books
+      summary: Add a new book to the library
+      operationId: addBook
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+        '409':
+          description: Library Resource already exists
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+
+  /books/{bookId}:
+    get:
+      tags:
+        - book
+      summary: Find book by ID
+      description: Returns a single book
+      operationId: getBookById
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of book to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+    put:
+      tags:
+        - books
+      summary: Update an existing book. It can be used to update Edition, Year Published and Publsiher
+      operationId: updateBook
+      parameters:
+        - name: bookId
+          in: path
+          description: BookId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '409':
+          description: Library Resource already exists
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Book'
+
+    delete:
+      tags:
+        - pet
+      summary: Deletes a book
+      operationId: deleteBook
+      parameters:
+        - name: bookId
+          in: path
+          description: BookId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '202':
+          description: Book deleted successfully
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /books/{bookId}/authors:
+    put:
+      tags:
+        - books
+      summary: Add authors to a book
+      operationId: addBookAuhors
+      parameters:
+        - name: bookId
+          in: path
+          description: BookId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '409':
+          description: Library Resource already exists
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                authorIds:
+                  type: array
+                  items:
+                    type: integer
+                    description: Array of Author Ids
+
+  /books/search:
+    get:
+      tags:
+        - books
+      summary: Search books
+      description: Search books based on title, author, subject area, etc.
+      operationId: searchBooks
+      parameters:
+        - name: criteria
+          in: query
+          description: Search criteria
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "java"
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+
+        '404':
+          description: No results found
+
+
+  '/pet/{petId}/uploadImage':
+    post:
+      tags:
+        - pet
+      summary: uploads an image
+      operationId: uploadFile
+      parameters:
+        - name: petId
+          in: path
+          description: ID of pet to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryUser'
+      security:
+        - petstore_auth:
+            - 'write:pets'
+            - 'read:pets'
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+  /store/inventory:
+    get:
+      tags:
+        - store
+      summary: Returns pet inventories by status
+      description: Returns a map of status codes to quantities
+      operationId: getInventory
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+      security:
+        - api_key: []
+  /store/order:
+    post:
+      tags:
+        - store
+      summary: Place an order for a pet
+      operationId: placeOrder
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/LibraryUser'
+        '400':
+          description: Invalid Order
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryUser'
+        description: order placed for purchasing the pet
+        required: true
+  '/store/order/{orderId}':
+    get:
+      tags:
+        - store
+      summary: Find purchase order by ID
+      description: >-
+        For valid response try integer IDs with value >= 1 and <= 10.\ \ Other
+        values will generated exceptions
+      operationId: getOrderById
+      parameters:
+        - name: orderId
+          in: path
+          description: ID of pet that needs to be fetched
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+            maximum: 10
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryUser'
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/LibraryUser'
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+    delete:
+      tags:
+        - store
+      summary: Delete purchase order by ID
+      description: >-
+        For valid response try integer IDs with positive integer value.\ \
+        Negative or non-integer values will generate API errors
+      operationId: deleteOrder
+      parameters:
+        - name: orderId
+          in: path
+          description: ID of the order that needs to be deleted
+          required: true
+          schema:
+            type: integer
+            format: int64
+            minimum: 1
+      responses:
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Order not found
+  /users:
+    put:
+      tags:
+        - user
+      summary: Update a user
+      description: This can only be done by the logged in user.
+      operationId: updateUser
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryUser'
+        description: Created user object
+        required: true
+
+  /users/register:
+    post:
+      tags:
+        - user
+      summary: Creates list of users with given input array
+      operationId: createUsersWithListInput
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryUser'
+
+  /login:
+    post:
+      tags:
+        - user
+      summary: Logs user into the system
+      operationId: loginUser
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+  /user/logout:
+    get:
+      tags:
+        - user
+      summary: Logs out current logged in user session
+      operationId: logoutUser
+      responses:
+        default:
+          description: successful operation
+  '/user/{username}':
+    get:
+      tags:
+        - user
+      summary: Get user by user name
+      operationId: getUserByName
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be fetched. Use user1 for testing.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryUser'
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+
+    delete:
+      tags:
+        - user
+      summary: Delete user
+      description: This can only be done by the logged in user.
+      operationId: deleteUser
+      parameters:
+        - name: username
+          in: path
+          description: The name that needs to be deleted
+          required: true
+          schema:
+            type: string
+      responses:
+        '400':
+          description: Invalid username supplied
+        '404':
+          description: User not found
+
+components:
+  schemas:
+    Credentials:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+    Book:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          format: int64
+        isbn:
+          type: string
+          format: int64
+        title:
+          type: string
+          format: int64
+        publisherId:
+          type: integer
+          format: int64
+        yearPublished:
+          type: string
+          format: date-time
+        edition:
+          type: integer
+          format: int32
+        bookStatus:
+          $ref: '#/components/schemas/BookStatus'
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+    BookStatus:
+      type: object
+      properties:
+        bookId:
+          type: integer
+        state:
+          enum:
+            - Active
+            - Inactive
+        totalNumberOfCopies:
+          type: integer
+        numberOfCopiesIssued:
+          type: integer
+    Author:
+      type: object
+      properties:
+        authorId:
+          type: integer
+        name:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+          example: "2000-01-20"
+        gender:
+          $ref: '#/components/schemas/Gender'
+    Gender:
+      enum:
+        - Male
+        - Female
+        - Undisclosed
+
+    Publisher:
+      type: object
+      properties:
+        publisherId:
+          type: integer
+        name:
+          type: string
+        emailId:
+          type: string
+        phoneNumber:
+          type: string
+          example: "111222333"
+    LibraryUser:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        username:
+          type: string
+        password:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        dateOfBirth:
+          type: string
+          format: date
+        gender:
+          $ref: '#/components/schemas/Gender'
+        phoneNumber:
+          type: string
+          example: "111222333"
+        emailId:
+          type: string
+        issuedBooks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
+
+    IssueBookResponse:
+      type: object
+      properties:
+        issueBookStatusMap:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueBookStatusMap'
+
+    IssueBookStatusMap:
+      type: object
+      properties:
+        key:
+          type: integer
+        value:
+          $ref: '#/components/schemas/IssueBookStatus'
+
+    IssueBookStatus:
+      type: object
+      properties:
+        bookId:
+          type: integer
+        status:
+          type: string
+        remarks:
+          type: string

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -31,7 +30,7 @@ public class LibraryUser implements UserDetails {
     @JsonIgnore
     private Role role;
 
-    private Set<Book> issuesBooks;
+    private Set<Book> issuedBooks;
 
     public LibraryUser() {
     }
@@ -136,12 +135,12 @@ public class LibraryUser implements UserDetails {
         this.role = role;
     }
 
-    public Set<Book> getIssuesBooks() {
-        return issuesBooks;
+    public Set<Book> getIssuedBooks() {
+        return issuedBooks;
     }
 
-    public void setIssuesBooks(Set<Book> issuesBooks) {
-        this.issuesBooks = issuesBooks;
+    public void setIssuedBooks(Set<Book> issuedBooks) {
+        this.issuedBooks = issuedBooks;
     }
 
     @Override

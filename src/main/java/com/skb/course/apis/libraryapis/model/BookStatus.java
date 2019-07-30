@@ -2,10 +2,10 @@ package com.skb.course.apis.libraryapis.model;
 
 public class BookStatus {
 
-    private int bookId;
+    private Integer bookId;
     private BookStatusState state;
-    private int totalNumberOfCopies;
-    private int numberOfCopiesIssued;
+    private Integer totalNumberOfCopies;
+    private Integer numberOfCopiesIssued;
 
     public BookStatus() {
     }
