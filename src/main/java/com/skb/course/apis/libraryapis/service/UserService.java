@@ -2,20 +2,24 @@ package com.skb.course.apis.libraryapis.service;
 
 import com.skb.course.apis.libraryapis.entity.BookEntity;
 import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
+import com.skb.course.apis.libraryapis.entity.UserBookEntity;
 import com.skb.course.apis.libraryapis.entity.UserEntity;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
 import com.skb.course.apis.libraryapis.model.*;
 import com.skb.course.apis.libraryapis.repository.BookRepository;
 import com.skb.course.apis.libraryapis.repository.BookStatusRepository;
+import com.skb.course.apis.libraryapis.repository.UserBookEntityRepository;
 import com.skb.course.apis.libraryapis.repository.UserRepository;
 import com.skb.course.apis.libraryapis.security.SecurityConstants;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,15 +33,20 @@ public class UserService {
     private BookRepository bookRepository;
     private BookStatusRepository bookStatusRepository;
     private BookService bookService;
+    private UserBookEntityRepository userBookEntityRepository;
+
+    @Value("${library.rule.user.book.max.times.issue: 3}")
+    private int maxNumberOfTimesIssue;
 
     public UserService(BCryptPasswordEncoder bCryptPasswordEncoder, UserRepository userRepository,
                        BookRepository bookRepository, BookStatusRepository bookStatusRepository,
-                       BookService bookService) {
+                       BookService bookService, UserBookEntityRepository userBookEntityRepository) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.userRepository = userRepository;
         this.bookRepository = bookRepository;
         this.bookStatusRepository = bookStatusRepository;
         this.bookService = bookService;
+        this.userBookEntityRepository = userBookEntityRepository;
     }
 
     public LibraryUser addUser(LibraryUser libraryUserToBeAdded) {
@@ -126,7 +135,7 @@ public class UserService {
         }
     }
 
-    public IssueBookResponse issueBooks(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
+    /*public IssueBookResponse issueBooks(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
 
         Optional<UserEntity> userEntity = userRepository.findById(userId);
 
@@ -171,6 +180,67 @@ public class UserService {
         } else {
             throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
         }
+    }*/
+
+    public IssueBookResponse issueBooks(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
+
+        Optional<UserEntity> userEntity = userRepository.findById(userId);
+
+        if(userEntity.isPresent()) {
+            Map<Integer, IssueBookStatus> issueBookStatusMap = new HashMap<>(bookIds.size());
+            //UserEntity ue = userEntity.get();
+            //Set<BookEntity> issueableBooks = new HashSet<>();
+            // Find out if the supplied list of books is issue-able or not
+            bookIds.stream()
+                    .forEach(bookId -> {
+                        Optional<BookEntity> be = bookRepository.findById(bookId);
+                        IssueBookStatus bookStatus;
+                        if (!be.isPresent()) {
+                            bookStatus = new IssueBookStatus(bookId, "Not Issued", "Book Not Found");
+                        } else {
+                            BookStatusEntity bse = be.get().getBookStatus();
+                            if ((bse.getTotalNumberOfCopies() - bse.getNumberOfCopiesIssued()) == 0) {
+                                bookStatus = new IssueBookStatus(bookId,"Not Issued", "No copies available");
+                            } else {
+                                // Check if the book has already been issued to the user, and this can be re-issued
+                                List<UserBookEntity> byUserIdAndBookId = userBookEntityRepository.findByUserIdAndBookId(userId, bookId);
+                                if(byUserIdAndBookId != null && byUserIdAndBookId.size() > 0) {
+                                    // Book can be re-issued
+                                    UserBookEntity userBookEntity = byUserIdAndBookId.get(0);
+                                    if(userBookEntity.getNumberOfTimesIssued() < maxNumberOfTimesIssue) {
+                                        userBookEntity.setNumberOfTimesIssued(userBookEntity.getNumberOfTimesIssued() + 1);
+                                        userBookEntity.setIssuedDate(LocalDate.now());
+                                        userBookEntity.setReturnDate(LocalDate.now().plusDays(14));
+                                        userBookEntityRepository.save(userBookEntity);
+                                        bookStatus = new IssueBookStatus(bookId, "Issued", "Book Re-Issued");
+                                    } else {
+                                        // Book cannot be re-issued as it has already been issued max number of times
+                                        bookStatus = new IssueBookStatus(bookId, "Not Issued",
+                                                "Book already issued to the user for " + maxNumberOfTimesIssue + " times");
+                                    }
+                                } else {
+                                    // This is the first time book is being issued
+                                    // Issue the books to the user
+                                    UserBookEntity userBookEntity = new UserBookEntity(userId, bookId, LocalDate.now(), LocalDate.now().plusDays(14), 1);
+                                    userBookEntityRepository.save(userBookEntity);
+
+                                    // Manage the number of issued copies
+                                    BookStatusEntity bs = be.get().getBookStatus();
+                                    bs.setNumberOfCopiesIssued(bs.getNumberOfCopiesIssued() + 1);
+                                    bookStatusRepository.save(bs);
+
+                                    bookStatus = new IssueBookStatus(bookId, "Issued", "Book Issued");
+                                }
+                            }
+                        }
+                        issueBookStatusMap.put(bookId, bookStatus);
+                    });
+
+            // Set and return final response
+            return new IssueBookResponse(issueBookStatusMap);
+        } else {
+            throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
+        }
     }
 
     public void returnBooks(int userId, Integer bookId, String traceId) throws LibraryResourceNotFoundException {
@@ -178,24 +248,20 @@ public class UserService {
         Optional<UserEntity> userEntity = userRepository.findById(userId);
 
         if(userEntity.isPresent()) {
-            UserEntity ue = userEntity.get();
-            boolean wasBookIssued = ue.getBooks().stream()
-                    .map(bookEntity -> bookEntity.getBookId())
-                    .anyMatch(bid -> bid == bookId);
+            List<UserBookEntity> byUserIdAndBookId = userBookEntityRepository.findByUserIdAndBookId(userId, bookId);
+            if(byUserIdAndBookId != null && byUserIdAndBookId.size() > 0) {
+                // Return the book
+                userBookEntityRepository.delete(byUserIdAndBookId.get(0));
 
-            Optional<BookEntity> be = bookRepository.findById(bookId);
-            if (!wasBookIssued) {
-                throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " was not issued to the user");
+                // Manage the number of issued copies
+                Optional<BookEntity> be = bookRepository.findById(bookId);
+                BookStatusEntity bs = be.get().getBookStatus();
+                bs.setNumberOfCopiesIssued(bs.getNumberOfCopiesIssued() - 1);
+                bookStatusRepository.save(bs);
             } else {
-                ue.getBooks().
-                BookStatusEntity bse = be.get().getBookStatus();
-                if ((bse.getTotalNumberOfCopies() - bse.getNumberOfCopiesIssued()) == 0) {
-                    bookStatus = new IssueBookStatus(bookId,"Not Issued", "No copies available");
-                } else {
-                    bookStatus = new IssueBookStatus(bookId,"Issued", "Book Issued");
-                    issueableBooks.add(be.get());
-                }
+                throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " has not been issued to User Id: "+ userId);
             }
+
         } else {
             throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
         }
@@ -205,10 +271,10 @@ public class UserService {
         LibraryUser libraryUser = new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
                 ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
 
-        libraryUser.setIssuesBooks(ue.getBooks().stream()
+       /* libraryUser.setIssuesBooks(ue.getBooks().stream()
                                         .map(be -> bookService.createBookFromEntity(be))
                                         .collect(Collectors.toSet())
-        );
+        );*/
 
         return libraryUser;
     }

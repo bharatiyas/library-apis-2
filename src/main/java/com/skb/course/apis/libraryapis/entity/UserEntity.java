@@ -45,12 +45,11 @@ public class UserEntity {
     @Column(name = "Role")
     private String role;
 
-    @ManyToMany(fetch = FetchType.LAZY,
+    /*@ManyToMany(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL
     )
-
     @JoinTable(name = "user_book", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "book_id"))
-    private Set<BookEntity> books = new HashSet<>();
+    private Set<BookEntity> books = new HashSet<>();*/
 
     public UserEntity() {
     }
@@ -124,12 +123,12 @@ public class UserEntity {
         this.role = role;
     }
 
-    public Set<BookEntity> getBooks() {
+    /*public Set<BookEntity> getBooks() {
         return books;
     }
 
     public void setBooks(Set<BookEntity> books) {
         this.books = books;
-    }
+    }*/
 }
 

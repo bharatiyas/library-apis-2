@@ -54,6 +54,7 @@ CREATE TABLE BOOK_SEQUENCE (
 INSERT INTO BOOK_SEQUENCE (Book_Id, next_val) VALUES (2001,2002);
 
 CREATE TABLE USER_BOOK (
+    User_Book_Id int PRIMARY KEY,
     User_Id INT,
     Book_Id INT,
     Issued_Date Date NOT NULL,
@@ -62,6 +63,12 @@ CREATE TABLE USER_BOOK (
     FOREIGN KEY fk_user(User_Id) REFERENCES USER(User_Id),
     FOREIGN KEY fk_book(Book_Id) REFERENCES BOOK(Book_Id)
     );
+
+CREATE TABLE USER_BOOK_SEQUENCE (
+	    User_Book_Id INT NOT NULL,
+      next_val INT );
+
+INSERT INTO USER_BOOK_SEQUENCE (User_Book_Id, next_val) VALUES (1,2);
 
 CREATE TABLE AUTHOR (
       Author_Id	 INT PRIMARY KEY,

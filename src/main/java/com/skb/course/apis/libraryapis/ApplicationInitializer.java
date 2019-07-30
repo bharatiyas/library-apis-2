@@ -41,7 +41,7 @@ public class ApplicationInitializer {
 
 
         // insert admin user on application start up, only for the first time
-        UserEntity admin = userRepository.findByUsername("admin");
+        UserEntity admin = userRepository.findByUsername(adminUsername);
         if(admin == null) {
             UserEntity userEntity = new UserEntity(adminUsername, bCryptPasswordEncoder.encode(adminPassword),
                     "Library", "Admin", LocalDate.now().minusYears(30), Gender.Female, "000-000000", "library.admin@email.com", "ADMIN");

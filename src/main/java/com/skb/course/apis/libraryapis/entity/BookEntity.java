@@ -46,7 +46,7 @@ public class BookEntity {
     @OneToOne(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             mappedBy = "bookEntity")
-    @OnDelete()
+    //@OnDelete()
     private BookStatusEntity bookStatus;
 
     // In a bi-directional association, the @ManyToMany annotation is used on both the entities but only one entity can
@@ -65,11 +65,11 @@ public class BookEntity {
     private Set<AuthorEntity> authors = new HashSet<>();
 
 
-    @ManyToMany(fetch = FetchType.LAZY,
+    /*@ManyToMany(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             mappedBy = "books"
     )
-    private Set<UserEntity> users = new HashSet<>();
+    private Set<UserEntity> users = new HashSet<>();*/
 
     public BookEntity() {
     }

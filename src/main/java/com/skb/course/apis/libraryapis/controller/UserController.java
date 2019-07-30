@@ -207,8 +207,8 @@ public class UserController {
         return new ResponseEntity<>(issueBookResponse, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/{userId}/books")
-    public ResponseEntity<?> deleteBooks(@PathVariable int userId, @RequestBody Integer bookId,
+    @DeleteMapping(path = "/{userId}/books/{bookId}")
+    public ResponseEntity<?> deleteBooks(@PathVariable int userId, @PathVariable int bookId,
                                         @RequestHeader("Authorization") String bearerToken,
                                         @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceUnauthorizedException, LibraryResourceBadRequestException, LibraryResourceNotFoundException {
@@ -220,10 +220,6 @@ public class UserController {
             logger.error(traceId +  LibraryApiUtils.getUserIdFromClaim(bearerToken) + " attempted to return Books. Disallowed. " +
                     "User is not a Admin.");
             throw new LibraryResourceUnauthorizedException(traceId, " attempted to delete Books. Disallowed.");
-        }
-        if(bookId == null) {
-            logger.error(traceId + " No Book Id provided for return.");
-            throw new LibraryResourceBadRequestException(traceId, "No Book Id provided for return.");
         }
         try {
             userService.returnBooks(userId, bookId, traceId);
