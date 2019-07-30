@@ -271,7 +271,7 @@ public class UserService {
         LibraryUser libraryUser = new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
                 ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
 
-       /* libraryUser.setIssuesBooks(ue.getBooks().stream()
+       /* libraryUser.setIssuedBooks(ue.getBooks().stream()
                                         .map(be -> bookService.createBookFromEntity(be))
                                         .collect(Collectors.toSet())
         );*/
