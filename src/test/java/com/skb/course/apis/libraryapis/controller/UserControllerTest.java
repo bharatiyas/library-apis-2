@@ -425,7 +425,7 @@ public class UserControllerTest {
 
         Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
         IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
-        Assert.assertEquals(bookIds.size(), issueBookResponse.getIssueBookStatusMap().keySet().size());
+        Assert.assertEquals(bookIds.size(), issueBookResponse.getIssueBookStatuses().size());
     }
 
     @Test
@@ -470,7 +470,7 @@ public class UserControllerTest {
 
         Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
         IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
-        Collection<IssueBookStatus> issueBookStatuses = issueBookResponse.getIssueBookStatusMap().values();
+        Collection<IssueBookStatus> issueBookStatuses = issueBookResponse.getIssueBookStatuses();
         Assert.assertEquals(bookIds.size(), issueBookStatuses.size());
 
         Assert.assertEquals(2, issueBookStatuses.stream()
@@ -513,7 +513,7 @@ public class UserControllerTest {
                     issueBooksRequest, IssueBookResponse.class);
             Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
             IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
-            Collection<IssueBookStatus> issueBookStatuses = issueBookResponse.getIssueBookStatusMap().values();
+            Collection<IssueBookStatus> issueBookStatuses = issueBookResponse.getIssueBookStatuses();
             Assert.assertEquals(bookIds.length, issueBookStatuses.size());
             if(i < 3) {
                 Assert.assertEquals(bookIds.length, issueBookStatuses.stream().
@@ -565,7 +565,7 @@ public class UserControllerTest {
 
         Assert.assertEquals(HttpStatus.OK, issueBookResponseEntity.getStatusCode());
         IssueBookResponse issueBookResponse = issueBookResponseEntity.getBody();
-        Assert.assertEquals(bookIds.length, issueBookResponse.getIssueBookStatusMap().keySet().size());
+        Assert.assertEquals(bookIds.length, issueBookResponse.getIssueBookStatuses().size());
 
         // Return the book
         URI returnBooksUri = null;

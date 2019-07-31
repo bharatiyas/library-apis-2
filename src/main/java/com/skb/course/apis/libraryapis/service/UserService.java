@@ -187,9 +187,7 @@ public class UserService {
         Optional<UserEntity> userEntity = userRepository.findById(userId);
 
         if(userEntity.isPresent()) {
-            Map<Integer, IssueBookStatus> issueBookStatusMap = new HashMap<>(bookIds.size());
-            //UserEntity ue = userEntity.get();
-            //Set<BookEntity> issueableBooks = new HashSet<>();
+            Set<IssueBookStatus> issueBookStatuses = new HashSet<>(bookIds.size());
             // Find out if the supplied list of books is issue-able or not
             bookIds.stream()
                     .forEach(bookId -> {
@@ -233,11 +231,11 @@ public class UserService {
                                 }
                             }
                         }
-                        issueBookStatusMap.put(bookId, bookStatus);
+                        issueBookStatuses.add(bookStatus);
                     });
 
             // Set and return final response
-            return new IssueBookResponse(issueBookStatusMap);
+            return new IssueBookResponse(issueBookStatuses);
         } else {
             throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
         }
@@ -259,7 +257,7 @@ public class UserService {
                 bs.setNumberOfCopiesIssued(bs.getNumberOfCopiesIssued() - 1);
                 bookStatusRepository.save(bs);
             } else {
-                throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " has not been issued to User Id: "+ userId);
+                throw new LibraryResourceNotFoundException(traceId, "Book Id: " + bookId + " has not been issued to User Id: "+ userId + ". So can't be returned.");
             }
 
         } else {

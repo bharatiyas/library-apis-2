@@ -1,0 +1,1068 @@
+openapi: 3.0.0
+servers:
+  - description: API Auto Mocking
+    url: https://virtserver.swaggerhub.com/bharatiyas/library-api/1.0.0
+info:
+  description: |
+    This is API specification for Library APIs.
+  version: "1.0.0"
+  title: Library API
+  contact:
+    email: sanjayfromgomi@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: books
+    description: Manage the Books of the Library
+  - name: authors
+    description: Manage the Authors of the Library
+  - name: publishers
+    description: Manage the Publishers of the Library
+  - name: users
+    description: Manage the Users of the Library
+
+paths:
+  /books:
+    post:
+      tags:
+        - books
+      summary: Add a new book to the library
+      operationId: addBook
+      responses:
+        '201':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+        '409':
+          description: Library Book already exists
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBook'
+
+  /books/{bookId}:
+    get:
+      tags:
+        - books
+      summary: Find book by ID
+      description: Returns a single book
+      operationId: getBookById
+      parameters:
+        - name: bookId
+          in: path
+          description: ID of book to return
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book found and returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+    put:
+      tags:
+        - books
+      summary: Update an existing book. It can be used to update Edition, Year Published and Publsiher
+      operationId: updateBook
+      parameters:
+        - name: bookId
+          in: path
+          description: BookId to be updated
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '409':
+          description: Library Resource already exists
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBook'
+
+    delete:
+      tags:
+        - books
+      summary: Deletes a book
+      operationId: deleteBook
+      parameters:
+        - name: bookId
+          in: path
+          description: BookId to delete
+          required: true
+          schema:
+            type: integer
+      responses:
+        '202':
+          description: Book deleted successfully
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /books/{bookId}/authors:
+    put:
+      tags:
+        - books
+      summary: Add authors to a book
+      operationId: addBookAuhors
+      parameters:
+        - name: bookId
+          in: path
+          description: BookId to which authors are to be added
+          required: true
+          schema:
+            type: integer
+      responses:
+        '202':
+          description: Authors added to the Book
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                authorIds:
+                  type: array
+                  items:
+                    type: integer
+                    description: Array of Author Ids
+
+  /books/search:
+    get:
+      tags:
+        - books
+      summary: Search books
+      description: Search books based on title.
+      operationId: searchBooks
+      parameters:
+        - name: title
+          in: query
+          description: Title of Book to be searched
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "java"
+      responses:
+        '200':
+          description: Book list matching the title of the book
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request. No search criteria (title)
+        '404':
+          description: No Books found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /books/isbn/{isbn}:
+    get:
+      tags:
+        - books
+      summary: Search books
+      description: Search books based on ISBN
+      operationId: searchBooksByIsbn
+      parameters:
+        - name: isbn
+          in: path
+          description: ISBN of Book to be searched
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "978-3-16-148410-1"
+      responses:
+        '200':
+          description: Book found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Bad Request. No search criteria (title)
+        '404':
+          description: No Books found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /authors:
+    post:
+      tags:
+        - authors
+      summary: Add a new author to the library
+      operationId: addAuthor
+      responses:
+        '201':
+          description: Author created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '400':
+          description: Bad Request
+        '409':
+          description: Author already exists
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAuthor'
+
+  /authors/{authorId}:
+    get:
+      tags:
+        - authors
+      summary: Find author by ID
+      description: Returns a single author wth Id supplied
+      operationId: getAuthorsById
+      parameters:
+        - name: authorId
+          in: path
+          description: ID of author to return
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Author found by the supplied ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Author'
+        '404':
+          description: Author not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+    put:
+      tags:
+        - authors
+      summary: Update an existing author. It can be used to update email and phone number of the author
+      operationId: updateAuthor
+      parameters:
+        - name: authorId
+          in: path
+          description: AuthorId to update
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Author updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateAuthor'
+        '400':
+          description: Bad Request
+        '404':
+          description: Author not found
+        '406':
+          description: Method not allowed
+        '409':
+          description: Author already exists
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Author'
+
+    delete:
+      tags:
+        - authors
+      summary: Deletes an Author
+      operationId: deleteAuthor
+      parameters:
+        - name: authorId
+          in: path
+          description: AuthorId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '202':
+          description: Author deleted successfully
+        '404':
+          description: Author not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /authors/search:
+    get:
+      tags:
+        - authors
+      summary: Search authors
+      description: Search authors based on firstName and lastName
+      operationId: searchAuthors
+      parameters:
+        - name: firstName
+          in: query
+          description: First name of the author to be searched
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "Herbet"
+        - name: lastName
+          in: query
+          description: Last name of the author to be searched
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "Shield"
+      responses:
+        '200':
+          description: Authors list matching the first and last name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Author'
+        '400':
+          description: Bad Request. No search criteria supplied
+        '404':
+          description: No Authors found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /publishers:
+    post:
+      tags:
+        - publishers
+      summary: Add a new publisher to the library
+      operationId: addPublisher
+      responses:
+        '201':
+          description: Publisher created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePublisher'
+        '400':
+          description: Bad Request
+        '409':
+          description: Library Resource already exists
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Publisher'
+
+  /publishers/{publisherId}:
+    get:
+      tags:
+        - publishers
+      summary: Find publisher by ID
+      description: Returns a single publisher
+      operationId: getPublisherById
+      parameters:
+        - name: publisherId
+          in: path
+          description: ID of publisher to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Publisher found by the supplied ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Publisher'
+        '404':
+          description: Publisher not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+    put:
+      tags:
+        - publishers
+      summary: Update an existing publisher. It can be used to update email and phone number of the publisher
+      operationId: updatePublisher
+      parameters:
+        - name: publisherId
+          in: path
+          description: PublisherId to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Publisher updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdatePublisher'
+        '400':
+          description: Bad Request
+        '404':
+          description: Publisher not found
+        '406':
+          description: Method not allowed
+        '409':
+          description: Publisher already exists
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Publisher'
+
+    delete:
+      tags:
+        - publishers
+      summary: Deletes an Publisher
+      operationId: deletePublisher
+      parameters:
+        - name: publisherId
+          in: path
+          description: PublisherId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '202':
+          description: Publisher deleted successfully
+        '404':
+          description: Publisher not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /publishers/search:
+    get:
+      tags:
+        - publishers
+      summary: Search publishers
+      description: Search publishers based on Name
+      operationId: searchPublishers
+      parameters:
+        - name: name
+          in: query
+          description: First name of the publisher to be searched
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "Pearson"
+      responses:
+        '200':
+          description: Publishers list matching the name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Publisher'
+        '400':
+          description: Bad Request. No search criteria supplied
+        '404':
+          description: No Publishers found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /users/register:
+    post:
+      tags:
+        - users
+      summary: Register a new user to the library
+      operationId: registerUser
+      responses:
+        '201':
+          description: Register a new User
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateLibraryUser'
+        '400':
+          description: Bad Request
+        '409':
+          description: User already exists
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryUser'
+
+  /users/{userId}:
+    get:
+      tags:
+        - users
+      summary: Gets the details of the user by ID. This can be searched only when user logged in and can get its own details
+      description: Returns the details of the user
+      operationId: getUserById
+      parameters:
+        - name: userId
+          in: path
+          description: ID of user to return
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User found by the supplied ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LibraryUser'
+        '404':
+          description: User not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+    put:
+      tags:
+        - users
+      summary: Update an existing user. It can be used to update email and phone number of the user
+      operationId: updateUser
+      parameters:
+        - name: userId
+          in: path
+          description: UserId to update
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateLibraryUser'
+        '400':
+          description: Bad Request
+        '404':
+          description: User not found
+        '406':
+          description: Method not allowed
+        '409':
+          description: User already exists
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LibraryUser'
+
+    delete:
+      tags:
+        - users
+      summary: Deletes an User
+      operationId: deleteUser
+      parameters:
+        - name: userId
+          in: path
+          description: UserId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '202':
+          description: User deleted successfully
+        '404':
+          description: User not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /users/search:
+    get:
+      tags:
+        - users
+      summary: Search users
+      description: Search users based on Name
+      operationId: searchUsers
+      parameters:
+        - name: firstName
+          in: query
+          description: First name of the author to be searched
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "Herbet"
+        - name: lastName
+          in: query
+          description: Last name of the author to be searched
+          required: true
+          explode: true
+          schema:
+            type: string
+            example: "Shield"
+      responses:
+        '200':
+          description: Users list matching the name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LibraryUser'
+        '400':
+          description: Bad Request. No search criteria supplied
+        '404':
+          description: No Users found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /users/{userId}/books:
+    put:
+      tags:
+        - users
+      summary: Issue books to the user
+      operationId: issueBooks
+      parameters:
+        - name: userId
+          in: path
+          description: BookId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IssueBookResponse'
+        '400':
+          description: Bad Request
+        '404':
+          description: Book not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                authorIds:
+                  type: array
+                  items:
+                    type: integer
+                    description: Array of Book Ids
+
+  /users/{userId}/books/{bookId}:
+    delete:
+      tags:
+        - users
+      summary: Deletes an User
+      operationId: returnBooks
+      parameters:
+        - name: userId
+          in: path
+          description: UserId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: bookId
+          in: path
+          description: UserId to delete
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '202':
+          description: User deleted successfully
+        '404':
+          description: User not found
+        '406':
+          description: Method not allowed
+        '500':
+          description: Internal Server Error
+
+  /login:
+    post:
+      tags:
+        - users
+      summary: Logs a user (norma and admin) into the system
+      operationId: loginUser
+      responses:
+        '200':
+          description: successful operation
+          headers:
+            X-Rate-Limit:
+              description: calls per hour allowed by the user
+              schema:
+                type: integer
+                format: int32
+            X-Expires-After:
+              description: date in UTC when token expires
+              schema:
+                type: string
+                format: date-time
+          content:
+            application/json:
+              schema:
+                type: string
+            application/xml:
+              schema:
+                type: string
+        '400':
+          description: Invalid username/password supplied
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credentials'
+
+components:
+  schemas:
+    Credentials:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "myusername"
+        password:
+          type: string
+          example: "mypassword"
+    CreateBook:
+      type: object
+      properties:
+        isbn:
+          type: string
+          example: "978-3-16-148410-1"
+        title:
+          type: string
+          example: "APIs are fun"
+        publisherId:
+          type: integer
+          example: 3476
+        yearPublished:
+          type: string
+          example: "2015-02-22"
+        edition:
+          type: string
+          example: "First edition"
+    UpdateBook:
+      type: object
+      properties:
+        publisherId:
+          type: integer
+          example: 3476
+        yearPublished:
+          type: string
+          example: "2015-02-22"
+        edition:
+          type: string
+          example: "First edition"
+    Book:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          example: 2001
+        isbn:
+          type: string
+          example: "978-3-16-148410-1"
+        title:
+          type: string
+          example: "APIs are fun"
+        publisherId:
+          type: integer
+          example: 3476
+        yearPublished:
+          type: string
+          example: "2015-02-22"
+        edition:
+          type: string
+          example: "First edition"
+        bookStatus:
+          $ref: '#/components/schemas/BookStatus'
+        authors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Author'
+    BookStatus:
+      type: object
+      properties:
+        bookId:
+          type: integer
+        state:
+          enum:
+            - Active
+            - Inactive
+        totalNumberOfCopies:
+          type: integer
+          example: 3
+        numberOfCopiesIssued:
+          type: integer
+          example: 0
+    CreateAuthor:
+      type: object
+      properties:
+        firstName:
+          type: string
+          example: "TestauthorFn"
+        lastName:
+          type: string
+          example: "TestauthorLn"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "2000-01-20"
+        gender:
+          $ref: '#/components/schemas/Gender'
+    UpdateAuthor:
+      type: object
+      properties:
+        dateOfBirth:
+          type: string
+          format: date
+          example: "2000-01-20"
+        gender:
+          $ref: '#/components/schemas/Gender'
+    Author:
+      type: object
+      properties:
+        authorId:
+          type: integer
+          example: 8973
+        firstName:
+          type: string
+          example: "TestauthorFn"
+        lastName:
+          type: string
+          example: "TestauthorLn"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "2000-01-20"
+        gender:
+          $ref: '#/components/schemas/Gender'
+    Gender:
+      enum:
+        - Male
+        - Female
+        - Undisclosed
+    CreatePublisher:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Pearson"
+        emailId:
+          type: string
+          example: "pearson.publishers@email.pub"
+        phoneNumber:
+          type: string
+          example: "111222333"
+    UpdatePublisher:
+      type: object
+      properties:
+        emailId:
+          type: string
+          example: "pearson.publishers@email.pub"
+        phoneNumber:
+          type: string
+          example: "111222333"
+    Publisher:
+      type: object
+      properties:
+        publisherId:
+          type: integer
+          example: 7563
+        name:
+          type: string
+          example: "Pearson"
+        emailId:
+          type: string
+          example: "pearson.publishers@email.pub"
+        phoneNumber:
+          type: string
+          example: "111222333"
+
+    CreateLibraryUser:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "test.username.1"
+        firstName:
+          type: string
+          example: "TestuserFn"
+        lastName:
+          type: string
+          example: "TestuserLn"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1996-01-20"
+        gender:
+          $ref: '#/components/schemas/Gender'
+        phoneNumber:
+          type: string
+          example: "111222333"
+        emailId:
+          type: string
+          example: "test.username.1@email.usr"
+    UpdateLibraryUser:
+      type: object
+      properties:
+        password:
+          type: string
+          example: "myPassword"
+        phoneNumber:
+          type: string
+          example: "111222333"
+        emailId:
+          type: string
+          example: "test.username.1@email.usr"
+    LibraryUser:
+      type: object
+      properties:
+        userId:
+          type: integer
+          example: 7839
+        username:
+          type: string
+          example: "test.username.1"
+        password:
+          type: string
+          example: "myPassword"
+        firstName:
+          type: string
+          example: "TestuserFn"
+        lastName:
+          type: string
+          example: "TestuserLn"
+        dateOfBirth:
+          type: string
+          format: date
+          example: "1996-01-20"
+        gender:
+          $ref: '#/components/schemas/Gender'
+        phoneNumber:
+          type: string
+          example: "111222333"
+        emailId:
+          type: string
+          example: "test.username.1@email.usr"
+        issuedBooks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Book'
+
+    IssueBookResponse:
+      type: object
+      properties:
+        issueBookStatuses:
+          type: array
+          items:
+            $ref: '#/components/schemas/IssueBookStatus'
+
+    IssueBookStatus:
+      type: object
+      properties:
+        bookId:
+          type: integer
+          description: Book Id
+          example: 2002
+        status:
+          type: string
+          example: "Issued"
+        remarks:
+          type: string
+          example: "Book Issued"
