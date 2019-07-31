@@ -1,25 +1,24 @@
 package com.skb.course.apis.libraryapis.model;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import java.util.Map;
+import java.util.Set;
 
 public class IssueBookResponse {
 
-    private Map<Integer, IssueBookStatus> issueBookStatusMap;
+    private Set<IssueBookStatus> issueBookStatuses;
 
     public IssueBookResponse() {
     }
 
-    public IssueBookResponse(Map<Integer, IssueBookStatus> issueBookStatusMap) {
-        this.issueBookStatusMap = issueBookStatusMap;
+    public IssueBookResponse(Set<IssueBookStatus> issueBookStatuses) {
+        this.issueBookStatuses = issueBookStatuses;
     }
 
-    public Map<Integer, IssueBookStatus> getIssueBookStatusMap() {
-        return issueBookStatusMap;
+    public Set<IssueBookStatus> getIssueBookStatuses() {
+        return issueBookStatuses;
     }
 
-    public void setIssueBookStatusMap(Map<Integer, IssueBookStatus> issueBookStatusMap) {
-        this.issueBookStatusMap = issueBookStatusMap;
+    public void setIssueBookStatuses(Set<IssueBookStatus> issueBookStatuses) {
+        this.issueBookStatuses = issueBookStatuses;
     }
 }
 

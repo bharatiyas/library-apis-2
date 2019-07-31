@@ -208,9 +208,9 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/{userId}/books/{bookId}")
-    public ResponseEntity<?> deleteBooks(@PathVariable int userId, @PathVariable int bookId,
-                                        @RequestHeader("Authorization") String bearerToken,
-                                        @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
+    public ResponseEntity<?> returnBooks(@PathVariable int userId, @PathVariable int bookId,
+                                         @RequestHeader("Authorization") String bearerToken,
+                                         @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceUnauthorizedException, LibraryResourceBadRequestException, LibraryResourceNotFoundException {
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
             traceId = UUID.randomUUID().toString();
