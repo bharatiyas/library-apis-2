@@ -111,7 +111,7 @@ public class BookController {
             throw new LibraryResourceUnauthorizedException(traceId, "You cannot delete an Book.");
         }
         try {
-            bookService.deleteAuthor(bookId, traceId);
+            bookService.deleteBook(bookId, traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + e.getMessage());
             throw e;

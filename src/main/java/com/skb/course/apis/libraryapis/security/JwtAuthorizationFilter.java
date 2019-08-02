@@ -48,6 +48,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                         .build()
                         .verify(authorizationHeader.replace(SecurityConstants.BEARER_TOKEN_PREFIX, ""))
                         .getSubject();
+
             if(userNameFromJwt != null) {
                 return new UsernamePasswordAuthenticationToken(userNameFromJwt, null, new ArrayList<>());
             }

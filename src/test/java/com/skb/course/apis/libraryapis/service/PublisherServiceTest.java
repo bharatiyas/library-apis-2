@@ -1,5 +1,6 @@
 package com.skb.course.apis.libraryapis.service;
 
+import com.skb.course.apis.libraryapis.LibraryApiTestUtil;
 import com.skb.course.apis.libraryapis.TestConstants;
 import com.skb.course.apis.libraryapis.entity.PublisherEntity;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceAlreadyExistException;
@@ -39,10 +40,10 @@ public class PublisherServiceTest {
     @Test
     public void addPublisher_success() throws LibraryResourceAlreadyExistException {
         when(publisherRepository.save(any(PublisherEntity.class))).thenReturn(createPublisherEntity());
-        Publisher publisher = publisherService.addPublisher(createPublisher(), TestConstants.API_TRACE_ID);
+        Publisher publisher = publisherService.addPublisher(LibraryApiTestUtil.createPublisher(), TestConstants.API_TRACE_ID);
         assertNotNull(publisher);
         assertNotNull(publisher.getPublisherId());
-        assertEquals(TestConstants.TEST_PUBLISHER_NAME, publisher.getName());
+        assertTrue(publisher.getName().contains(TestConstants.TEST_PUBLISHER_NAME));
         assertEquals(TestConstants.TEST_PUBLISHER_EMAIL, publisher.getEmailId());
         assertEquals(TestConstants.TEST_PUBLISHER_PHONE, publisher.getPhoneNumber());
     }
@@ -75,7 +76,7 @@ public class PublisherServiceTest {
         PublisherEntity publisherEntity = createPublisherEntity();
         when(publisherRepository.save(any(PublisherEntity.class))).thenReturn(publisherEntity);
 
-        Publisher publisher = publisherService.addPublisher(createPublisher(), TestConstants.API_TRACE_ID);
+        Publisher publisher = publisherService.addPublisher(LibraryApiTestUtil.createPublisher(), TestConstants.API_TRACE_ID);
         assertNotNull(publisher);
         assertNotNull(publisher.getPublisherId());
 
@@ -97,7 +98,7 @@ public class PublisherServiceTest {
         PublisherEntity publisherEntity = createPublisherEntity();
         when(publisherRepository.save(any(PublisherEntity.class))).thenReturn(publisherEntity);
 
-        Publisher publisher = publisherService.addPublisher(createPublisher(), TestConstants.API_TRACE_ID);
+        Publisher publisher = publisherService.addPublisher(LibraryApiTestUtil.createPublisher(), TestConstants.API_TRACE_ID);
         assertNotNull(publisher);
         assertNotNull(publisher.getPublisherId());
 
@@ -113,7 +114,7 @@ public class PublisherServiceTest {
     public void deletePublisher_success() throws LibraryResourceAlreadyExistException, LibraryResourceNotFoundException {
 
         when(publisherRepository.save(any(PublisherEntity.class))).thenReturn(createPublisherEntity());
-        Publisher publisher = publisherService.addPublisher(createPublisher(), TestConstants.API_TRACE_ID);
+        Publisher publisher = publisherService.addPublisher(LibraryApiTestUtil.createPublisher(), TestConstants.API_TRACE_ID);
         assertNotNull(publisher);
 
         doNothing().when(publisherRepository).deleteById(anyInt());
@@ -124,7 +125,7 @@ public class PublisherServiceTest {
     public void deletePublisher_failure_publisher_not_found() throws LibraryResourceAlreadyExistException, LibraryResourceNotFoundException {
 
         when(publisherRepository.save(any(PublisherEntity.class))).thenReturn(createPublisherEntity());
-        Publisher publisher = publisherService.addPublisher(createPublisher(), TestConstants.API_TRACE_ID);
+        Publisher publisher = publisherService.addPublisher(LibraryApiTestUtil.createPublisher(), TestConstants.API_TRACE_ID);
         assertNotNull(publisher);
 
         doThrow(EmptyResultDataAccessException.class).when(publisherRepository).deleteById(anyInt());
@@ -156,18 +157,8 @@ public class PublisherServiceTest {
 
     }
 
-    private Publisher createPublisher() {
-        return new Publisher(TestConstants.TEST_PUBLISHER_NAME, TestConstants.TEST_PUBLISHER_EMAIL, TestConstants.TEST_PUBLISHER_PHONE);
-    }
-
     private PublisherEntity createPublisherEntity() {
         return new PublisherEntity(TestConstants.TEST_PUBLISHER_NAME, TestConstants.TEST_PUBLISHER_EMAIL, TestConstants.TEST_PUBLISHER_PHONE);
-    }
-
-    private PublisherEntity updatedPublisherEntity(PublisherEntity pe) {
-        pe.setEmailId("publisher.new.email@email.con");
-        pe.setPhoneNumber("99999999");
-        return pe;
     }
 
     private Optional<PublisherEntity> createPublisherEntityOptional() {

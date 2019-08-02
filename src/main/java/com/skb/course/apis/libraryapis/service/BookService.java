@@ -109,7 +109,7 @@ public class BookService {
         return book;
     }
 
-    public void deleteAuthor(int bookId, String traceId) throws LibraryResourceNotFoundException {
+    public void deleteBook(int bookId, String traceId) throws LibraryResourceNotFoundException {
 
         try {
             bookRepository.deleteById(bookId);

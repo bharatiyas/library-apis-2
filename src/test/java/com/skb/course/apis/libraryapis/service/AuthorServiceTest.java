@@ -1,5 +1,6 @@
 package com.skb.course.apis.libraryapis.service;
 
+import com.skb.course.apis.libraryapis.LibraryApiTestUtil;
 import com.skb.course.apis.libraryapis.TestConstants;
 import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceAlreadyExistException;
@@ -40,11 +41,11 @@ public class AuthorServiceTest {
     @Test
     public void addAuthor_success() throws LibraryResourceAlreadyExistException {
         when(authorRepository.save(any(AuthorEntity.class))).thenReturn(createAuthorEntity());
-        Author author = authorService.addAuthor(createAuthor(), TestConstants.API_TRACE_ID);
+        Author author = authorService.addAuthor(LibraryApiTestUtil.createAuthor(), TestConstants.API_TRACE_ID);
         assertNotNull(author);
         assertNotNull(author.getAuthorId());
-        assertEquals(TestConstants.TEST_AUTHOR_FIRST_NAME, author.getFirstName());
-        assertEquals(TestConstants.TEST_AUTHOR_LAST_NAME, author.getLastName());
+        assertTrue(author.getFirstName().contains(TestConstants.TEST_AUTHOR_FIRST_NAME));
+        assertTrue(author.getLastName().contains(TestConstants.TEST_AUTHOR_LAST_NAME));
     }
 
     @Test
@@ -74,7 +75,7 @@ public class AuthorServiceTest {
         AuthorEntity authorEntity = createAuthorEntity();
         when(authorRepository.save(any(AuthorEntity.class))).thenReturn(authorEntity);
 
-        Author author = authorService.addAuthor(createAuthor(), TestConstants.API_TRACE_ID);
+        Author author = authorService.addAuthor(LibraryApiTestUtil.createAuthor(), TestConstants.API_TRACE_ID);
         assertNotNull(author);
         assertNotNull(author.getAuthorId());
 
@@ -95,7 +96,7 @@ public class AuthorServiceTest {
         AuthorEntity authorEntity = createAuthorEntity();
         when(authorRepository.save(any(AuthorEntity.class))).thenReturn(authorEntity);
 
-        Author author = authorService.addAuthor(createAuthor(), TestConstants.API_TRACE_ID);
+        Author author = authorService.addAuthor(LibraryApiTestUtil.createAuthor(), TestConstants.API_TRACE_ID);
         assertNotNull(author);
         assertNotNull(author.getAuthorId());
 
@@ -111,7 +112,7 @@ public class AuthorServiceTest {
     public void deleteAuthor_success() throws LibraryResourceAlreadyExistException, LibraryResourceNotFoundException {
 
         when(authorRepository.save(any(AuthorEntity.class))).thenReturn(createAuthorEntity());
-        Author author = authorService.addAuthor(createAuthor(), TestConstants.API_TRACE_ID);
+        Author author = authorService.addAuthor(LibraryApiTestUtil.createAuthor(), TestConstants.API_TRACE_ID);
         assertNotNull(author);
 
         doNothing().when(authorRepository).deleteById(anyInt());
@@ -122,7 +123,7 @@ public class AuthorServiceTest {
     public void deleteAuthor_failure_author_not_found() throws LibraryResourceAlreadyExistException, LibraryResourceNotFoundException {
 
         when(authorRepository.save(any(AuthorEntity.class))).thenReturn(createAuthorEntity());
-        Author author = authorService.addAuthor(createAuthor(), TestConstants.API_TRACE_ID);
+        Author author = authorService.addAuthor(LibraryApiTestUtil.createAuthor(), TestConstants.API_TRACE_ID);
         assertNotNull(author);
 
         doThrow(EmptyResultDataAccessException.class).when(authorRepository).deleteById(anyInt());
@@ -188,12 +189,6 @@ public class AuthorServiceTest {
         when(authorRepository.findByFirstNameAndLastNameContaining(TestConstants.TEST_AUTHOR_FIRST_NAME, TestConstants.TEST_AUTHOR_LAST_NAME)).thenReturn(Collections.emptyList());
         authorService.searchAuthors(TestConstants.TEST_AUTHOR_FIRST_NAME, TestConstants.TEST_AUTHOR_LAST_NAME, TestConstants.API_TRACE_ID);
 
-    }
-
-    private Author createAuthor() {
-        // String firstName, String lastName, LocalDate dateOfBirth, Gender gender
-        return new Author(TestConstants.TEST_AUTHOR_FIRST_NAME, TestConstants.TEST_AUTHOR_LAST_NAME,
-                LocalDate.now().minusYears(30), Gender.Female);
     }
 
     private AuthorEntity createAuthorEntity() {
