@@ -4,6 +4,7 @@ import com.skb.course.apis.libraryapis.entity.BookEntity;
 import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
 import com.skb.course.apis.libraryapis.entity.UserBookEntity;
 import com.skb.course.apis.libraryapis.entity.UserEntity;
+import com.skb.course.apis.libraryapis.exception.LibraryResourceAlreadyExistException;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
 import com.skb.course.apis.libraryapis.model.*;
@@ -16,6 +17,7 @@ import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -49,7 +51,7 @@ public class UserService {
         this.userBookEntityRepository = userBookEntityRepository;
     }
 
-    public LibraryUser addUser(LibraryUser libraryUserToBeAdded) {
+    public LibraryUser addUser(LibraryUser libraryUserToBeAdded, String traceId) throws LibraryResourceAlreadyExistException {
         UserEntity userEntity = new UserEntity(
                 // Saving password as plain text isn't a good idea therefore encrypt it
                 libraryUserToBeAdded.getUsername(),
@@ -63,7 +65,19 @@ public class UserService {
                 "USER");
 
         libraryUserToBeAdded.setPassword(SecurityConstants.NEW_USER_DEFAULT_PASSWORD);
-        UserEntity addedUser = userRepository.save(userEntity);
+        UserEntity addedUser = null;
+
+        try {
+            addedUser = userRepository.save(userEntity);
+        } catch (DataIntegrityViolationException e) {
+            logger.error(e.getMessage());
+            if(e.getMessage().contains("constraint [Username]")) {
+                throw new LibraryResourceAlreadyExistException(traceId, "Username already exists!! Please use different Username.");
+            } else {
+                throw new LibraryResourceAlreadyExistException(traceId, "EmailId already exists!! You cannot register with same Email address.");
+            }
+        }
+
         libraryUserToBeAdded.setUserId(addedUser.getUserId());
         return libraryUserToBeAdded;
     }
@@ -134,53 +148,6 @@ public class UserService {
             throw new LibraryResourceNotFoundException(traceId, "No Users found with First name: " + firstName + " and Last name: " + lastName);
         }
     }
-
-    /*public IssueBookResponse issueBooks(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
-
-        Optional<UserEntity> userEntity = userRepository.findById(userId);
-
-        if(userEntity.isPresent()) {
-            Map<Integer, IssueBookStatus> issueBookStatusMap = new HashMap<>(bookIds.size());
-            UserEntity ue = userEntity.get();
-            Set<BookEntity> issueableBooks = new HashSet<>();
-            // Find out if the supplied list of books is issue-able or not
-            bookIds.stream()
-                    .forEach(bookId -> {
-                        Optional<BookEntity> be = bookRepository.findById(bookId);
-                        IssueBookStatus bookStatus;
-                        if (!be.isPresent()) {
-                            bookStatus = new IssueBookStatus(bookId, "Not Issued", "Book Not Found");
-                        } else {
-                            BookStatusEntity bse = be.get().getBookStatus();
-                            if ((bse.getTotalNumberOfCopies() - bse.getNumberOfCopiesIssued()) == 0) {
-                                bookStatus = new IssueBookStatus(bookId,"Not Issued", "No copies available");
-                            } else {
-                                bookStatus = new IssueBookStatus(bookId,"Issued", "Book Issued");
-                                issueableBooks.add(be.get());
-                            }
-                        }
-                        issueBookStatusMap.put(bookId, bookStatus);
-                    });
-
-            // If there are issue-able books then finally issue them
-            if(issueableBooks.size() > 0) {
-                ue.setBooks(issueableBooks);
-                userRepository.save(ue);
-                // Manage the number of issued copies
-                issueableBooks.stream()
-                        .forEach(be -> {
-                            BookStatusEntity bs = be.getBookStatus();
-                            bs.setNumberOfCopiesIssued(bs.getNumberOfCopiesIssued() + 1);
-                            bookStatusRepository.save(bs);
-                        });
-            }
-
-            // Set and return final response
-            return new IssueBookResponse(issueBookStatusMap);
-        } else {
-            throw new LibraryResourceNotFoundException(traceId, "Library User Id: " + userId + " Not Found");
-        }
-    }*/
 
     public IssueBookResponse issueBooks(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
 

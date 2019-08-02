@@ -30,6 +30,9 @@ public class TestConstants {
     // Test Publisher Details
     public static final String TEST_PUBLISHER_NAME = "TestPublisherName";
     public static final String TEST_PUBLISHER_EMAIL = "TestPublisher@email.com";
+    public static final String TEST_PUBLISHER_PHONE = "1122334455";
+    public static final String TEST_PUBLISHER_EMAIL_UPDATED = "TestPublisherNew@email.com";
+    public static final String TEST_PUBLISHER_PHONE_UPDATED = "5544332211";
 
     // Book API URLs
     public static final String BOOK_API_BASE_URL = "/books";
@@ -46,4 +49,7 @@ public class TestConstants {
 
     // Login URL
     public static final String LOGIN_URL = "/login";
+
+    // Common
+    public static final String API_TRACE_ID = "library-api-unique-trace-id";
 }

@@ -112,7 +112,7 @@ public class LibraryApiIntegrationTestUtil {
 
         // Create a new Publisher object
         Publisher newPublisher = new Publisher(TestConstants.TEST_PUBLISHER_NAME + publisherCtr,
-                TestConstants.TEST_PUBLISHER_EMAIL, "12344556");
+                TestConstants.TEST_PUBLISHER_EMAIL, TestConstants.TEST_PUBLISHER_PHONE);
 
         // Add Authorization Token and create request entity
         HttpEntity<Publisher> newPublisherRequest = new HttpEntity<>(newPublisher, headers);

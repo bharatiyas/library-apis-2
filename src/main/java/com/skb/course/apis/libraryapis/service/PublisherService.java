@@ -1,11 +1,15 @@
 package com.skb.course.apis.libraryapis.service;
 
 import com.skb.course.apis.libraryapis.entity.PublisherEntity;
+import com.skb.course.apis.libraryapis.exception.LibraryResourceAlreadyExistException;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.model.Publisher;
 import com.skb.course.apis.libraryapis.repository.PublisherRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +20,26 @@ import java.util.stream.Collectors;
 @Service
 public class PublisherService {
 
-    @Autowired
+    private static Logger logger = LoggerFactory.getLogger(PublisherService.class);
     private PublisherRepository publisherRepository;
 
-    public Publisher addPublisher(Publisher publisherToBeAdded) {
+    public PublisherService(PublisherRepository publisherRepository) {
+        this.publisherRepository = publisherRepository;
+    }
+
+    public Publisher addPublisher(Publisher publisherToBeAdded, String traceId) throws LibraryResourceAlreadyExistException {
         PublisherEntity bookEntity = new PublisherEntity(
                 publisherToBeAdded.getName(),
                 publisherToBeAdded.getEmailId(),
                 publisherToBeAdded.getPhoneNumber());
 
-        PublisherEntity addedPublisher = publisherRepository.save(bookEntity);
+        PublisherEntity addedPublisher = null;
+        try {
+            addedPublisher = publisherRepository.save(bookEntity);
+        } catch (DataIntegrityViolationException e) {
+            logger.error(e.getMessage());
+            throw new LibraryResourceAlreadyExistException(traceId, "Publisher already exists!!");
+        }
 
         publisherToBeAdded.setPublisherId(addedPublisher.getPublisherId());
         return publisherToBeAdded;
@@ -76,7 +90,7 @@ public class PublisherService {
         //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         List<PublisherEntity> publisherEntities = null;
         if(LibraryApiUtils.doesStringValueExist(name)) {
-            publisherEntities = publisherRepository.findByName(name);
+            publisherEntities = publisherRepository.findByNameContaining(name);
         }
         if(publisherEntities != null && publisherEntities.size() > 0) {
             return createPublishersForSearchResponse(publisherEntities);
