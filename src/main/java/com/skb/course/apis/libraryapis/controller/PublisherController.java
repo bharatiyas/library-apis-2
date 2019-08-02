@@ -30,7 +30,7 @@ public class PublisherController {
     public ResponseEntity<Publisher> addPublisher(@RequestBody Publisher publisher,
                                           @RequestHeader("Authorization") String bearerToken,
                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
-            throws LibraryResourceUnauthorizedException {
+            throws LibraryResourceUnauthorizedException, LibraryResourceAlreadyExistException {
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
             traceId = UUID.randomUUID().toString();
         }
@@ -40,7 +40,7 @@ public class PublisherController {
                     "User is not a Admin.");
             throw new LibraryResourceUnauthorizedException(traceId, "You cannot update Publisher details");
         }
-        publisher = publisherService.addPublisher(publisher);
+        publisher = publisherService.addPublisher(publisher, traceId);
 
         return new ResponseEntity<>(publisher, HttpStatus.CREATED);
     }

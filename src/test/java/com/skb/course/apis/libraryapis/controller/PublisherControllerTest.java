@@ -204,8 +204,8 @@ public class PublisherControllerTest {
         Assert.assertNotNull(responsePublisher);
 
         // Set the values to be updated
-        responsePublisher.setEmailId("publishernewemail@email.com");
-        responsePublisher.setPhoneNumber("99887766");
+        responsePublisher.setEmailId(TestConstants.TEST_PUBLISHER_EMAIL_UPDATED);
+        responsePublisher.setPhoneNumber(TestConstants.TEST_PUBLISHER_PHONE_UPDATED);
 
         URI authorUri = null;
         try {
@@ -230,8 +230,8 @@ public class PublisherControllerTest {
         Publisher publisher = libPublisherResponse.getBody();
 
         // Check if the response has updated details
-        Assert.assertEquals("publishernewemail@email.com", publisher.getEmailId());
-        Assert.assertEquals("99887766", publisher.getPhoneNumber());
+        Assert.assertEquals(TestConstants.TEST_PUBLISHER_EMAIL_UPDATED, publisher.getEmailId());
+        Assert.assertEquals(TestConstants.TEST_PUBLISHER_PHONE_UPDATED, publisher.getPhoneNumber());
     }
 
     @Test
@@ -447,7 +447,7 @@ public class PublisherControllerTest {
         URI publisherSearchUri = null;
         try {
             publisherSearchUri = new URI(TestConstants.PUBLISHER_API_SEARCH_URL +
-                    "?name=" + TestConstants.TEST_PUBLISHER_NAME + 1);
+                    "?name=" + TestConstants.TEST_PUBLISHER_NAME);
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
@@ -457,7 +457,7 @@ public class PublisherControllerTest {
 
         Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
         // Comparing with >= 10 because depending upon which other test methods run the number of Publishers may vary
-        Assert.assertTrue(response.getBody().length == 1);
+        Assert.assertTrue(response.getBody().length >= 10);
         for(Publisher Publisher : response.getBody()) {
             Assert.assertTrue(Publisher.getName().contains(TestConstants.TEST_PUBLISHER_NAME));
         }

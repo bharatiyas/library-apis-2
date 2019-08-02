@@ -16,8 +16,11 @@ import java.util.stream.Collectors;
 @Service
 public class AuthorService {
 
-    @Autowired
     AuthorRepository authorRepository;
+
+    public AuthorService(AuthorRepository authorRepository) {
+        this.authorRepository = authorRepository;
+    }
 
     public Author addAuthor(Author authorToBeAdded, String traceId) {
         AuthorEntity authorEntity = new AuthorEntity(
@@ -77,7 +80,7 @@ public class AuthorService {
         //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         List<AuthorEntity> authorEntities = null;
         if(LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
-            authorEntities = authorRepository.findByLastNameAndFirstName(lastName, firstName);
+            authorEntities = authorRepository.findByFirstNameAndLastNameContaining(firstName, lastName);
         } else if(LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
             authorEntities = authorRepository.findByFirstNameContaining(firstName);
         } else if(!LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {

@@ -38,16 +38,7 @@ public class UserController {
             traceId = UUID.randomUUID().toString();
         }
 
-        try {
-            libraryUser = userService.addUser(libraryUser);
-        } catch (DataIntegrityViolationException e) {
-            logger.error(e.getMessage());
-            if(e.getMessage().contains("constraint [Username]")) {
-                throw new LibraryResourceAlreadyExistException(traceId, "Username already exists!! Please use different Username.");
-            } else {
-                throw new LibraryResourceAlreadyExistException(traceId, "EmailId already exists!! You cannot register with same Email address.");
-            }
-        }
+        libraryUser = userService.addUser(libraryUser, traceId);
         return new ResponseEntity<>(libraryUser, HttpStatus.CREATED);
     }
 
