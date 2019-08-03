@@ -2,14 +2,13 @@ package com.skb.course.apis.libraryapis.service;
 
 import com.skb.course.apis.libraryapis.LibraryApiTestUtil;
 import com.skb.course.apis.libraryapis.TestConstants;
+import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 import com.skb.course.apis.libraryapis.entity.BookEntity;
 import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
+import com.skb.course.apis.libraryapis.entity.PublisherEntity;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceAlreadyExistException;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
-import com.skb.course.apis.libraryapis.model.Book;
-import com.skb.course.apis.libraryapis.model.BookStatus;
-import com.skb.course.apis.libraryapis.model.BookStatusState;
-import com.skb.course.apis.libraryapis.model.Gender;
+import com.skb.course.apis.libraryapis.model.*;
 import com.skb.course.apis.libraryapis.repository.AuthorRepository;
 import com.skb.course.apis.libraryapis.repository.BookRepository;
 import com.skb.course.apis.libraryapis.repository.BookStatusRepository;
@@ -22,10 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,6 +45,9 @@ public class BookServiceTest {
 
     BookService bookService;
 
+    @Mock
+    private PublisherService publisherService;
+
     @Before
     public void setUp() {
         bookService = new BookService(bookRepository, bookStatusRepository, authorRepository, publisherRepository);
@@ -56,18 +55,21 @@ public class BookServiceTest {
 
     @Test
     public void addBook_success() throws LibraryResourceNotFoundException {
-        when(bookRepository.save(any(BookEntity.class))).thenReturn(createBookEntity());
-        Book book = bookService.addBook(LibraryApiTestUtil.createBook(1), TestConstants.API_TRACE_ID);
+        when(bookRepository.save(any(BookEntity.class))).thenReturn(LibraryApiTestUtil.createBookEntity());
+        when(publisherRepository.findById(anyInt())).thenReturn(Optional.of(new PublisherEntity()));
+        Book book = bookService.addBook(LibraryApiTestUtil.createBook(0), TestConstants.API_TRACE_ID);
         assertNotNull(book);
         assertNotNull(book.getBookId());
-        assertEquals(TestConstants.TEST_BOOK_ISBN, book.getIsbn());
-        assertEquals(TestConstants.TEST_BOOK_TITLE, book.getTitle());
+        assertTrue(book.getIsbn().contains(TestConstants.TEST_BOOK_ISBN));
+        assertTrue(book.getTitle().contains(TestConstants.TEST_BOOK_TITLE));
     }
 
     @Test
     public void getBook_success() throws Exception {
 
-        when(bookRepository.findById(anyInt())).thenReturn(createBookEntityOptional());
+        Optional<BookEntity> bookEntityOptional = LibraryApiTestUtil.createBookEntityOptional();
+        when(bookRepository.findById(anyInt())).thenReturn(bookEntityOptional);
+        when(bookStatusRepository.findById(anyInt())).thenReturn(Optional.of(new BookStatusEntity(0, BookStatusState.Active, 3, 0)));
         Book book = bookService.getBook(123, TestConstants.API_TRACE_ID);
 
         assertNotNull(book);
@@ -88,9 +90,10 @@ public class BookServiceTest {
     @Test
     public void updateBook_success() throws LibraryResourceNotFoundException {
 
-        BookEntity bookEntity = createBookEntity();
+        BookEntity bookEntity = LibraryApiTestUtil.createBookEntity();
         when(bookRepository.save(any(BookEntity.class))).thenReturn(bookEntity);
-
+        when(publisherRepository.findById(anyInt())).thenReturn(Optional.of(new PublisherEntity()));
+        when(bookStatusRepository.findById(anyInt())).thenReturn(Optional.of(new BookStatusEntity(0, BookStatusState.Active, 3, 0)));
         Book book = bookService.addBook(LibraryApiTestUtil.createBook(1), TestConstants.API_TRACE_ID);
         assertNotNull(book);
         assertNotNull(book.getBookId());
@@ -98,7 +101,7 @@ public class BookServiceTest {
         int updatedYearPublished = book.getYearPublished() + 1;
         book.setYearPublished(updatedYearPublished);
 
-        when(bookRepository.findById(anyInt())).thenReturn(createBookEntityOptional());
+        when(bookRepository.findById(anyInt())).thenReturn(LibraryApiTestUtil.createBookEntityOptional());
 
         book = bookService.updateBook(book, TestConstants.API_TRACE_ID);
         assertEquals(TestConstants.TEST_BOOK_ISBN, book.getIsbn());
@@ -109,9 +112,6 @@ public class BookServiceTest {
     @Test(expected = LibraryResourceNotFoundException.class)
     public void updateBook_failure_book_not_found() throws LibraryResourceNotFoundException {
 
-        BookEntity bookEntity = createBookEntity();
-        when(bookRepository.save(any(BookEntity.class))).thenReturn(bookEntity);
-
         Book book = bookService.addBook(LibraryApiTestUtil.createBook(1), TestConstants.API_TRACE_ID);
         assertNotNull(book);
         assertNotNull(book.getBookId());
@@ -120,13 +120,13 @@ public class BookServiceTest {
 
         when(bookRepository.findById(anyInt())).thenReturn(Optional.empty());
         bookService.updateBook(book, TestConstants.API_TRACE_ID);
-
     }
 
     @Test
     public void deleteBook_success() throws LibraryResourceNotFoundException {
 
-        when(bookRepository.save(any(BookEntity.class))).thenReturn(createBookEntity());
+        when(bookRepository.save(any(BookEntity.class))).thenReturn(LibraryApiTestUtil.createBookEntity());
+        when(publisherRepository.findById(anyInt())).thenReturn(Optional.of(new PublisherEntity()));
         Book book = bookService.addBook(LibraryApiTestUtil.createBook(1), TestConstants.API_TRACE_ID);
         assertNotNull(book);
 
@@ -137,7 +137,6 @@ public class BookServiceTest {
     @Test(expected = LibraryResourceNotFoundException.class)
     public void deleteBook_failure_book_not_found() throws LibraryResourceNotFoundException {
 
-        when(bookRepository.save(any(BookEntity.class))).thenReturn(createBookEntity());
         Book book = bookService.addBook(LibraryApiTestUtil.createBook(1), TestConstants.API_TRACE_ID);
         assertNotNull(book);
 
@@ -146,14 +145,56 @@ public class BookServiceTest {
     }
 
     @Test
+    public void addBookAuthors_success() throws LibraryResourceNotFoundException {
+
+        BookEntity bookEntity = LibraryApiTestUtil.createBookEntity();
+        when(bookRepository.save(any(BookEntity.class))).thenReturn(bookEntity);
+        when(publisherRepository.findById(anyInt())).thenReturn(Optional.of(new PublisherEntity()));
+        when(bookStatusRepository.findById(anyInt())).thenReturn(Optional.of(new BookStatusEntity(0, BookStatusState.Active, 3, 0)));
+        Book book = bookService.addBook(LibraryApiTestUtil.createBook(1), TestConstants.API_TRACE_ID);
+        assertNotNull(book);
+        assertNotNull(book.getBookId());
+        when(bookRepository.findById(anyInt())).thenReturn(LibraryApiTestUtil.createBookEntityOptional());
+
+        Set<Integer> authors = new HashSet<>(1);
+        authors.add(1);
+        when(authorRepository.findById(anyInt())).thenReturn(LibraryApiTestUtil.createAuthorEntityOptional());
+        book = bookService.addBookAuhors(book.getBookId(), authors, TestConstants.API_TRACE_ID);
+        assertEquals(TestConstants.TEST_BOOK_ISBN, book.getIsbn());
+        assertEquals(1, book.getAuthors().size());
+        assertTrue(
+                book.getAuthors().stream().
+                        allMatch(author -> author.getFirstName().contains(TestConstants.TEST_AUTHOR_FIRST_NAME))
+        );
+    }
+
+    @Test(expected = LibraryResourceNotFoundException.class)
+    public void addBookAuthors_failure_author_not_found() throws LibraryResourceNotFoundException {
+
+        BookEntity bookEntity = LibraryApiTestUtil.createBookEntity();
+        when(bookRepository.save(any(BookEntity.class))).thenReturn(bookEntity);
+        when(publisherRepository.findById(anyInt())).thenReturn(Optional.of(new PublisherEntity()));
+        Book book = bookService.addBook(LibraryApiTestUtil.createBook(1), TestConstants.API_TRACE_ID);
+        assertNotNull(book);
+        assertNotNull(book.getBookId());
+        when(bookRepository.findById(anyInt())).thenReturn(LibraryApiTestUtil.createBookEntityOptional());
+
+        Set<Integer> authors = new HashSet<>(1);
+        authors.add(1);
+        when(authorRepository.findById(anyInt())).thenReturn(Optional.empty());
+        bookService.addBookAuhors(book.getBookId(), authors, TestConstants.API_TRACE_ID);
+    }
+
+    @Test
     public void searchBookByIsbn_success() throws LibraryResourceNotFoundException {
 
         String isbn = TestConstants.TEST_BOOK_ISBN + "100";
         BookEntity book = new BookEntity(isbn, TestConstants.TEST_BOOK_TITLE,
                 TestConstants.TEST_BOOK_YEAR_PUBLISHED, TestConstants.TEST_BOOK_EDITION);
+        book.setPublisher(LibraryApiTestUtil.createPublisherEntity());
 
         when(bookRepository.findByIsbn(isbn)).thenReturn(book);
-        when(bookStatusRepository.findById(anyInt())).thenReturn(createBookStatusEntityOptional(1));
+        when(bookStatusRepository.findById(anyInt())).thenReturn(LibraryApiTestUtil.createBookStatusEntityOptional(1));
         Book booksSearched = bookService.searchBookByIsbn(isbn, TestConstants.API_TRACE_ID);
 
         assertEquals(isbn, booksSearched.getIsbn());
@@ -173,6 +214,8 @@ public class BookServiceTest {
                 new BookEntity(TestConstants.TEST_BOOK_ISBN + "102", TestConstants.TEST_BOOK_TITLE,
                         TestConstants.TEST_BOOK_YEAR_PUBLISHED + 3, "Third Edition"));
 
+        booksAdded.stream().forEach(bookEntity -> bookEntity.setPublisher(LibraryApiTestUtil.createPublisherEntity()));
+        when(bookStatusRepository.findById(anyInt())).thenReturn(LibraryApiTestUtil.createBookStatusEntityOptional(1));
         when(bookRepository.findByTitleContaining(TestConstants.TEST_BOOK_TITLE)).thenReturn(booksAdded);
         List<Book> booksSearched = bookService.searchBookByTitle(TestConstants.TEST_BOOK_TITLE, TestConstants.API_TRACE_ID);
 
@@ -186,7 +229,7 @@ public class BookServiceTest {
     public void searchBookByIsbn_failure_books_not_found() throws LibraryResourceNotFoundException {
 
         when(bookRepository.findByIsbn(TestConstants.TEST_BOOK_TITLE)).thenReturn(null);
-        bookService.searchBookByTitle(TestConstants.TEST_BOOK_TITLE, TestConstants.API_TRACE_ID);
+        bookService.searchBookByIsbn(TestConstants.TEST_BOOK_TITLE, TestConstants.API_TRACE_ID);
 
     }
 
@@ -198,20 +241,5 @@ public class BookServiceTest {
 
     }
 
-    private BookEntity createBookEntity() {
-        return new BookEntity(TestConstants.TEST_BOOK_ISBN, TestConstants.TEST_BOOK_TITLE,
-                TestConstants.TEST_BOOK_YEAR_PUBLISHED, TestConstants.TEST_BOOK_EDITION);
-    }
 
-    private Optional<BookEntity> createBookEntityOptional() {
-        return Optional.of(createBookEntity());
-    }
-
-    private BookStatusEntity createBookStatusEntity(int bookId) {
-        return new BookStatusEntity(bookId, BookStatusState.Active, 3, 0);
-    }
-
-    private Optional<BookStatusEntity> createBookStatusEntityOptional(int bookId) {
-        return Optional.of(createBookStatusEntity(bookId));
-    }
 }
