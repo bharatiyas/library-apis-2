@@ -9,9 +9,9 @@ import java.util.List;
 public interface UserRepository extends CrudRepository<UserEntity, Integer> {
     UserEntity findByUsername(String username);
 
-    List<UserEntity> findByLastNameAndFirstName(String lastName, String firstName);
+    List<UserEntity> findByFirstNameAndLastNameContaining(String firstName, String lastName);
 
-    List<UserEntity> findByFirstName(String firstName);
+    List<UserEntity> findByFirstNameContaining(String firstName);
 
-    List<UserEntity> findByLastName(String lastName);
+    List<UserEntity> findByLastNameContaining(String lastName);
 }

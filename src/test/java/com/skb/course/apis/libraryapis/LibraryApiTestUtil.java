@@ -1,9 +1,6 @@
 package com.skb.course.apis.libraryapis;
 
-import com.skb.course.apis.libraryapis.entity.AuthorEntity;
-import com.skb.course.apis.libraryapis.entity.BookEntity;
-import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
-import com.skb.course.apis.libraryapis.entity.PublisherEntity;
+import com.skb.course.apis.libraryapis.entity.*;
 import com.skb.course.apis.libraryapis.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,6 +85,7 @@ public class LibraryApiTestUtil {
         BookEntity be = new BookEntity(TestConstants.TEST_BOOK_ISBN, TestConstants.TEST_BOOK_TITLE,
                 TestConstants.TEST_BOOK_YEAR_PUBLISHED, TestConstants.TEST_BOOK_EDITION);
         be.setPublisher(createPublisherEntity());
+        be.setBookStatus(createBookStatusEntity(0));
         return be;
     }
 
@@ -110,5 +108,16 @@ public class LibraryApiTestUtil {
 
     public static Optional<AuthorEntity> createAuthorEntityOptional() {
         return Optional.of(createAuthorEntity());
+    }
+
+    public static UserEntity createUserEntity(String username) {
+        UserEntity be = new UserEntity(username, TestConstants.TEST_USER_PASSWORD, TestConstants.TEST_USER_FIRST_NAME,
+                TestConstants.TEST_USER_LAST_NAME, LocalDate.now().minusYears(20), TestConstants.TEST_USER_GENDER,
+                TestConstants.TEST_USER_PHONE, TestConstants.TEST_USER_EMAIL, "USER");
+        return be;
+    }
+
+    public static Optional<UserEntity> createUserEntityOptional(String username) {
+        return Optional.of(createUserEntity(username));
     }
 }

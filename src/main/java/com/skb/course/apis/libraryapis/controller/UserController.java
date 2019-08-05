@@ -141,15 +141,20 @@ public class UserController {
             throw new LibraryResourceUnauthorizedException(traceId, "You cannot delete User with userId: " + userId);
         }
 
-        userService.deleteUserByUserId(userId, traceId);
+        try {
+            userService.deleteUserByUserId(userId, traceId);
+        } catch (LibraryResourceNotFoundException e) {
+            logger.error(traceId + e.getMessage());
+            throw e;
+        }
         return new ResponseEntity<>(HttpStatus.ACCEPTED);
     }
 
     @GetMapping(path = "/search")
     public ResponseEntity<?> searchUsers(@RequestParam String firstName, @RequestParam String lastName,
-                                         @RequestParam(defaultValue = "0") Integer pageNo,
+                                         /*@RequestParam(defaultValue = "0") Integer pageNo,
                                          @RequestParam(defaultValue = "10") Integer pageSize,
-                                         @RequestParam(defaultValue = "userId") String sortBy,
+                                         @RequestParam(defaultValue = "userId") String sortBy,*/
                                          @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId
     ) throws LibraryResourceNotFoundException {
 
@@ -162,7 +167,7 @@ public class UserController {
             if(!LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
                 return new ResponseEntity<>(new LibraryApiError(traceId, "Please enter at least one search criteria"), HttpStatus.BAD_REQUEST);
             }
-            libraryUsers = userService.searchUsers(firstName, lastName, pageNo, pageSize, sortBy, traceId);
+            libraryUsers = userService.searchUsers(firstName, lastName, traceId);
         } catch (LibraryResourceNotFoundException e) {
             logger.error(traceId + e.getMessage());
             throw e;
