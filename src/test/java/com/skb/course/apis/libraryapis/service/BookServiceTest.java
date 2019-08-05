@@ -2,11 +2,9 @@ package com.skb.course.apis.libraryapis.service;
 
 import com.skb.course.apis.libraryapis.LibraryApiTestUtil;
 import com.skb.course.apis.libraryapis.TestConstants;
-import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 import com.skb.course.apis.libraryapis.entity.BookEntity;
 import com.skb.course.apis.libraryapis.entity.BookStatusEntity;
 import com.skb.course.apis.libraryapis.entity.PublisherEntity;
-import com.skb.course.apis.libraryapis.exception.LibraryResourceAlreadyExistException;
 import com.skb.course.apis.libraryapis.exception.LibraryResourceNotFoundException;
 import com.skb.course.apis.libraryapis.model.*;
 import com.skb.course.apis.libraryapis.repository.AuthorRepository;
@@ -20,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.EmptyResultDataAccessException;
 
-import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.Assert.*;

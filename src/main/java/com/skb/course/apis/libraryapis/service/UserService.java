@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -128,19 +129,22 @@ public class UserService {
     }
 
     public void deleteUserByUserId(int userId, String traceId) throws LibraryResourceNotFoundException {
-        userRepository.deleteById(userId);
+        try {
+            userRepository.deleteById(userId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new LibraryResourceNotFoundException(traceId, "LibraryUser Id: " + userId + " Not Found");
+        }
     }
 
-    public List<LibraryUser> searchUsers(String firstName, String lastName, Integer pageNo, Integer pageSize,
-                                         String sortBy, String traceId) throws LibraryResourceNotFoundException {
+    public List<LibraryUser> searchUsers(String firstName, String lastName, String traceId) throws LibraryResourceNotFoundException {
         //Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         List<UserEntity> userEntities = null;
         if(LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
-            userEntities = userRepository.findByLastNameAndFirstName(lastName, firstName);
+            userEntities = userRepository.findByFirstNameAndLastNameContaining(firstName, lastName);
         } else if(LibraryApiUtils.doesStringValueExist(firstName) && !LibraryApiUtils.doesStringValueExist(lastName)) {
-            userEntities = userRepository.findByFirstName(firstName);
+            userEntities = userRepository.findByFirstNameContaining(firstName);
         } else if(!LibraryApiUtils.doesStringValueExist(firstName) && LibraryApiUtils.doesStringValueExist(lastName)) {
-            userEntities = userRepository.findByLastName(lastName);
+            userEntities = userRepository.findByLastNameContaining(lastName);
         }
         if(userEntities != null && userEntities.size() > 0) {
             return createUsersForSearchResponse(userEntities);
@@ -233,15 +237,8 @@ public class UserService {
     }
 
     private LibraryUser createUserFromEntity(UserEntity ue) {
-        LibraryUser libraryUser = new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
+        return new LibraryUser(ue.getUserId(), ue.getUsername(), ue.getFirstName(), ue.getLastName(),
                 ue.getDateOfBirth(), ue.getGender(), ue.getPhoneNumber(), ue.getEmailId(), Role.valueOf(ue.getRole()));
-
-       /* libraryUser.setIssuedBooks(ue.getBooks().stream()
-                                        .map(be -> bookService.createBookFromEntity(be))
-                                        .collect(Collectors.toSet())
-        );*/
-
-        return libraryUser;
     }
 
     private LibraryUser createUserFromEntityForLogin(UserEntity ue) {

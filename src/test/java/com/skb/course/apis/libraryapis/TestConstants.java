@@ -1,5 +1,7 @@
 package com.skb.course.apis.libraryapis;
 
+import com.skb.course.apis.libraryapis.model.Gender;
+
 public class TestConstants {
 
     // Base URL
@@ -14,6 +16,11 @@ public class TestConstants {
     // Test User Details
     public static final String TEST_USER_FIRST_NAME = "TestUserFn";
     public static final String TEST_USER_LAST_NAME = "TestUserLn";
+    public static final String TEST_USER_USERNAME = "test.username";
+    public static final String TEST_USER_PASSWORD = "test.password";
+    public static final String TEST_USER_EMAIL = TEST_USER_USERNAME + "@email.con";
+    public static final String TEST_USER_PHONE = "2233445566";
+    public static final Gender TEST_USER_GENDER = Gender.Female;
 
     // Author API URLs
     public static final String AUTHOR_API_BASE_URL = "/authors";
