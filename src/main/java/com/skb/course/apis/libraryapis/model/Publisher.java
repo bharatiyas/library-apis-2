@@ -2,14 +2,24 @@ package com.skb.course.apis.libraryapis.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Publisher implements Serializable {
 
     private Integer publisherId;
+
+    @Size(min = 1, max = 50, message
+            = "Username must be between 1 and 50 characters")
     private String name;
+
+    @Email(message = "Please enter a valid EmailId")
     private String emailId;
+
+    @Pattern(regexp = "\\d{3}-\\d{3}-\\d{3}", message = "Please enter phone number in format 123-456-789")
     private String phoneNumber;
 
     public Publisher() {

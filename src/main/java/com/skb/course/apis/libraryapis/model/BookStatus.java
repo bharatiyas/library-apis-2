@@ -1,10 +1,16 @@
 package com.skb.course.apis.libraryapis.model;
 
+import javax.validation.constraints.Pattern;
+
 public class BookStatus {
 
     private Integer bookId;
     private BookStatusState state;
+
+    @Pattern(regexp = "[1-9][0-9]")
     private Integer totalNumberOfCopies;
+
+    @Pattern(regexp = "[1-9][0-9]")
     private Integer numberOfCopiesIssued;
 
     public BookStatus() {

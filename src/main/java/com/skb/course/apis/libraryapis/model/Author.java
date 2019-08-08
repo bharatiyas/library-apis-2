@@ -2,6 +2,9 @@ package com.skb.course.apis.libraryapis.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.time.LocalDate;
 
@@ -9,9 +12,18 @@ import java.time.LocalDate;
 public class Author implements Serializable {
 
     private Integer authorId;
+
+    @Size(min = 1, max = 50, message
+            = "First Name must be between 1 and 50 characters")
     private String firstName;
+
+    @Size(min = 1, max = 50, message
+            = "Last Name must be between 1 and 50 characters")
     private String lastName;
+
+    @Past(message = "Date of birth must be a past date")
     private LocalDate dateOfBirth;
+
     private Gender gender;
 
     public Author() {

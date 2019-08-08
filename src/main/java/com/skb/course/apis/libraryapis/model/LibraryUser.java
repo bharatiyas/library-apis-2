@@ -5,7 +5,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Set;
@@ -16,15 +20,31 @@ public class LibraryUser implements UserDetails {
 
     private Integer userId;
 
+    @Size(min = 1, max = 50, message
+            = "Username must be between 1 and 50 characters")
     private String username;
+
+    @Size(min = 8, max = 20, message
+            = "Password must be between 8 and 20 characters")
     private String password;
+
+    @Size(min = 1, max = 50, message
+            = "First Name must be between 1 and 50 characters")
     private String firstName;
+
+    @Size(min = 1, max = 50, message
+            = "Last Name must be between 1 and 50 characters")
     private String lastName;
 
-    @Past
+    @Past(message = "Date of birth must be a past date")
     private LocalDate dateOfBirth;
+
     private Gender gender;
+
+    @Pattern(regexp = "\\d{3}-\\d{3}-\\d{3}", message = "Please enter phone number in format 123-456-789")
     private String phoneNumber;
+
+    @Email(message = "Please enter a valid EmailId")
     private String emailId;
 
     @JsonIgnore
