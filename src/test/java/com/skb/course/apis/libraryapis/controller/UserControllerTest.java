@@ -196,7 +196,7 @@ public class UserControllerTest {
         // Set the values to be updated
         responseLibraryUser.setPassword("NewPassword");
         responseLibraryUser.setEmailId("newemailaddress@email.com");
-        responseLibraryUser.setPhoneNumber("23423523");
+        responseLibraryUser.setPhoneNumber(TestConstants.TEST_USER_PHONE_UPDATED);
 
         URI userUri = null;
         try {
@@ -229,7 +229,7 @@ public class UserControllerTest {
         Assert.assertEquals(HttpStatus.OK, libUserResponse.getStatusCode());
         LibraryUser libraryUser = libUserResponse.getBody();
         Assert.assertEquals("newemailaddress@email.com", libraryUser.getEmailId());
-        Assert.assertEquals("23423523", libraryUser.getPhoneNumber());
+        Assert.assertEquals(TestConstants.TEST_USER_PHONE_UPDATED, libraryUser.getPhoneNumber());
     }
 
     @Test
@@ -253,7 +253,7 @@ public class UserControllerTest {
         // Set the values to be updated
         responseLibraryUser.setPassword("NewPassword");
         responseLibraryUser.setEmailId("newemailaddress@email.com");
-        responseLibraryUser.setPhoneNumber("23423523");
+        responseLibraryUser.setPhoneNumber(TestConstants.TEST_USER_PHONE_UPDATED);
 
         URI userUri = null;
         try {

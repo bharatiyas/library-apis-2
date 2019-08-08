@@ -32,7 +32,7 @@ public class LibraryApiTestUtil {
         userCtr++;
         Gender gender = userCtr % 2 == 1 ? Gender.Male : Gender.Female;
         return new LibraryUser(username, TestConstants.TEST_USER_FIRST_NAME,
-                TestConstants.TEST_USER_LAST_NAME, LocalDate.now().minusYears(30 + userCtr), gender, "123445556",
+                TestConstants.TEST_USER_LAST_NAME, LocalDate.now().minusYears(30 + userCtr), gender, TestConstants.TEST_USER_PHONE,
                 username + "@email.com");
 
     }

@@ -27,6 +27,7 @@ public class ApplicationInitializer {
     public ApplicationInitializer(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+
     }
 
     @Value("${library.api.user.admin.username:lib-admin}")
@@ -44,7 +45,7 @@ public class ApplicationInitializer {
         UserEntity admin = userRepository.findByUsername(adminUsername);
         if(admin == null) {
             UserEntity userEntity = new UserEntity(adminUsername, bCryptPasswordEncoder.encode(adminPassword),
-                    "Library", "Admin", LocalDate.now().minusYears(30), Gender.Female, "000-000000", "library.admin@email.com", "ADMIN");
+                    "Library", "Admin", LocalDate.now().minusYears(30), Gender.Female, "000-000-000", "library.admin@email.com", "ADMIN");
 
             userRepository.save(userEntity);
         }

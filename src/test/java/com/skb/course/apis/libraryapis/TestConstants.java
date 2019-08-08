@@ -19,7 +19,8 @@ public class TestConstants {
     public static final String TEST_USER_USERNAME = "test.username";
     public static final String TEST_USER_PASSWORD = "test.password";
     public static final String TEST_USER_EMAIL = TEST_USER_USERNAME + "@email.con";
-    public static final String TEST_USER_PHONE = "2233445566";
+    public static final String TEST_USER_PHONE = "223-344-566";
+    public static final String TEST_USER_PHONE_UPDATED = "111-344-908";
     public static final Gender TEST_USER_GENDER = Gender.Female;
 
     // Author API URLs
@@ -37,9 +38,9 @@ public class TestConstants {
     // Test Publisher Details
     public static final String TEST_PUBLISHER_NAME = "TestPublisherName";
     public static final String TEST_PUBLISHER_EMAIL = "TestPublisher@email.com";
-    public static final String TEST_PUBLISHER_PHONE = "1122334455";
+    public static final String TEST_PUBLISHER_PHONE = "112-233-455";
     public static final String TEST_PUBLISHER_EMAIL_UPDATED = "TestPublisherNew@email.com";
-    public static final String TEST_PUBLISHER_PHONE_UPDATED = "5544332211";
+    public static final String TEST_PUBLISHER_PHONE_UPDATED = "554-433-211";
 
     // Book API URLs
     public static final String BOOK_API_BASE_URL = "/books";
