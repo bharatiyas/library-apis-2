@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class UserController {
     }
 
     @PostMapping(path = "/register")
-    public ResponseEntity<?> registerUser(@RequestBody LibraryUser libraryUser,
+    public ResponseEntity<?> registerUser(@Valid @RequestBody LibraryUser libraryUser,
                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceAlreadyExistException {
         if(!LibraryApiUtils.doesStringValueExist(traceId)) {
@@ -72,7 +73,7 @@ public class UserController {
     // This method can be used to update Password, PhoneNumber and EmailId
     // You cannot update any other details for a user
     @PutMapping(path = "/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable int userId, @RequestBody LibraryUser libraryUser,
+    public ResponseEntity<?> updateUser(@PathVariable int userId, @Valid @RequestBody LibraryUser libraryUser,
                                         @RequestHeader("Authorization") String bearerToken,
                                         @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceUnauthorizedException, LibraryResourceBadRequestException, LibraryResourceNotFoundException {

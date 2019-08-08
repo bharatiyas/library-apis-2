@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,7 +65,7 @@ public class AuthorController {
     }
 
     @PutMapping(path = "/{authorID}")
-    public ResponseEntity<Author> updateAuthor(@PathVariable int authorID, @RequestBody Author author,
+    public ResponseEntity<Author> updateAuthor(@PathVariable int authorID, @Valid @RequestBody Author author,
                                           @RequestHeader("Authorization") String bearerToken,
                                           @RequestHeader(value = "Trace-Id", defaultValue = "") String traceId)
             throws LibraryResourceNotFoundException, LibraryResourceBadRequestException, LibraryResourceUnauthorizedException {

@@ -12,7 +12,7 @@ CREATE TABLE USER (
 				Last_Name VARCHAR(50) NOT NULL,
 				Date_Of_Birth DATE NOT NULL,
 				Gender ENUM('Male', 'Female', 'Undisclosed') NOT NULL,
-				Phone_Number VARCHAR(10) NOT NULL,
+				Phone_Number VARCHAR(11) NOT NULL,
 				Email_Id VARCHAR(100) NOT NULL UNIQUE,
 				Role ENUM('ADMIN', 'USER') NOT NULL
 );
@@ -28,7 +28,7 @@ CREATE TABLE PUBLISHER (
       Publisher_Id	INT PRIMARY KEY,
 			Name VARCHAR(50) NOT NULL UNIQUE,
 			Email_Id VARCHAR(50),
-			Phone_Number VARCHAR(10)
+			Phone_Number VARCHAR(11)
 			);
 
 CREATE TABLE PUBLISHER_SEQUENCE (

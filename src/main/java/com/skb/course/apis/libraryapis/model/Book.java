@@ -3,6 +3,10 @@ package com.skb.course.apis.libraryapis.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.skb.course.apis.libraryapis.entity.AuthorEntity;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -11,11 +15,25 @@ import java.util.Set;
 public class Book implements Serializable {
 
     private Integer bookId;
+
+    @Size(min = 1, max = 50, message
+            = "ISBN must be between 1 and 50 characters")
     private String isbn;
+
+    @Size(min = 1, max = 50, message
+            = "Title must be between 1 and 50 characters")
     private String title;
     private Integer publisherId;
+
+    // Assuming that the year the book was published would be after 1990. Not too old books
+    @Pattern(regexp = "^(199[0-9]|200[0-9]|201[0-9])$")
     private Integer yearPublished;
+
+    @Size(min = 1, max = 50, message
+            = "Edition must be between 1 and 20 characters")
     private String edition;
+
+    @Valid
     private BookStatus bookStatus;
     private Set<Author> authors = new HashSet<>();
 
