@@ -18,3 +18,12 @@
 6.   Error Handling:
         https://www.springboottutorial.com/spring-boot-exception-handling-for-rest-services
 
+7. Security Config and Jsypt:
+        https://stackoverflow.com/questions/37404703/spring-boot-how-to-hide-passwords-in-properties-file
+        http://www.jasypt.org/cli.html
+        http://www.jasypt.org/maven.html
+
+   But you do not need to download or use the Jasypt dependency to use the CLI to encrypt the password. You can find
+   the org.jasypt.intf.cli.JasyptPBEStringEncryptionCLI in your Maven repo in com.melloware.
+   You will not find this information anywhere on the internet because most of the people have copied and pasted the
+   same stuff in their blogs.

@@ -15,6 +15,7 @@ import com.skb.course.apis.libraryapis.repository.PublisherRepository;
 import com.skb.course.apis.libraryapis.util.LibraryApiUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +37,7 @@ public class BookService {
         this.publisherRepository = publisherRepository;
     }
 
+    @Transactional
     public Book addBook(Book bookToBeAdded, String traceId) throws LibraryResourceNotFoundException {
         BookEntity bookEntity = new BookEntity(
                 bookToBeAdded.getIsbn(),
@@ -119,6 +121,7 @@ public class BookService {
         }
     }
 
+    @Transactional
     public Book addBookAuhors(int bookId, Set<Integer> authorIds, String traceId) throws LibraryResourceNotFoundException {
         if(authorIds == null || authorIds.size() == 0) {
             throw new IllegalArgumentException("Invalid Authors list");

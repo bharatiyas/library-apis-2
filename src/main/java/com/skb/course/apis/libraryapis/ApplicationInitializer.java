@@ -39,8 +39,6 @@ public class ApplicationInitializer {
     @PostConstruct
     private void init() {
 
-
-
         // insert admin user on application start up, only for the first time
         UserEntity admin = userRepository.findByUsername(adminUsername);
         if(admin == null) {
@@ -50,4 +48,6 @@ public class ApplicationInitializer {
             userRepository.save(userEntity);
         }
     }
+
+
 }
