@@ -21,6 +21,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -153,6 +154,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public IssueBookResponse issueBooks(int userId, Set<Integer> bookIds, String traceId) throws LibraryResourceNotFoundException {
 
         Optional<UserEntity> userEntity = userRepository.findById(userId);
@@ -212,6 +214,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public void returnBooks(int userId, Integer bookId, String traceId) throws LibraryResourceNotFoundException {
 
         Optional<UserEntity> userEntity = userRepository.findById(userId);
