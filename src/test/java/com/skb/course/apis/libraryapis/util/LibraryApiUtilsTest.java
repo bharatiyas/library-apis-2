@@ -1,10 +1,10 @@
 package com.skb.course.apis.libraryapis.util;
 
 import com.auth0.jwt.JWT;
-import com.skb.course.apis.libraryapis.LibraryApiTestUtil;
-import com.skb.course.apis.libraryapis.TestConstants;
-import com.skb.course.apis.libraryapis.model.LibraryUser;
-import com.skb.course.apis.libraryapis.model.Role;
+import com.skb.course.apis.libraryapis.testutils.LibraryApiTestUtil;
+import com.skb.course.apis.libraryapis.testutils.TestConstants;
+import com.skb.course.apis.libraryapis.user.LibraryUser;
+import com.skb.course.apis.libraryapis.user.Role;
 import com.skb.course.apis.libraryapis.security.SecurityConstants;
 import org.junit.Test;
 

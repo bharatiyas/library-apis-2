@@ -2,7 +2,7 @@ package com.skb.course.apis.libraryapis.security;
 
 import com.auth0.jwt.JWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.skb.course.apis.libraryapis.model.LibraryUser;
+import com.skb.course.apis.libraryapis.user.LibraryUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;

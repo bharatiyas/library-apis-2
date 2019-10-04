@@ -1,8 +1,8 @@
 package com.skb.course.apis.libraryapis;
 
-import com.skb.course.apis.libraryapis.entity.UserEntity;
-import com.skb.course.apis.libraryapis.model.Gender;
-import com.skb.course.apis.libraryapis.repository.UserRepository;
+import com.skb.course.apis.libraryapis.user.UserEntity;
+import com.skb.course.apis.libraryapis.model.common.Gender;
+import com.skb.course.apis.libraryapis.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;

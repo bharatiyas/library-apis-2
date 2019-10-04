@@ -1,8 +1,8 @@
 package com.skb.course.apis.libraryapis.security;
 
 import com.skb.course.apis.libraryapis.exception.UserNotFoundException;
-import com.skb.course.apis.libraryapis.model.LibraryUser;
-import com.skb.course.apis.libraryapis.service.UserService;
+import com.skb.course.apis.libraryapis.user.LibraryUser;
+import com.skb.course.apis.libraryapis.user.UserService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
